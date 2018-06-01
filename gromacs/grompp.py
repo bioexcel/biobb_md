@@ -208,11 +208,11 @@ class Grompp(object):
         if self.global_log is not None:
             md = self.mdp.get('type', 'minimization')
             if md != 'index' and md != 'free':
-                self.global_log.info(22*' '+'Will run a '+md+' md of ' + str(self.nsteps) +' steps')
+                self.global_log.info(fu.get_logs_prefix()+'Will run a '+md+' md of ' + str(self.nsteps) +' steps')
             elif md == 'index':
-                self.global_log.info(22*' '+'Will create a TPR to be used as structure file')
+                self.global_log.info(fu.get_logs_prefix()+'Will create a TPR to be used as structure file')
             else:
-                self.global_log.info(22*' '+'Will run a '+md+' md of ' + fu.human_readable_time(int(self.nsteps)*float(self.dt)))
+                self.global_log.info(fu.get_logs_prefix()+'Will run a '+md+' md of ' + fu.human_readable_time(int(self.nsteps)*float(self.dt)))
 
         # Unzip topology in de directory of the output_tpr_path and get the
         # topology path

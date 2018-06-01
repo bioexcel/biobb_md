@@ -1,71 +1,80 @@
 #!/usr/bin/env python
-
-"""Python wrapper module for the GROMACS editconf module
-"""
-import sys
-import json
-from command_wrapper import cmd_wrapper
-import configuration.settings as settings
-from tools import file_utils as fu
+import argparse
+from biobb_common.configuration import  settings
+from biobb_common.tools import file_utils as fu
+from biobb_common.command_wrapper import cmd_wrapper
 
 class Editconf(object):
-    """Wrapper for the 5.1.2 version of the editconf module
+    """Wrapper class for the GROMACS editconf module.
+
     Args:
         input_gro_path (str): Path to the input GRO file.
         output_gro_path (str): Path to the output GRO file.
         properties (dic):
-            distance_to_molecule (float): Distance of the box from the outermost
-                                          atom in nm. ie 1.0nm = 10 Angstroms.
-            box_type (str): Geometrical shape of the solvent box.
-                            Available box types: octahedron, cubic, etc.
-            center_molecule (bool): Center molecule in the box.
+            | - **distance_to_molecule** (*float*) - (1.0) Distance of the box from the outermost atom in nm. ie 1.0nm = 10 Angstroms.
+            | - **box_type** (*str*) - ("cubic") Geometrical shape of the solvent box. Available box types: octahedron, cubic, etc.
+            | - **center_molecule** (*bool*) - (True) Center molecule in the box.
+            | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
     """
 
     def __init__(self, input_gro_path, output_gro_path, properties, **kwargs):
-        if isinstance(properties, basestring):
-            properties=json.loads(properties)
         self.input_gro_path = input_gro_path
         self.output_gro_path = output_gro_path
+        # Properties specific for BB
         self.distance_to_molecule = properties.get('distance_to_molecule',1.0)
         self.box_type = properties.get('box_type', 'cubic')
-        self.center_molecule = properties.get('center_molecule',False)
-        self.gmx_path = properties.get('gmx_path',None)
-        self.mutation = properties.get('mutation',None)
+        self.center_molecule = properties.get('center_molecule',True)
+        # Common in all BB
+        self.gmx_path = properties.get('gmx_path','gmx')
+        self.global_log= properties.get('global_log', None)
+        self.prefix = properties.get('prefix',None)
         self.step = properties.get('step',None)
         self.path = properties.get('path','')
-        self.mpirun = properties.get('mpirun', False)
-        self.mpirun_np = properties.get('mpirun_np', None)
+
 
     def launch(self):
         """Launches the execution of the GROMACS editconf module.
         """
-        out_log, err_log = fu.get_logs(path=self.path, mutation=self.mutation, step=self.step)
-        gmx = 'gmx' if self.gmx_path is None else self.gmx_path
-        cmd = [gmx, 'editconf', '-f', self.input_gro_path,
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
+
+        cmd = [self.gmx_path, 'editconf',
+               '-f', self.input_gro_path,
                '-o', self.output_gro_path,
                '-d', str(self.distance_to_molecule),
                '-bt', self.box_type]
 
-        if self.mpirun_np is not None:
-            cmd.insert(0, str(self.mpirun_np))
-            cmd.insert(0, '-np')
-        if self.mpirun:
-            cmd.insert(0, 'mpirun')
         if self.center_molecule:
             cmd.append('-c')
+            out_log.info('Centering molecule in the box.')
+            if self.global_log:
+                self.global_log.info(fu.get_logs_prefix()+'Centering molecule in the box.')
 
-        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log)
+        out_log.info('Distance of the box to molecule: '+str(self.distance_to_molecule))
+        out_log.info('Box type: '+self.box_type)
+        if self.global_log:
+            self.global_log.info(fu.get_logs_prefix()+'Distance of the box to molecule: '+str(self.distance_to_molecule))
+            self.global_log.info(fu.get_logs_prefix()+'Box type: '+self.box_type)
+
+        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
         return command.launch()
 
-#Creating a main function to be compatible with CWL
 def main():
-    system=sys.argv[1]
-    step=sys.argv[2]
-    properties_file=sys.argv[3]
-    prop = settings.YamlReader(properties_file, system).get_prop_dic()[step]
-    Editconf(input_gro_path=sys.argv[4],
-             output_gro_path=sys.argv[5],
-             properties=prop).launch()
+    parser = argparse.ArgumentParser(description="Wrapper of the GROMACS editconf module.")
+    parser.add_argument('--conf_file', required=True)
+    parser.add_argument('--system', required=True)
+    parser.add_argument('--step', required=True)
+
+    #Specific args of each building block
+    parser.add_argument('--input_gro_path', required=True)
+    parser.add_argument('--output_gro_path', required=True)
+    ####
+
+    args = parser.parse_args()
+    properties = settings.YamlReader(conf_file_path=args.conf_file, system=args.system).get_prop_dic()[args.step]
+
+    #Specific call of each building block
+    Editconf(input_gro_path=args.input_gro_path, output_gro_path=args.output_gro_path, properties=properties).launch()
+    ####
 
 if __name__ == '__main__':
     main()

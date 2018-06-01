@@ -50,7 +50,7 @@ class Genion(object):
         """
         if self.global_log is not None:
             if self.concentration:
-                self.global_log.info(22*' '+'To reach up '+str(self.concentration)+' mol/litre concentration')
+                self.global_log.info(fu.get_logs_prefix()+'To reach up '+str(self.concentration)+' mol/litre concentration')
 
         out_log, err_log = fu.get_logs(path=self.path, mutation=self.mutation, step=self.step)
         self.output_top_path = fu.add_step_mutation_path_to_name(self.output_top_path, self.step, self.mutation)

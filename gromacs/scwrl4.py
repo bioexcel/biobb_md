@@ -56,7 +56,7 @@ class Scwrl4(object):
             for chain in chains:
                 out_log.info('Replacing: '+self.mut_dict['wt']+' number: '+self.mut_dict['resnum']+' by: '+self.mut_dict['mt'])
                 if self.global_log:
-                    self.global_log.info(22*' '+'Replacing: '+self.mut_dict['wt']+' number: '+self.mut_dict['resnum']+' by: '+self.mut_dict['mut'])
+                    self.global_log.info(fu.get_logs_prefix()+'Replacing: '+self.mut_dict['wt']+' number: '+self.mut_dict['resnum']+' by: '+self.mut_dict['mut'])
                 residue = st[0][chain][(' ', resnum, ' ')]
                 backbone_atoms = ['N', 'CA', 'C', 'O', 'CB']
                 not_backbone_atoms = []
@@ -94,7 +94,7 @@ class Scwrl4(object):
             out_log.info('Writting Scwrl4 sequence file '+sequence_file_path+' containing:')
             out_log.info(sequence)
             if self.global_log:
-                self.global_log.info(22*' '+'Writting Scwrl4 sequence file '+sequence_file_path+' containing:')
+                self.global_log.info(fu.get_logs_prefix()+'Writting Scwrl4 sequence file '+sequence_file_path+' containing:')
                 self.global_log.info(sequence)
 
             # Write resultant structure
@@ -104,7 +104,7 @@ class Scwrl4(object):
             w.save(prepared_file_path)
             out_log.info('Writting modified Scwrl4 PDB input file to: '+prepared_file_path)
             if self.global_log:
-                self.global_log.info(22*' '+'Writting modified Scwrl4 PDB input file to: '+prepared_file_path)
+                self.global_log.info(fu.get_logs_prefix()+'Writting modified Scwrl4 PDB input file to: '+prepared_file_path)
 
         else:
             prepared_file_path = self.input_pdb_path

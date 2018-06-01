@@ -30,6 +30,7 @@ class Pdb2gmx(object):
         self.water_type = properties.get('water_type','spce')
         self.force_field = properties.get('force_field','amber99sb-ildn')
         self.ignh = properties.get('ignh',False)
+        # Common in all BB
         self.gmx_path = properties.get('gmx_path','gmx')
         self.global_log= properties.get('global_log', None)
         self.prefix = properties.get('prefix',None)
@@ -53,7 +54,7 @@ class Pdb2gmx(object):
             cmd.append("-ignh")
 
         if self.global_log:
-            self.global_log.info(22*' '+'Launching '+' '.join(cmd))
+            self.global_log.info(fu.get_logs_prefix()+'Launching '+' '.join(cmd))
 
         command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
         returncode = command.launch()
@@ -61,7 +62,7 @@ class Pdb2gmx(object):
         # zip topology
         out_log.info('Compressing topology to: '+self.output_top_zip_path)
         if self.global_log:
-            self.global_log.info(22*' '+'Compressing topology to: '+self.output_top_zip_path)
+            self.global_log.info(fu.get_logs_prefix()+'Compressing topology to: '+self.output_top_zip_path)
         fu.zip_top(self.output_top_zip_path)
 
         return returncode

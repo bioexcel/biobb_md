@@ -12,3 +12,8 @@ pdb2gmx:
     input_pdb_path: file:test_data_dir/gromacs/pyruvate_kinase.pdb
     output_gro_path: output_gro.gro
     output_top_zip_path: output_top_zip.zip
+
+editconf:
+  paths:
+    input_gro_path: file:test_data_dir/gromacs/editconf.gro
+    output_gro_path: output_gro.gro

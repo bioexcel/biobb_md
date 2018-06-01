@@ -1,0 +1,7 @@
+conf_file:
+    class: File
+    location: ../../../test/conf.yml
+input_gro_path:
+    class: File
+    location: ../../../test/data/gromacs/editconf.gro
+output_gro_path: output_gro_path.pdb
