@@ -1,75 +1,70 @@
 #!/usr/bin/env python
-
-"""Python wrapper for the GROMACS genion module
-"""
-import sys
-import json
-import configuration.settings as settings
-from command_wrapper import cmd_wrapper
-from tools import file_utils as fu
+import argparse
+from biobb_common.configuration import  settings
+from biobb_common.tools import file_utils as fu
+from biobb_common.command_wrapper import cmd_wrapper
 
 class Genion(object):
-    """Wrapper for the 5.1.2 version of the genion module
+    """Wrapper class for the GROMACS genion module.
+
     Args:
         input_tpr_path (str): Path to the input portable run input TPR file.
         output_gro_path (str): Path to the input structure GRO file.
         input_top_zip_path (str): Path the input TOP topology in zip format.
         output_top_zip_path (str): Path the output topology TOP and ITP files zipball.
         properties (dic):
-            output_top_path (str): Path the output topology TOP file.
-            replaced_group (str): Group of molecules that will be replaced by the solvent.
-            neutral (bool): Neutralize the charge of the system.
-            concentration (float): Concentration of the ions in (mol/liter).
-            seed (int): Seed for random number generator.
-            gmx_path (str): Path to the GROMACS executable binary.
+            | - **output_top_path** (*str*) - ("gio.top") Path the output topology TOP file.
+            | - **replaced_group** (*str*) - ("SOL") Group of molecules that will be replaced by the solvent.
+            | - **neutral** (*bool*) - (False) Neutralize the charge of the system.
+            | - **concentration** (*float*) - (0.05) Concentration of the ions in (mol/liter).
+            | - **seed** (*int*) - (1993) Seed for random number generator.
+            | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
     """
 
     def __init__(self, input_tpr_path, output_gro_path, input_top_zip_path,
                  output_top_zip_path, properties, **kwargs):
-        if isinstance(properties, basestring):
-            properties=json.loads(properties)
         self.input_tpr_path = input_tpr_path
         self.output_gro_path = output_gro_path
         self.input_top_zip_path = input_top_zip_path
         self.output_top_zip_path = output_top_zip_path
+        # Properties specific for BB
         self.output_top_path = properties.get('output_top_path','gio.top')
         self.replaced_group = properties.get('replaced_group','SOL')
         self.neutral = properties.get('neutral',False)
         self.concentration = properties.get('concentration',0.05)
         self.seed = properties.get('seed',1993)
-        self.gmx_path = properties.get('gmx_path',None)
-        self.mutation = properties.get('mutation',None)
+        # Common in all BB
+        self.gmx_path = properties.get('gmx_path','gmx')
+        self.global_log= properties.get('global_log', None)
+        self.prefix = properties.get('prefix',None)
         self.step = properties.get('step',None)
         self.path = properties.get('path','')
-        self.mpirun = properties.get('mpirun', False)
-        self.mpirun_np = properties.get('mpirun_np', None)
-        self.global_log= properties.get('global_log', None)
 
     def launch(self):
         """Launches the execution of the GROMACS genion module.
         """
-        if self.global_log is not None:
-            if self.concentration:
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
+
+        if self.concentration:
+            out_log.info('To reach up '+str(self.concentration)+' mol/litre concentration')
+            if self.global_log:
                 self.global_log.info(fu.get_logs_prefix()+'To reach up '+str(self.concentration)+' mol/litre concentration')
 
-        out_log, err_log = fu.get_logs(path=self.path, mutation=self.mutation, step=self.step)
-        self.output_top_path = fu.add_step_mutation_path_to_name(self.output_top_path, self.step, self.mutation)
+        self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
 
         # Unzip topology to topology_out
         fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path)
-        gmx = 'gmx' if self.gmx_path is None else self.gmx_path
-        cmd = [gmx, 'genion',
+
+        cmd = ['echo', '|', '\"'+self.replaced_group+'\"',
+               gmx, 'genion',
                '-s', self.input_tpr_path,
                '-o', self.output_gro_path,
                '-p', self.output_top_path]
 
-        if self.mpirun_np is not None:
-            cmd.insert(0, str(self.mpirun_np))
-            cmd.insert(0, '-np')
-        if self.mpirun:
-            cmd.insert(0, 'mpirun')
+
         if self.neutral:
             cmd.append('-neutral')
+
         if self.concentration:
             cmd.append('-conc')
             cmd.append(str(self.concentration))
@@ -78,31 +73,32 @@ class Genion(object):
             cmd.append('-seed')
             cmd.append(str(self.seed))
 
-        if self.mpirun:
-            cmd.append('<<<')
-            cmd.append('\"'+self.replaced_group+'\"')
-        else:
-            cmd.insert(0, '|')
-            cmd.insert(0, '\"'+self.replaced_group+'\"')
-            cmd.insert(0, 'echo')
-        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log)
+        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
         returncode = command.launch()
 
         # zip new_topology
-        fu.zip_top(self.output_top_path, self.output_top_zip_path, remove_files=False)
+        fu.zip_top(self.output_top_zip_path)
         return returncode
 
-#Creating a main function to be compatible with CWL
 def main():
-    system=sys.argv[1]
-    step=sys.argv[2]
-    properties_file=sys.argv[3]
-    prop = settings.YamlReader(properties_file, system).get_prop_dic()[step]
-    Genion(input_tpr_path = sys.argv[4],
-           output_gro_path = sys.argv[5],
-           input_top_zip_path = sys.argv[6],
-           output_top_zip_path = sys.argv[7],
-           properties=prop).launch()
+    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS genion module.")
+    parser.add_argument('--conf_file', required=True)
+    parser.add_argument('--system', required=True)
+    parser.add_argument('--step', required=True)
+
+    #Specific args of each building block
+    parser.add_argument('--input_tpr_path', required=True)
+    parser.add_argument('--output_gro_path', required=True)
+    parser.add_argument('--input_top_zip_path', required=True)
+    parser.add_argument('--output_top_zip_path', required=True)
+    ####
+
+    args = parser.parse_args()
+    properties = settings.YamlReader(conf_file_path=args.conf_file, system=args.system).get_prop_dic()[args.step]
+
+    #Specific call of each building block
+    Genion(input_tpr_path=args.input_tpr_path, output_gro_path=args.output_gro_path, input_top_zip_path=args.input_top_zip_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
+    ####
 
 if __name__ == '__main__':
     main()
