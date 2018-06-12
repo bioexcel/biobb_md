@@ -12,8 +12,8 @@ class Pdb2gmx(object):
         output_gro_path (str): Path to the output GRO file.
         output_top_zip_path (str): Path the output TOP topology in zip format.
         properties (dic):
-            | - **output_top_path** (*str*) - ("p2g.top") Path the output TOP file.
-            | - **output_itp_path** (*str*) - ("p2g.itp") Path the output itp file.
+            | - **output_top_path** (*str*) - ("p2g.top") Path of the output TOP file.
+            | - **output_itp_path** (*str*) - ("p2g.itp") Path of the output itp file.
             | - **water_type** (*str*) - ("spce") Water molecule type. Valid values: tip3p, spce, etc.
             | - **force_field** (*str*) - ("amber99sb-ildn") Force field to be used during the conversion. Valid values: amber99sb-ildn, oplsaa, etc.
             | - **ignh** (*bool*) - (False) Should pdb2gmx ignore the hidrogens in the original structure.

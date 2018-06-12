@@ -1,15 +1,8 @@
 #!/usr/bin/env python
-
-"""Python wrapper for the GROMACS grompp module
-"""
-import os
-import sys
-import json
-from os.path import join as opj
-import configuration.settings as settings
-from command_wrapper import cmd_wrapper
-from tools import file_utils as fu
-import time
+import argparse
+from biobb_common.configuration import  settings
+from biobb_common.tools import file_utils as fu
+from biobb_common.command_wrapper import cmd_wrapper
 
 class Grompp(object):
     """Python Wrapper of the GROMACS grompp module.
@@ -25,28 +18,32 @@ class Grompp(object):
         output_tpr_path (str): Path to the output portable binary run file TPR.
         input_cpt_path (str)[Optional]: Path to the input GROMACS checkpoint file CPT.
         properties (dic):
-               | **mdp** (*str*): MDP options specification.
-
+            | - **input_mdp_path** (*str*) - (None) Path of the input MDP file.
+            | - **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
+                | - **type** (*str*) - ("minimization") Default options for the mdp file. Valid values: minimization, nvt, npt, free, index
+            | - **output_mdp_path** (*str*) - ("grompp.mdp") Path of the output MDP file.
+            | - **output_top_path** (*str*) - ("grompp.top") Path the output topology TOP file.
+            | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
     """
 
     def __init__(self, input_gro_path, input_top_zip_path,
-                 output_tpr_path, properties, input_cpt_path=None, **kwargs):
-        if isinstance(properties, basestring):
-            properties=json.loads(properties)
+                 output_tpr_path, input_cpt_path, properties, **kwargs):
         self.input_gro_path = input_gro_path
         self.input_top_zip_path = input_top_zip_path
         self.output_tpr_path = output_tpr_path
         self.input_cpt_path = input_cpt_path
+        # Properties specific for BB
         self.input_mdp_path= properties.get('input_mdp_path', None)
-        self.output_mdp_path= properties.get('output_mdp_path', 'generated.mdp')
-        self.gmx_path = properties.get('gmx_path', None)
-        self.mutation = properties.get('mutation',None)
+        self.output_mdp_path= properties.get('output_mdp_path', 'grompp.mdp')
+        self.output_top_path = properties.get('output_top_path','grompp.top')
+        self.mdp = {k: str(v) for k, v in properties.get('mdp', None).items()}
+        # Common in all BB
+        self.gmx_path = properties.get('gmx_path','gmx')
+        self.global_log= properties.get('global_log', None)
+        self.prefix = properties.get('prefix',None)
         self.step = properties.get('step',None)
         self.path = properties.get('path','')
-        self.mpirun = properties.get('mpirun', False)
-        self.mpirun_np = properties.get('mpirun_np', None)
-        self.mdp = {k: str(v) for k, v in properties.get('mdp', None).items()}
-        self.global_log= properties.get('global_log', None)
+        #TODO Check this two attributes
         self.nsteps=''
         self.dt=''
 
@@ -56,7 +53,7 @@ class Grompp(object):
         """
 
         mdp_list=[]
-        mdp_file_path=fu.add_step_mutation_path_to_name(self.output_mdp_path, self.step, self.mutation)
+        self.output_mdp_path=fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_mdp_path)
 
         sim_type = self.mdp.get('type', 'minimization')
         minimization = (sim_type == 'minimization')
@@ -194,64 +191,63 @@ class Grompp(object):
             if k != 'type':
                 mdp_list.append(str(k) + ' = '+str(v))
 
-        with open(mdp_file_path, 'w') as mdp:
+        with open(self.output_mdp_path, 'w') as mdp:
             for line in mdp_list:
                 mdp.write(line + '\n')
 
-        return mdp_file_path
+        return self.output_mdp_path
 
     def launch(self):
         """Launches the execution of the GROMACS grompp module.
         """
-        out_log, err_log = fu.get_logs(path=self.path, mutation=self.mutation, step=self.step)
-        mdp_file_path = self.create_mdp() if self.input_mdp_path is None else self.input_mdp_path
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
+        self.output_mdp_path = self.create_mdp() if self.input_mdp_path is None else self.input_mdp_path
+
         if self.global_log is not None:
             md = self.mdp.get('type', 'minimization')
             if md != 'index' and md != 'free':
+                out_log.info('Will run a '+md+' md of ' + str(self.nsteps) +' steps')
                 self.global_log.info(fu.get_logs_prefix()+'Will run a '+md+' md of ' + str(self.nsteps) +' steps')
             elif md == 'index':
+                out_log.info('Will create a TPR to be used as structure file')
                 self.global_log.info(fu.get_logs_prefix()+'Will create a TPR to be used as structure file')
             else:
+                out_log.info('Will run a '+md+' md of ' + fu.human_readable_time(int(self.nsteps)*float(self.dt)))
                 self.global_log.info(fu.get_logs_prefix()+'Will run a '+md+' md of ' + fu.human_readable_time(int(self.nsteps)*float(self.dt)))
 
-        # Unzip topology in de directory of the output_tpr_path and get the
-        # topology path
-        topology_path = fu.unzip_top(self.input_top_zip_path)
-        gmx = 'gmx' if self.gmx_path is None else self.gmx_path
-        cmd = [gmx, 'grompp', '-f', mdp_file_path,
+        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, out_log=out_log)
+
+        cmd = [self.gmx_path, 'grompp',
+               '-f', self.output_mdp_path,
                '-c', self.input_gro_path,
-               '-p', topology_path,
+               '-p', self.output_top_path,
                '-o', self.output_tpr_path]
 
-        if self.mpirun_np is not None:
-            cmd.insert(0, str(self.mpirun_np))
-            cmd.insert(0, '-np')
-        if self.mpirun:
-            cmd.insert(0, 'mpirun')
-        if self.input_cpt_path is not None:
+        if self.input_cpt_path:
             cmd.append('-t')
             cmd.append(self.input_cpt_path)
-        if self.output_mdp_path is not None:
-            cmd.append('-po')
-            cmd.append(self.output_mdp_path)
 
-        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log)
-        return command.launch()
+        return cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
 
-#Creating a main function to be compatible with CWL
 def main():
-    if len(sys.argv) < 9:
-        sys.argv.append(None)
-    system=sys.argv[1]
-    step=sys.argv[2]
-    properties_file=sys.argv[3]
-    prop = settings.YamlReader(properties_file, system).get_prop_dic()[step]
-    Grompp(input_gro_path = sys.argv[4],
-           input_top_zip_path = sys.argv[5],
-           input_mdp_path = sys.argv[6],
-           output_tpr_path = sys.argv[7],
-           input_cpt_path = sys.argv[8],
-           properties=prop).launch()
+    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS genion module.")
+    parser.add_argument('--conf_file', required=True)
+    parser.add_argument('--system', required=True)
+    parser.add_argument('--step', required=True)
+
+    #Specific args of each building block
+    parser.add_argument('--input_gro_path', required=True)
+    parser.add_argument('--input_top_zip_path', required=True)
+    parser.add_argument('--output_tpr_path', required=True)
+    parser.add_argument('--input_cpt_path', required=False)
+    ####
+
+    args = parser.parse_args()
+    properties = settings.YamlReader(conf_file_path=args.conf_file, system=args.system).get_prop_dic()[args.step]
+
+    #Specific call of each building block
+    Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path, output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path, properties=properties).launch()
+    ####
 
 if __name__ == '__main__':
     main()
