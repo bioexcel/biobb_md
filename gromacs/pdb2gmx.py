@@ -25,6 +25,7 @@ class Pdb2gmx(object):
         self.input_pdb_path = input_pdb_path
         self.output_gro_path = output_gro_path
         self.output_top_zip_path = output_top_zip_path
+        # Properties specific for BB
         self.output_top_path = properties.get('output_top_path','p2g.top')
         self.output_itp_path = properties.get('output_itp_path','p2g.itp')
         self.water_type = properties.get('water_type','spce')
@@ -53,11 +54,7 @@ class Pdb2gmx(object):
         if self.ignh:
             cmd.append("-ignh")
 
-        if self.global_log:
-            self.global_log.info(fu.get_logs_prefix()+'Launching '+' '.join(cmd))
-
-        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
-        returncode = command.launch()
+        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
 
         # zip topology
         out_log.info('Compressing topology to: '+self.output_top_zip_path)

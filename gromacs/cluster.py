@@ -1,84 +1,75 @@
 #!/usr/bin/env python
-
-"""Python wrapper for the GROMACS cluster module
-"""
-import os
-import sys
-import json
-import ntpath
-import numpy as np
-import configuration.settings as settings
-from command_wrapper import cmd_wrapper
-from tools import file_utils as fu
+import argparse
+from biobb_common.configuration import  settings
+from biobb_common.tools import file_utils as fu
+from biobb_common.command_wrapper import cmd_wrapper
 
 class Cluster(object):
-    """Wrapper for the 5.1.2 version of the rms module
+    """Wrapper class for the GROMACS rms module.
+
     Args:
         input_gro_path (str): Path to the original (before launching the trajectory) GROMACS structure file GRO.
-        input_xtc_path (str): Path to the GROMACS trajectory.
+        input_traj_path (str): Path to the GROMACS trajectory: TRR or XTC formats.
         output_pdb_path (str): Path to the output cluster PDB file.
         properties (dic):
-            gmx_path (str): Path to the GROMACS executable binary.
-            dista (bool): Use RMSD of distances instead of RMS deviation
-            method (str): Method for cluster determination: linkage, jarvis-patrick, monte-carlo, diagonalization, gromos
-            cutoff (float): RMSD cut-off (nm) for two structures to be neighbor
+            | - **dista** (*bool*) - (False) Use RMSD of distances instead of RMS deviation.
+            | - **method** (*str*) - ("linkage") Method for cluster determination: linkage, jarvis-patrick, monte-carlo, diagonalization, gromos
+            | - **cutoff** (*float*) - (0.1) RMSD cut-off (nm) for two structures to be neighbor
+            | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
     """
 
-    def __init__(self, input_gro_path, input_xtc_path, output_pdb_path, properties, **kwargs):
-        if isinstance(properties, basestring):
-            properties=json.loads(properties)
+    def __init__(self, input_gro_path, input_traj_path, output_pdb_path, properties, **kwargs):
         self.input_gro_path = input_gro_path
-        self.input_trr_path = input_trr_path
+        self.input_traj_path = input_traj_path
         self.output_pdb_path = output_pdb_path
-        self.gmx_path = properties.get('gmx_path',None)
-        self.mutation = properties.get('mutation',None)
+        # Properties specific for BB
+        self.dista = properties.get('dista', False)
+        self.method = properties.get('method', "linkage")
+        self.cutoff = properties.get('cutoff', 0.1)
+        # Common in all BB
+        self.gmx_path = properties.get('gmx_path','gmx')
+        self.global_log= properties.get('global_log', None)
+        self.prefix = properties.get('prefix',None)
         self.step = properties.get('step',None)
         self.path = properties.get('path','')
-        self.dista = properties.get('dista', False)
-        self.method = properties.get('method', 'linkage')
-        self.cutoff = str(properties.get('cutoff', 0.1))
-        self.mpirun = properties.get('mpirun', False)
-        self.mpirun_np = properties.get('mpirun_np', None)
 
 
     def launch(self):
         """Launches the execution of the GROMACS rms module.
         """
-        out_log, err_log = fu.get_logs(path=self.path, mutation=self.mutation, step=self.step)
-        gmx = 'gmx' if self.gmx_path is 'None' else self.gmx_path
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
 
-        cmd = [gmx, 'rms', '-xvg', 'none',
+        cmd = ['echo', '\"'+'1 1'+'\"', '|',
+               self.gmx_path, 'cluster',
                '-s', self.input_gro_path,
-               '-f', self.input_trr_path,
-               '-o', self.output_xvg_path]
+               '-f', self.input_traj_path,
+               '-cl', self.output_pdb_path,
+               '-cutoff', str(self.cutoff),
+               '-method', self.method]
 
-        if self.mpirun_np is not None:
-            cmd.insert(0, str(self.mpirun_np))
-            cmd.insert(0, '-np')
-        if self.mpirun:
-            cmd.insert(0, 'mpirun')
-            cmd.append('<<<')
-            cmd.append('\"'+"$'0\n0\n'"+'\"')
-        else:
-            cmd.insert(0, '|')
-            cmd.insert(0, '\"'+'0 0'+'\"')
-            cmd.insert(0, 'echo')
-        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log)
-        command.launch()
-        xvg = self.output_xvg_path if os.path.isfile(self.output_xvg_path) else ntpath.basename(self.output_xvg_path)
-        self.mutation = '' if self.mutation is None else self.mutation
-        return {self.mutation: np.loadtxt(xvg)}
+        if self.dista:
+            cmd.append('-dista')
 
-#Creating a main function to be compatible with CWL
+        return cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+
 def main():
-    system=sys.argv[1]
-    step=sys.argv[2]
-    properties_file=sys.argv[3]
-    prop = settings.YamlReader(properties_file, system).get_prop_dic()[step]
-    Rms(input_gro_path=sys.argv[4],
-        input_trr_path=sys.argv[5],
-        output_xvg_path=sys.argv[6],
-        properties=prop).launch()
+    parser = argparse.ArgumentParser(description="Wrapper of the GROMACS cluster module.")
+    parser.add_argument('--conf_file', required=True)
+    parser.add_argument('--system', required=True)
+    parser.add_argument('--step', required=True)
+
+    #Specific args of each building block
+    parser.add_argument('--input_gro_path', required=True)
+    parser.add_argument('--input_xtc_path', required=True)
+    parser.add_argument('--output_pdb_path', required=True)
+    ####
+
+    args = parser.parse_args()
+    properties = settings.YamlReader(conf_file_path=args.conf_file, system=args.system).get_prop_dic()[args.step]
+
+    #Specific call of each building block
+    Cluster(input_gro_path=args.input_gro_path, input_xtc_path=args.input_xtc_path, output_pdb_path=args.output_pdb_path, properties=properties).launch()
+    ####
 
 if __name__ == '__main__':
     main()
