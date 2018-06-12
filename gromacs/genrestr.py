@@ -4,6 +4,7 @@ from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
 import re
+import os
 
 class Genrestr(object):
     """Wrapper class for the GROMACS genrestr module.
