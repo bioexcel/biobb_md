@@ -30,3 +30,10 @@ cluster:
     input_gro_path: file:test_data_dir/gromacs/cluster.gro
     input_traj_path: file:test_data_dir/gromacs/cluster.trr
     output_pdb_path: output_pdb.pdb
+
+genrestr:
+  paths:
+    input_structure_path: file:test_data_dir/gromacs/genrestr.gro
+    input_ndx_path: file:test_data_dir/gromacs/genrestr.ndx
+    input_top_zip_path: file:test_data_dir/gromacs/genrestr.zip
+    output_top_zip_path: output_top_zip.zip
