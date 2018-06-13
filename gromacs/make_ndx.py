@@ -5,17 +5,18 @@ from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
 
 class MakeNdx(object):
-    """Wrapper of the make_ndx module
+    """Wrapper of the GROMACS make_ndx module.
 
     Args:
         input_structure_path (str): Path to the input GRO/PDB/TPR file.
         output_ndx_path (str): Path to the output index NDX file.
         properties (dic):
-            | **selection** (*str*): ("a CA C N O") Heavy atoms. Atom selection string.
+            | - **selection** (*str*) - ("a CA C N O") Heavy atoms. Atom selection string.
+            | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
     """
 
-    def __init__(self, input_structure_path, output_ndx_path, input_ndx_path=None, properties=None, **kwargs):
-
+    def __init__(self, input_structure_path, output_ndx_path,
+                 input_ndx_path=None, properties=None, **kwargs):
         self.input_structure_path = input_structure_path
         self.output_ndx_path = output_ndx_path
         #Optional files
@@ -55,7 +56,6 @@ def main():
     parser.add_argument('--input_structure_path', required=True)
     parser.add_argument('--output_ndx_path', required=True)
     parser.add_argument('--input_ndx_path', required=False)
-
     ####
 
     args = parser.parse_args()

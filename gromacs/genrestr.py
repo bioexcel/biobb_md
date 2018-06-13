@@ -61,7 +61,6 @@ class Genrestr(object):
         command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
         returncode = command.launch()
 
-        # Unzip topology to topology_out
         fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, out_log=out_log)
         # Find ITP file name in the topology
         with open(self.output_top_path, 'r') as fin:

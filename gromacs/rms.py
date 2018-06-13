@@ -1,79 +1,71 @@
 #!/usr/bin/env python
-
-"""Python wrapper for the GROMACS rms module
-"""
-import os
-import sys
-import json
-import ntpath
-import numpy as np
-import configuration.settings as settings
-from command_wrapper import cmd_wrapper
-from tools import file_utils as fu
+import argparse
+from biobb_common.configuration import  settings
+from biobb_common.tools import file_utils as fu
+from biobb_common.command_wrapper import cmd_wrapper
 
 class Rms(object):
-    """Wrapper for the 5.1.2 version of the rms module
+    """Wrapper of the GROMACS rms module.
+
     Args:
-        input_gro_path (str): Path to the original (before launching the trajectory) GROMACS structure file GRO.
-        input_xtc_paht (str): Path to the GROMACS compressed raw trajectory file XTC.
-        output_xvg_path (str): Path to the simple xmgrace plot file XVG.
+        input_structure_path (str): Path to the input GRO/PDB/TPR file.
+        input_traj_path (str): Path to the GROMACS trajectory file XTC/TRR.
+        output_xvg_path (str): Path to the XVG output file.
         properties (dic):
-            gmx_path (str): Path to the GROMACS executable binary.
+            | - **xvg** (*str*) - ("none") XVG plot formatting: xmgrace, xmgr, none.
+            | - **selection** (*str*) - ("Protein-H") Group where the rms will be performed: System, Protein, Protein-H...
+            | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
     """
 
-    def __init__(self, input_gro_path, input_trr_path, output_xvg_path,
+    def __init__(self, input_structure_path, input_traj_path, output_xvg_path,
                  properties, **kwargs):
-        if isinstance(properties, basestring):
-            properties=json.loads(properties)
-        self.input_gro_path = input_gro_path
-        self.input_xtc_path = input_xtc_path
+
+        self.input_structure_path = input_structure_path
+        self.input_traj_path = input_traj_path
         self.output_xvg_path = output_xvg_path
-        self.gmx_path = properties.get('gmx_path',None)
-        self.mutation = properties.get('mutation',None)
+        # Properties specific for BB
+        self.xvg = properties.get('xvg', "none")
+        self.selection = properties.get('selection', "Protein-H")
+        # Common in all BB
+        self.gmx_path = properties.get('gmx_path','gmx')
+        self.global_log= properties.get('global_log', None)
+        self.prefix = properties.get('prefix',None)
         self.step = properties.get('step',None)
         self.path = properties.get('path','')
-        self.mpirun = properties.get('mpirun', False)
-        self.mpirun_np = properties.get('mpirun_np', None)
 
 
     def launch(self):
         """Launches the execution of the GROMACS rms module.
         """
-        out_log, err_log = fu.get_logs(path=self.path, mutation=self.mutation, step=self.step)
-        gmx = 'gmx' if self.gmx_path is 'None' else self.gmx_path
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
 
-        cmd = [gmx, 'rms', '-xvg', 'none',
-               '-s', self.input_gro_path,
-               '-f', self.input_xtc_path,
-               '-o', self.output_xvg_path]
+        cmd = ['echo', '\"'+self.selection+' '+self.selection+'\"', '|',
+               self.gmx_path, 'rms',
+               '-s', self.input_structure_path,
+               '-f', self.input_traj_path,
+               '-o', self.output_xvg_path,
+               '-xvg', self.xvg]
 
-        if self.mpirun_np is not None:
-            cmd.insert(0, str(self.mpirun_np))
-            cmd.insert(0, '-np')
-        if self.mpirun:
-            cmd.insert(0, 'mpirun')
-            cmd.append('<<<')
-            cmd.append('\"'+"$'0\n0\n'"+'\"')
-        else:
-            cmd.insert(0, '|')
-            cmd.insert(0, '\"'+'0 0'+'\"')
-            cmd.insert(0, 'echo')
-        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log)
-        command.launch()
-        xvg = self.output_xvg_path if os.path.isfile(self.output_xvg_path) else ntpath.basename(self.output_xvg_path)
-        self.mutation = '' if self.mutation is None else self.mutation
-        return {self.mutation: np.loadtxt(xvg)}
+        return cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
 
-#Creating a main function to be compatible with CWL
 def main():
-    system=sys.argv[1]
-    step=sys.argv[2]
-    properties_file=sys.argv[3]
-    prop = settings.YamlReader(properties_file, system).get_prop_dic()[step]
-    Rms(input_gro_path=sys.argv[4],
-        input_trr_path=sys.argv[5],
-        output_xvg_path=sys.argv[6],
-        properties=prop).launch()
+    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS cluster module.")
+    parser.add_argument('--conf_file', required=True)
+    parser.add_argument('--system', required=True)
+    parser.add_argument('--step', required=True)
+
+    #Specific args of each building block
+    parser.add_argument('--input_structure_path', required=True)
+    parser.add_argument('--input_traj_path', required=True)
+    parser.add_argument('--output_xvg_path', required=True)
+    ####
+
+    args = parser.parse_args()
+    properties = settings.YamlReader(conf_file_path=args.conf_file, system=args.system).get_prop_dic()[args.step]
+
+    #Specific call of each building block
+    Rms(input_structure_path=args.input_structure_path, input_traj_path=args.input_traj_path, output_xvg_path=args.output_xvg_path, properties=properties).launch()
+    ####
 
 if __name__ == '__main__':
     main()
