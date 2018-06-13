@@ -7,8 +7,7 @@ class TestGenrestr(object):
         fx.test_setup(self,'genrestr')
 
     def tearDown(self):
-        pass
-        #fx.test_teardown(self)
+        fx.test_teardown(self)
 
     def test_genrestr(self):
         returncode= Genrestr(properties=self.properties, **self.paths).launch()

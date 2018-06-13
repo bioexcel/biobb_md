@@ -5,7 +5,7 @@ from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
 
 class Grompp(object):
-    """Python Wrapper of the GROMACS grompp module.
+    """Wrapper of the GROMACS grompp module.
     The GROMACS preprocessor module needs to be feeded with the input system
     and the dynamics parameters to create a portable binary run input file TPR.
     The dynamics parameters are specified in the mdp section of the
@@ -23,11 +23,12 @@ class Grompp(object):
                 | - **type** (*str*) - ("minimization") Default options for the mdp file. Valid values: minimization, nvt, npt, free, index
             | - **output_mdp_path** (*str*) - ("grompp.mdp") Path of the output MDP file.
             | - **output_top_path** (*str*) - ("grompp.top") Path the output topology TOP file.
+            | - **maxwarn** (*int*) - (10) Maximum number of allowed warnings.
             | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
     """
 
     def __init__(self, input_gro_path, input_top_zip_path,
-                 output_tpr_path, input_cpt_path, properties, **kwargs):
+                 output_tpr_path, input_cpt_path=None, properties=None, **kwargs):
         self.input_gro_path = input_gro_path
         self.input_top_zip_path = input_top_zip_path
         self.output_tpr_path = output_tpr_path
@@ -36,7 +37,8 @@ class Grompp(object):
         self.input_mdp_path= properties.get('input_mdp_path', None)
         self.output_mdp_path= properties.get('output_mdp_path', 'grompp.mdp')
         self.output_top_path = properties.get('output_top_path','grompp.top')
-        self.mdp = {k: str(v) for k, v in properties.get('mdp', None).items()}
+        self.maxwarn = str(properties.get('maxwarn', 10))
+        self.mdp = {k: str(v) for k, v in properties.get('mdp', dict()).items()}
         # Common in all BB
         self.gmx_path = properties.get('gmx_path','gmx')
         self.global_log= properties.get('global_log', None)
@@ -220,17 +222,19 @@ class Grompp(object):
         cmd = [self.gmx_path, 'grompp',
                '-f', self.output_mdp_path,
                '-c', self.input_gro_path,
+               '-r', self.input_gro_path,
                '-p', self.output_top_path,
-               '-o', self.output_tpr_path]
+               '-o', self.output_tpr_path,
+               '-maxwarn', self.maxwarn]
 
         if self.input_cpt_path:
             cmd.append('-t')
             cmd.append(self.input_cpt_path)
 
-        return cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
+        return cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
 
 def main():
-    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS genion module.")
+    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.")
     parser.add_argument('--conf_file', required=True)
     parser.add_argument('--system', required=True)
     parser.add_argument('--step', required=True)
