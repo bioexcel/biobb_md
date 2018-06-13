@@ -15,7 +15,6 @@ class Mdrun(object):
         output_log_path (str): Path to the output GROMACS trajectory log file LOG.
         output_xtc_path (str)[Optional]: Path to the GROMACS compressed trajectory file XTC.
         output_cpt_path (str)[Optional]: Path to the output GROMACS checkpoint file CPT.
-
         properties (dic):
             | - **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
             | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
