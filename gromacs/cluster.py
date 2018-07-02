@@ -68,7 +68,7 @@ def main():
     properties = settings.YamlReader(conf_file_path=args.conf_file, system=args.system).get_prop_dic()[args.step]
 
     #Specific call of each building block
-    Cluster(input_gro_path=args.input_gro_path, input_xtc_path=args.input_xtc_path, output_pdb_path=args.output_pdb_path, properties=properties).launch()
+    Cluster(input_gro_path=args.input_gro_path, input_traj_path=args.input_traj_path, output_pdb_path=args.output_pdb_path, properties=properties).launch()
     ####
 
 if __name__ == '__main__':
