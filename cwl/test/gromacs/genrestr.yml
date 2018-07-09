@@ -1,0 +1,13 @@
+conf_file:
+    class: File
+    location: ../../../test/conf.yml
+input_structure_path:
+    class: File
+    location: ../../../test/data/gromacs/genrestr.gro
+input_ndx_path:
+    class: File
+    location: ../../../test/data/gromacs/genrestr.ndx
+input_top_zip_path:
+    class: File
+    location: ../../../test/data/gromacs/genrestr.zip
+output_top_zip_path: output_top_zip.zip
