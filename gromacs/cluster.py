@@ -60,7 +60,7 @@ def main():
 
     #Specific args of each building block
     parser.add_argument('--input_gro_path', required=True)
-    parser.add_argument('--input_xtc_path', required=True)
+    parser.add_argument('--input_traj_path', required=True)
     parser.add_argument('--output_pdb_path', required=True)
     ####
 
