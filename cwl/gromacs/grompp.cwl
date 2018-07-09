@@ -40,7 +40,6 @@ inputs:
   input_cpt_path:
     type: File?
     inputBinding:
-      position: 7
       prefix: --input_cpt_path
 
 outputs:
