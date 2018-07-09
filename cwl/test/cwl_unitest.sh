@@ -4,3 +4,4 @@ cwltool $BIOBB_MD/cwl/gromacs/editconf.cwl $BIOBB_MD/cwl/test/gromacs/editconf.y
 cwltool $BIOBB_MD/cwl/gromacs/genion.cwl $BIOBB_MD/cwl/test/gromacs/genion.yml
 cwltool $BIOBB_MD/cwl/gromacs/cluster.cwl $BIOBB_MD/cwl/test/gromacs/cluster.yml
 cwltool $BIOBB_MD/cwl/gromacs/genrestr.cwl $BIOBB_MD/cwl/test/gromacs/genrestr.yml
+cwltool $BIOBB_MD/cwl/gromacs/grompp.cwl $BIOBB_MD/cwl/test/gromacs/grompp.yml
