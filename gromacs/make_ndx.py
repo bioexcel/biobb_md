@@ -62,7 +62,7 @@ def main():
     properties = settings.YamlReader(conf_file_path=args.conf_file, system=args.system).get_prop_dic()[args.step]
 
     #Specific call of each building block
-    Make_ndx(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path, input_ndx_path=args.input_ndx_path, properties=properties).launch()
+    MakeNdx(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path, input_ndx_path=args.input_ndx_path, properties=properties).launch()
     ####
 
 if __name__ == '__main__':
