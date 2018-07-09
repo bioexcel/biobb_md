@@ -6,3 +6,4 @@ cwltool $BIOBB_MD/cwl/gromacs/cluster.cwl $BIOBB_MD/cwl/test/gromacs/cluster.yml
 cwltool $BIOBB_MD/cwl/gromacs/genrestr.cwl $BIOBB_MD/cwl/test/gromacs/genrestr.yml
 cwltool $BIOBB_MD/cwl/gromacs/grompp.cwl $BIOBB_MD/cwl/test/gromacs/grompp.yml
 cwltool $BIOBB_MD/cwl/gromacs/mdrun.cwl $BIOBB_MD/cwl/test/gromacs/mdrun.yml
+cwltool $BIOBB_MD/cwl/gromacs/solvate.cwl $BIOBB_MD/cwl/test/gromacs/solvate.yml
