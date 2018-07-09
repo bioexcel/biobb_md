@@ -1,0 +1,10 @@
+conf_file:
+    class: File
+    location: ../../../test/conf.yml
+input_structure_path:
+    class: File
+    location: ../../../test/data/gromacs/rms.gro
+input_traj_path:
+    class: File
+    location: ../../../test/data/gromacs/rms.trr
+output_xvg_path: output_xvg.xvg
