@@ -1,9 +1,9 @@
-biobb
-=====
+biobb_md
+========
 
 .. toctree::
    :maxdepth: 4
 
-   configuration
-   
-   tools
+   gromacs
+
+   gromacs_extra
