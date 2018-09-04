@@ -37,7 +37,7 @@ class Ndx2resttop(object):
     def launch(self):
         """Launch the topology generation.
         """
-        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
+        out_log, _ = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
         self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
 
         fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, out_log=out_log)
@@ -49,9 +49,9 @@ class Ndx2resttop(object):
         for index, line in enumerate(lines):
             if line.startswith('['):
                 index_dic[line] = index,
+                label = line
                 if index > 0:
                     index_dic[label] = index_dic[label][0], index
-                label = line
         index_dic[label] = index_dic[label][0], index
         out_log.info('Index_dic: '+str(index_dic))
 
