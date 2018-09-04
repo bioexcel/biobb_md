@@ -1,0 +1,79 @@
+linux:
+  workflow_path: /tmp/biobb/unitests
+
+macos:
+  workflow_path: /tmp/biobb/unitests
+
+galaxy:
+  workflow_path: /tmp/galaxy/unitests
+
+pdb2gmx:
+  paths:
+    input_pdb_path: file:test_data_dir/gromacs/pyruvate_kinase.pdb
+    output_gro_path: output_gro.gro
+    output_top_zip_path: output_top_zip.zip
+
+editconf:
+  paths:
+    input_gro_path: file:test_data_dir/gromacs/editconf.gro
+    output_gro_path: output_gro.gro
+
+genion:
+  paths:
+    input_tpr_path: file:test_data_dir/gromacs/genion.tpr
+    output_gro_path: output_gro.gro
+    input_top_zip_path: file:test_data_dir/gromacs/genion.zip
+    output_top_zip_path: output_top_zip.zip
+
+cluster:
+  paths:
+    input_gro_path: file:test_data_dir/gromacs/cluster.gro
+    input_traj_path: file:test_data_dir/gromacs/cluster.trr
+    output_pdb_path: output_pdb.pdb
+
+genrestr:
+  paths:
+    input_structure_path: file:test_data_dir/gromacs/genrestr.gro
+    input_ndx_path: file:test_data_dir/gromacs/genrestr.ndx
+    input_top_zip_path: file:test_data_dir/gromacs/genrestr.zip
+    output_top_zip_path: output_top_zip.zip
+
+grompp:
+  paths:
+    input_gro_path: file:test_data_dir/gromacs/grompp.gro
+    input_top_zip_path: file:test_data_dir/gromacs/grompp.zip
+    output_tpr_path: output_tpr.tpr
+
+mdrun:
+  paths:
+    input_tpr_path: file:test_data_dir/gromacs/mdrun.tpr
+    output_trr_path: output_trr_path.trr
+    output_gro_path: output_gro_path.gro
+    output_edr_path: output_edr_path.edr
+    output_log_path: output_log_path.log
+
+make_ndx:
+  paths:
+    input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
+    output_ndx_path: output_ndx.ndx
+
+rms:
+  paths:
+    input_structure_path: file:test_data_dir/gromacs/rms.gro
+    input_traj_path: file:test_data_dir/gromacs/rms.trr
+    output_xvg_path: output_xvg.xvg
+
+solvate:
+  paths:
+    input_solute_gro_path: file:test_data_dir/gromacs/solvate.gro
+    output_gro_path: output_gro.gro
+    input_top_zip_path: file:test_data_dir/gromacs/solvate.zip
+    output_top_zip_path: output_top_zip.zip
+
+ndx2resttop:
+  paths:
+    input_ndx_path: file:test_data_dir/gromacs_extra/ndx2resttop.ndx
+    input_top_zip_path: file:test_data_dir/gromacs_extra/ndx2resttop.zip
+    output_top_zip_path: output_top_zip.zip
+  properties:
+    ref_rest_chain_triplet_list: ( Chain_A, Chain_A_noMut, A ), ( Chain_B, Chain_B_noMut, B ), ( Chain_C, Chain_C_noMut, C ), ( Chain_D, Chain_D_noMut, D )

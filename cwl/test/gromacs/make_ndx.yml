@@ -1,7 +1,0 @@
-conf_file:
-    class: File
-    location: ../../../test/conf.yml
-input_structure_path:
-    class: File
-    location: ../../../test/data/gromacs/make_ndx.tpr
-output_ndx_path: output_ndx.ndx
