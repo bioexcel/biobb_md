@@ -4,11 +4,11 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="biobb_io",
+    name="biobb_md",
     version="0.0.1",
     author="Biobb developers",
     author_email="pau.andrio@bsc.es",
-    description="Biobb_io is the Biobb module collection to fetch data to be consumed by the rest of the Biobb building blocks.",
+    description="Biobb_md is the Biobb module collection to perform molecular dynamics simulations.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     keywords="Bioinformatics Workflows BioExcel Compatibility",
