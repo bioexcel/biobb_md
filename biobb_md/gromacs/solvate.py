@@ -56,8 +56,8 @@ class Solvate(object):
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS solvate module.")
     parser.add_argument('--conf_file', required=True)
-    parser.add_argument('--system', required=True)
-    parser.add_argument('--step', required=True)
+    parser.add_argument('--system', required=False)
+    parser.add_argument('--step', required=False)
 
     #Specific args of each building block
     parser.add_argument('--input_solute_gro_path', required=True)
@@ -67,7 +67,10 @@ def main():
     ####
 
     args = parser.parse_args()
-    properties = settings.YamlReader(conf_file_path=args.conf_file, system=args.system).get_prop_dic()[args.step]
+    if args.step:
+        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
+    else:
+        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
 
     #Specific call of each building block
     Solvate(input_solute_gro_path=args.input_solute_gro_path, output_gro_path=args.output_gro_path, input_top_zip_path=args.input_top_zip_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
