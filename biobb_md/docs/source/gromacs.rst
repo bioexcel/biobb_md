@@ -4,13 +4,6 @@ gromacs package
 Submodules
 ----------
 
-gromacs.cluster module
-------------------
-
-.. automodule:: gromacs.cluster
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 gromacs.editconf module
 ---------------------------
@@ -29,7 +22,7 @@ gromacs.genion module
     :show-inheritance:
 
 gromacs.genrestr module
-------------------
+--------------------------
 
 .. automodule:: gromacs.genrestr
     :members:
@@ -53,7 +46,7 @@ gromacs.make_ndx module
     :show-inheritance:
 
 gromacs.mdrun module
-------------------
+----------------------
 
 .. automodule:: gromacs.mdrun
     :members:
@@ -64,14 +57,6 @@ gromacs.pdb2gmx module
 ---------------------------
 
 .. automodule:: gromacs.pdb2gmx
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-gromacs.rms module
-------------------------------
-
-.. automodule:: gromacs.rms
     :members:
     :undoc-members:
     :show-inheritance:

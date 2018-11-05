@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu

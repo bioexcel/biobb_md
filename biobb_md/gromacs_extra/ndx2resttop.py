@@ -1,9 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+"""
+Module containing the Ndx2resttop class and the command line interface.
+"""
+
+import os
+import fnmatch
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
-import os
-import fnmatch
+
 
 class Ndx2resttop(object):
     """Generate a restrained topology from an index NDX file.
@@ -24,15 +30,15 @@ class Ndx2resttop(object):
         self.input_top_zip_path = input_top_zip_path
         self.output_top_zip_path = output_top_zip_path
         # Properties specific for BB
-        self.output_top_path = properties.get('output_top_path','restrain.top')
-        self.force_constants = properties.get('force_constants','500 500 500')
+        self.output_top_path = properties.get('output_top_path', 'restrain.top')
+        self.force_constants = properties.get('force_constants', '500 500 500')
         self.ref_rest_chain_triplet_list = properties.get('ref_rest_chain_triplet_list', None)
         # Common in all BB
-        self.gmx_path = properties.get('gmx_path','gmx')
-        self.global_log= properties.get('global_log', None)
-        self.prefix = properties.get('prefix',None)
-        self.step = properties.get('step',None)
-        self.path = properties.get('path','')
+        self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.global_log = properties.get('global_log', None)
+        self.prefix = properties.get('prefix', None)
+        self.step = properties.get('step', None)
+        self.path = properties.get('path', '')
 
     def launch(self):
         """Launch the topology generation.
@@ -71,11 +77,11 @@ class Ndx2resttop(object):
 
             # Creating new ITP with restrictions
             with open(self.output_itp_path, 'w') as f:
-                    out_log.info('Creating: '+str(f)+' and adding the selected atoms force constants')
-                    f.write('[ position_restraints ]\n')
-                    f.write('; atom  type      fx      fy      fz\n')
-                    for atom in selected_list:
-                        f.write(str(atom)+'     1  '+self.force_constants+'\n')
+                out_log.info('Creating: '+str(f)+' and adding the selected atoms force constants')
+                f.write('[ position_restraints ]\n')
+                f.write('; atom  type      fx      fy      fz\n')
+                for atom in selected_list:
+                    f.write(str(atom)+'     1  '+self.force_constants+'\n')
 
             # Including new ITP in the corresponding ITP-chain file
             for file_name in os.listdir('.'):
