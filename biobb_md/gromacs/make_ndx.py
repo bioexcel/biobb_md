@@ -60,9 +60,9 @@ def main():
 
     args = parser.parse_args()
     if args.step:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
+        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()[args.step]
     else:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
+        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()
 
     #Specific call of each building block
     MakeNdx(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path, input_ndx_path=args.input_ndx_path, properties=properties).launch()
