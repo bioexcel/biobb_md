@@ -82,9 +82,9 @@ def main():
 
     args = parser.parse_args()
     if args.step:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
+        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()[args.step]
     else:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
+        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()
 
     #Specific call of each building block
     Mdrun(input_tpr_path=args.input_tpr_path, output_trr_path=args.output_trr_path, output_gro_path=args.output_gro_path, output_edr_path=args.output_edr_path, output_log_path=args.output_log_path, output_xtc_path=args.output_xtc_path, output_cpt_path=args.output_cpt_path, properties=properties).launch()
