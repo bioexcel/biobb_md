@@ -48,7 +48,7 @@ class MakeNdx(object):
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS make_ndx module.")
-    parser.add_argument('--conf_file', required=True)
+    parser.add_argument('--config', required=True)
     parser.add_argument('--system', required=False)
     parser.add_argument('--step', required=False)
 
@@ -60,9 +60,9 @@ def main():
 
     args = parser.parse_args()
     if args.step:
-        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()[args.step]
+        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
     else:
-        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()
+        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
 
     #Specific call of each building block
     MakeNdx(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path, input_ndx_path=args.input_ndx_path, properties=properties).launch()

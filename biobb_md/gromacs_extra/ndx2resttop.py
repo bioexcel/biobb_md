@@ -101,7 +101,7 @@ class Ndx2resttop(object):
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS extra ndx2resttop module.")
-    parser.add_argument('--conf_file', required=True)
+    parser.add_argument('--config', required=True)
     parser.add_argument('--system', required=False)
     parser.add_argument('--step', required=False)
 

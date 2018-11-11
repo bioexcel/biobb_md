@@ -235,7 +235,7 @@ class Grompp(object):
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.")
-    parser.add_argument('--conf_file', required=True)
+    parser.add_argument('--config', required=True)
     parser.add_argument('--system', required=False)
     parser.add_argument('--step', required=False)
 
@@ -248,9 +248,9 @@ def main():
 
     args = parser.parse_args()
     if args.step:
-        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()[args.step]
+        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
     else:
-        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()
+        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
 
     #Specific call of each building block
     Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path, output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path, properties=properties).launch()

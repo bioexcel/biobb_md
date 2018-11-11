@@ -66,7 +66,7 @@ class Pdb2gmx(object):
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper of the GROMACS pdb2gmx module.")
-    parser.add_argument('--conf_file', required=True)
+    parser.add_argument('--config', required=True)
     parser.add_argument('--system', required=False)
     parser.add_argument('--step', required=False)
 
@@ -78,9 +78,9 @@ def main():
 
     args = parser.parse_args()
     if args.step:
-        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()[args.step]
+        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
     else:
-        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()
+        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
 
     #Specific call of each building block
     Pdb2gmx(input_pdb_path=args.input_pdb_path, output_gro_path=args.output_gro_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
