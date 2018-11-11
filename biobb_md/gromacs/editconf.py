@@ -71,9 +71,9 @@ def main():
 
     args = parser.parse_args()
     if args.step:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
+        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()[args.step]
     else:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
+        properties = settings.ConfReader(config=args.conf_file, system=args.system).get_prop_dic()
 
     #Specific call of each building block
     Editconf(input_gro_path=args.input_gro_path, output_gro_path=args.output_gro_path, properties=properties).launch()
