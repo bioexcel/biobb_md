@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from pathlib import Path
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
@@ -227,7 +228,7 @@ class Grompp(object):
                '-o', self.output_tpr_path,
                '-maxwarn', self.maxwarn]
 
-        if self.input_cpt_path:
+        if self.input_cpt_path and Path(self.input_cpt_path).exists():
             cmd.append('-t')
             cmd.append(self.input_cpt_path)
 
