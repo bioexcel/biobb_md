@@ -77,7 +77,7 @@ class Genion(object):
         returncode = command.launch()
 
         # zip new_topology
-        fu.zip_top(zip_file=self.output_top_zip_path, prefix=self.prefix, out_log=out_log)
+        fu.zip_top(zip_file=self.output_top_zip_path, top_file=self.output_top_path, prefix=self.prefix, out_log=out_log)
         return returncode
 
 def main():

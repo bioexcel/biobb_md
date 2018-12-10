@@ -50,7 +50,7 @@ class Solvate(object):
 
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
 
-        fu.zip_top(zip_file=self.output_top_zip_path, prefix=self.prefix, out_log=out_log)
+        fu.zip_top(zip_file=self.output_top_zip_path, prefix=self.prefix, top_file=self.output_top_path, out_log=out_log)
         return returncode
 
 def main():

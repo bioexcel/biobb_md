@@ -62,7 +62,7 @@ class Pdb2gmx(object):
         out_log.info('Compressing topology to: '+self.output_top_zip_path)
         if self.global_log:
             self.global_log.info(fu.get_logs_prefix()+'Compressing topology to: '+self.output_top_zip_path)
-        fu.zip_top(zip_file=self.output_top_zip_path, prefix=self.prefix, out_log=out_log)
+        fu.zip_top(zip_file=self.output_top_zip_path, prefix=self.prefix, top_file=self.output_top_path, out_log=out_log)
 
         return returncode
 
