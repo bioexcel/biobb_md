@@ -58,6 +58,7 @@ class Grompp(object):
         mdp_list=[]
         self.output_mdp_path=fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_mdp_path)
 
+
         sim_type = self.mdp.get('type', 'minimization')
         minimization = (sim_type == 'minimization')
         nvt = (sim_type == 'nvt')
@@ -205,6 +206,7 @@ class Grompp(object):
         """
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
         self.output_mdp_path = self.create_mdp() if self.input_mdp_path is None else self.input_mdp_path
+        self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
 
         if self.global_log is not None:
             md = self.mdp.get('type', 'minimization')
@@ -218,7 +220,7 @@ class Grompp(object):
                 out_log.info('Will run a '+md+' md of ' + fu.human_readable_time(int(self.nsteps)*float(self.dt)))
                 self.global_log.info(fu.get_logs_prefix()+'Will run a '+md+' md of ' + fu.human_readable_time(int(self.nsteps)*float(self.dt)))
 
-        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, out_log=out_log)
+        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, prefix=self.prefix, out_log=out_log)
 
         cmd = [self.gmx_path, 'grompp',
                '-f', self.output_mdp_path,

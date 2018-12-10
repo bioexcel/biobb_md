@@ -40,7 +40,7 @@ class Solvate(object):
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
         self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
 
-        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, out_log=out_log)
+        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, prefix=self.prefix, out_log=out_log)
 
         cmd = [self.gmx_path, 'solvate',
                '-cp', self.input_solute_gro_path,
@@ -50,7 +50,7 @@ class Solvate(object):
 
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
 
-        fu.zip_top(zip_file=self.output_top_zip_path, out_log=out_log)
+        fu.zip_top(zip_file=self.output_top_zip_path, prefix=self.prefix, out_log=out_log)
         return returncode
 
 def main():

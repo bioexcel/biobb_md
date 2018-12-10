@@ -42,6 +42,8 @@ class Pdb2gmx(object):
         """Launches the execution of the GROMACS pdb2gmx module.
         """
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
+        self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
+        self.output_itp_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_itp_path)
 
         cmd = [self.gmx_path, "pdb2gmx",
                "-f", self.input_pdb_path,
@@ -60,7 +62,7 @@ class Pdb2gmx(object):
         out_log.info('Compressing topology to: '+self.output_top_zip_path)
         if self.global_log:
             self.global_log.info(fu.get_logs_prefix()+'Compressing topology to: '+self.output_top_zip_path)
-        fu.zip_top(zip_file=self.output_top_zip_path, out_log=out_log)
+        fu.zip_top(zip_file=self.output_top_zip_path, prefix=self.prefix, out_log=out_log)
 
         return returncode
 

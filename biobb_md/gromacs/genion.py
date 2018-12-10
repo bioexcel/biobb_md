@@ -53,7 +53,7 @@ class Genion(object):
         self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
 
         # Unzip topology to topology_out
-        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, out_log=out_log)
+        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, prefix=self.prefix, out_log=out_log)
 
         cmd = ['echo', '\"'+self.replaced_group+'\"', '|',
                self.gmx_path, 'genion',
@@ -77,7 +77,7 @@ class Genion(object):
         returncode = command.launch()
 
         # zip new_topology
-        fu.zip_top(zip_file=self.output_top_zip_path, out_log=out_log)
+        fu.zip_top(zip_file=self.output_top_zip_path, prefix=self.prefix, out_log=out_log)
         return returncode
 
 def main():
