@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+"""Genion Module"""
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
@@ -22,7 +24,7 @@ class Genion(object):
     """
 
     def __init__(self, input_tpr_path, output_gro_path, input_top_zip_path,
-                 output_top_zip_path, properties, **kwargs):
+                 output_top_zip_path, properties=None, **kwargs):
         self.input_tpr_path = input_tpr_path
         self.output_gro_path = output_gro_path
         self.input_top_zip_path = input_top_zip_path

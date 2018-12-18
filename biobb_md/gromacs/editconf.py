@@ -28,6 +28,7 @@ class Editconf(object):
 
         # Properties specific for BB
         self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_version = fu.gromacs_version(self.gmx_path)
         self.distance_to_molecule = properties.get('distance_to_molecule', 1.0)
         self.box_type = properties.get('box_type', 'cubic')
         self.center_molecule = properties.get('center_molecule', True)
