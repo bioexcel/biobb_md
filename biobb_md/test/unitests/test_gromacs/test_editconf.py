@@ -8,6 +8,7 @@ class TestEditconf(object):
     def tearDown(self):
         fx.test_teardown(self)
 
+
     def test_editconf(self):
         returncode= Editconf(properties=self.properties, **self.paths).launch()
         assert fx.not_empty(self.paths['input_gro_path'])
