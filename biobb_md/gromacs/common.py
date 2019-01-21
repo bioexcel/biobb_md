@@ -41,3 +41,35 @@ class GromacsVersionError(Exception):
         compatible with the current function.
     """
     pass
+
+def gmx_check(file_a, file_b, gmx='gmx'):
+    print("Comparing GROMACS files:")
+    print("FILE_A: %s" % os.path.abspath(file_a))
+    print("FILE_B: %s" % os.path.abspath(file_b))
+    check_result = 'check_result.out'
+    cmd = [gmx, 'check']
+    if file_a.endswith(".tpr"):
+        cmd.append('-s1')
+    else:
+        cmd.append('-f')
+    cmd.append(file_a)
+    if file_b.endswith(".tpr"):
+        cmd.append('-s2')
+    else:
+        cmd.append('-f2')
+    cmd.append(file_b)
+    cmd.append('> check_result.out')
+    cmd_wrapper.CmdWrapper(cmd).launch()
+    print("Result file: %s" % os.path.abspath(check_result))
+    with open(check_result, 'r') as check_file:
+        if file_a.endswith(".tpr"):
+            for line_num, line in enumerate(check_file):
+                if not line.startswith('comparing'):
+                    print('Discrepance found in line %d: %s' % (line_num, line))
+                    return False
+        else:
+            for line in check_file:
+                if line.strip() and not line.strip() == "Both files read correctly":
+                    return False
+
+    return True

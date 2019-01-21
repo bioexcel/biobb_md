@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
+
+"""Module containing the Genrestr class and the command line interface."""
+import re
+import os
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
-import re
-import os
+from biobb_md.gromacs.common import get_gromacs_version
+from biobb_md.gromacs.common import GromacsVersionError
 
 class Genrestr(object):
-    """Wrapper class for the GROMACS genrestr module.
+    """Wrapper class for the GROMACS genrestr (http://manual.gromacs.org/current/onlinehelp/gmx-genrestr.html) module.
 
     Args:
         input_structure_path (str): Path to the input structure PDB, GRO or TPR format.
@@ -24,32 +28,41 @@ class Genrestr(object):
 
     def __init__(self, input_structure_path, input_ndx_path, input_top_zip_path,
                  output_top_zip_path, properties, **kwargs):
+        properties = properties or {}
+
+        # Input/Output files
         self.input_structure_path = input_structure_path
         self.input_ndx_path = input_ndx_path
         self.input_top_zip_path = input_top_zip_path
         self.output_top_zip_path = output_top_zip_path
+
         # Properties specific for BB
         self.output_itp_path = properties.get('output_itp_path','restrain.itp')
         self.output_top_path = properties.get('output_top_path','restrain.top')
         self.force_constants = str(properties.get('force_constants','500 500 500'))
         self.restricted_group = properties.get('restricted_group', 'system')
-        # Common in all BB
-        self.gmx_path = properties.get('gmx_path','gmx')
-        self.global_log= properties.get('global_log', None)
-        self.prefix = properties.get('prefix',None)
-        self.step = properties.get('step',None)
-        self.path = properties.get('path','')
+
+        # Properties common in all GROMACS BB
+        self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_version = get_gromacs_version(self.gmx_path)
+
+        # Properties common in all BB
+        self.can_write_console_log = properties.get('can_write_console_log', True)
+        self.global_log = properties.get('global_log', None)
+        self.prefix = properties.get('prefix', None)
+        self.step = properties.get('step', None)
+        self.path = properties.get('path', '')
 
     def launch(self):
-        """Launches the execution of the GROMACS genrestr module.
-        """
-        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
-        self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
-        self.output_itp_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_itp_path)
+        """Launches the execution of the GROMACS genrestr module."""
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+        if self.gmx_version < 512:
+            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
-        out_log.info('Adding restraints for atoms in group: '+self.restricted_group+' using a force constant of: '+self.force_constants)
-        if self.global_log:
-            self.global_log.info(fu.get_logs_prefix()+'Adding restraints for atoms in group: '+self.restricted_group+' using a force constant of: '+self.force_constants)
+        self.output_itp_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_itp_path)
+
+        fu.log('Adding restraints for atoms in group: %s using a force constant of: %s' % (self.restricted_group, self.force_constants), out_log, self.global_log)
 
         cmd = ['echo', '\"'+self.restricted_group+'\"', '|',
                self.gmx_path, "genrestr",
@@ -61,9 +74,9 @@ class Genrestr(object):
         command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
         returncode = command.launch()
 
-        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, out_log=out_log)
+        top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
         # Find ITP file name in the topology
-        with open(self.output_top_path, 'r') as fin:
+        with open(top_file, 'r') as fin:
             for line in fin:
                 if line.startswith('#ifdef POSRES'):
                     itp_name = re.findall('"([^"]*)"',next(fin))[0]
@@ -72,12 +85,12 @@ class Genrestr(object):
         # content of the ITP file created with genrest.
         with open(self.output_itp_path, 'r') as fin:
             data = fin.read().splitlines(True)
-        with open(itp_name, 'w') as fout:
+        with open(os.path.join(os.path.dirname(top_file),itp_name), 'w') as fout:
             fout.writelines(data)
         # Remove the ITP file created with genrest.
         os.remove(self.output_itp_path)
         # zip topology
-        fu.zip_top(zip_file=self.output_top_zip_path, out_log=out_log)
+        fu.zip_top(zip_file=self.output_top_zip_path, top_file=top_file, out_log=out_log)
 
         return returncode
 

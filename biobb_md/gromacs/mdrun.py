@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
+
+"""Module containing the MDrun class and the command line interface."""
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
+from biobb_md.gromacs.common import get_gromacs_version
+from biobb_md.gromacs.common import GromacsVersionError
 
 class Mdrun(object):
     """Wrapper of the GROMACS of the mdrun module.
@@ -24,7 +28,9 @@ class Mdrun(object):
                  output_gro_path, output_edr_path,
                  output_log_path, output_xtc_path=None,
                  output_cpt_path=None, properties=None, **kwargs):
+        properties = properties or {}
 
+        # Input/Output files
         self.input_tpr_path = input_tpr_path
         self.output_trr_path = output_trr_path
         self.output_gro_path = output_gro_path
@@ -33,19 +39,27 @@ class Mdrun(object):
         #Optional files
         self.output_xtc_path = output_xtc_path
         self.output_cpt_path = output_cpt_path
+
         # Properties specific for BB
         self.num_threads = str(properties.get('num_threads', 0))
-        # Common in all BB
-        self.gmx_path = properties.get('gmx_path','gmx')
-        self.global_log= properties.get('global_log', None)
-        self.prefix = properties.get('prefix',None)
-        self.step = properties.get('step',None)
-        self.path = properties.get('path','')
+
+        # Properties common in all GROMACS BB
+        self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_version = get_gromacs_version(self.gmx_path)
+
+        # Properties common in all BB
+        self.can_write_console_log = properties.get('can_write_console_log', True)
+        self.global_log = properties.get('global_log', None)
+        self.prefix = properties.get('prefix', None)
+        self.step = properties.get('step', None)
+        self.path = properties.get('path', '')
 
     def launch(self):
-        """Launches the execution of the GROMACS mdrun module.
-        """
-        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
+        """Launches the execution of the GROMACS mdrun module."""
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+        if self.gmx_version < 512:
+            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
         cmd = [self.gmx_path, 'mdrun',
                '-s', self.input_tpr_path,
@@ -78,17 +92,15 @@ def main():
     parser.add_argument('--output_log_path', required=True)
     parser.add_argument('--output_xtc_path', required=False)
     parser.add_argument('--output_cpt_path', required=False)
-    ####
 
     args = parser.parse_args()
+    args.config = args.config or "{}"
+    properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
     if args.step:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
-    else:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
+        properties = properties[args.step]
 
     #Specific call of each building block
     Mdrun(input_tpr_path=args.input_tpr_path, output_trr_path=args.output_trr_path, output_gro_path=args.output_gro_path, output_edr_path=args.output_edr_path, output_log_path=args.output_log_path, output_xtc_path=args.output_xtc_path, output_cpt_path=args.output_cpt_path, properties=properties).launch()
-    ####
 
 if __name__ == '__main__':
     main()

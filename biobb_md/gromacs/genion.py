@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
-"""Genion Module"""
+"""Module containing the Genion class and the command line interface."""
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
+from biobb_md.gromacs.common import get_gromacs_version
+from biobb_md.gromacs.common import GromacsVersionError
 
 class Genion(object):
-    """Wrapper class for the GROMACS genion module.
+    """Wrapper class for the GROMACS genion (http://manual.gromacs.org/current/onlinehelp/gmx-genion.html) module.
 
     Args:
         input_tpr_path (str): Path to the input portable run input TPR file.
@@ -25,43 +27,50 @@ class Genion(object):
 
     def __init__(self, input_tpr_path, output_gro_path, input_top_zip_path,
                  output_top_zip_path, properties=None, **kwargs):
+        properties = properties or {}
+
+        # Input/Output files
         self.input_tpr_path = input_tpr_path
         self.output_gro_path = output_gro_path
         self.input_top_zip_path = input_top_zip_path
         self.output_top_zip_path = output_top_zip_path
+
         # Properties specific for BB
         self.output_top_path = properties.get('output_top_path','gio.top')
         self.replaced_group = properties.get('replaced_group','SOL')
         self.neutral = properties.get('neutral',False)
         self.concentration = properties.get('concentration',0.05)
         self.seed = properties.get('seed',1993)
-        # Common in all BB
-        self.gmx_path = properties.get('gmx_path','gmx')
-        self.global_log= properties.get('global_log', None)
-        self.prefix = properties.get('prefix',None)
-        self.step = properties.get('step',None)
-        self.path = properties.get('path','')
+
+        # Properties common in all GROMACS BB
+        self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_version = get_gromacs_version(self.gmx_path)
+
+        # Properties common in all BB
+        self.can_write_console_log = properties.get('can_write_console_log', True)
+        self.global_log = properties.get('global_log', None)
+        self.prefix = properties.get('prefix', None)
+        self.step = properties.get('step', None)
+        self.path = properties.get('path', '')
 
     def launch(self):
-        """Launches the execution of the GROMACS genion module.
-        """
-        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
+        """Launches the execution of the GROMACS genion module."""
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+        if self.gmx_version < 512:
+            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
         if self.concentration:
-            out_log.info('To reach up '+str(self.concentration)+' mol/litre concentration')
-            if self.global_log:
-                self.global_log.info(fu.get_logs_prefix()+'To reach up '+str(self.concentration)+' mol/litre concentration')
-
-        self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
+            fu.log('To reach up %g mol/litre concentration' % self.concentration, out_log, self.global_log)
 
         # Unzip topology to topology_out
-        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, out_log=out_log)
+        top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
 
         cmd = ['echo', '\"'+self.replaced_group+'\"', '|',
                self.gmx_path, 'genion',
                '-s', self.input_tpr_path,
                '-o', self.output_gro_path,
-               '-p', self.output_top_path]
+               '-p', top_file]
 
 
         if self.neutral:
@@ -79,7 +88,7 @@ class Genion(object):
         returncode = command.launch()
 
         # zip new_topology
-        fu.zip_top(zip_file=self.output_top_zip_path, top_file=self.output_top_path, prefix=self.prefix, out_log=out_log)
+        fu.zip_top(zip_file=self.output_top_zip_path, top_file=top_file, out_log=out_log)
         return returncode
 
 def main():
@@ -93,17 +102,15 @@ def main():
     parser.add_argument('--output_gro_path', required=True)
     parser.add_argument('--input_top_zip_path', required=True)
     parser.add_argument('--output_top_zip_path', required=True)
-    ####
 
     args = parser.parse_args()
+    args.config = args.config or "{}"
+    properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
     if args.step:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
-    else:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
+        properties = properties[args.step]
 
     #Specific call of each building block
     Genion(input_tpr_path=args.input_tpr_path, output_gro_path=args.output_gro_path, input_top_zip_path=args.input_top_zip_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
-    ####
 
 if __name__ == '__main__':
     main()

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
-"""Editconf Module"""
+"""Module containing the Editconf class and the command line interface."""
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
+from biobb_md.gromacs.common import get_gromacs_version
+from biobb_md.gromacs.common import GromacsVersionError
 
 class Editconf(object):
     """Wrapper class for the GROMACS editconf (http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html) module.
@@ -22,29 +24,32 @@ class Editconf(object):
     def __init__(self, input_gro_path, output_gro_path, properties=None, **kwargs):
         properties = properties or {}
 
-        # IN OUT files
+        # Input/Output files
         self.input_gro_path = input_gro_path
         self.output_gro_path = output_gro_path
 
         # Properties specific for BB
-        self.gmx_path = properties.get('gmx_path', 'gmx')
-        self.gmx_version = fu.gromacs_version(self.gmx_path)
         self.distance_to_molecule = properties.get('distance_to_molecule', 1.0)
         self.box_type = properties.get('box_type', 'cubic')
         self.center_molecule = properties.get('center_molecule', True)
 
+        # Properties common in all GROMACS BB
+        self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_version = get_gromacs_version(self.gmx_path)
+
         # Properties common in all BB
-        self.global_log = properties.get('global_log', None)
         self.can_write_console_log = properties.get('can_write_console_log', True)
+        self.global_log = properties.get('global_log', None)
         self.prefix = properties.get('prefix', None)
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
 
-
     def launch(self):
-        """Launches the execution of the GROMACS editconf module.
-        """
+        """Launches the execution of the GROMACS editconf module."""
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+        if self.gmx_version < 512:
+            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
         cmd = [self.gmx_path, 'editconf',
                '-f', self.input_gro_path,
@@ -71,18 +76,15 @@ def main():
     #Specific args of each building block
     parser.add_argument('--input_gro_path', required=True)
     parser.add_argument('--output_gro_path', required=True)
-    ####
 
     args = parser.parse_args()
     args.config = args.config or "{}"
+    properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
     if args.step:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
-    else:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
+        properties = properties[args.step]
 
     #Specific call of each building block
     Editconf(input_gro_path=args.input_gro_path, output_gro_path=args.output_gro_path, properties=properties).launch()
-    ####
 
 if __name__ == '__main__':
     main()

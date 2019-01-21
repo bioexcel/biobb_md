@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
+
+"""Module containing the Grompp class and the command line interface."""
 import argparse
 from pathlib import Path
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
+from biobb_md.gromacs.common import get_gromacs_version
+from biobb_md.gromacs.common import GromacsVersionError
 
 class Grompp(object):
     """Wrapper of the GROMACS grompp module.
@@ -30,34 +34,40 @@ class Grompp(object):
 
     def __init__(self, input_gro_path, input_top_zip_path,
                  output_tpr_path, input_cpt_path=None, properties=None, **kwargs):
+        properties = properties or {}
+
+        # Input/Output files
         self.input_gro_path = input_gro_path
         self.input_top_zip_path = input_top_zip_path
         self.output_tpr_path = output_tpr_path
         self.input_cpt_path = input_cpt_path
+
         # Properties specific for BB
-        self.input_mdp_path= properties.get('input_mdp_path', None)
-        self.output_mdp_path= properties.get('output_mdp_path', 'grompp.mdp')
-        self.output_top_path = properties.get('output_top_path','grompp.top')
+        self.input_mdp_path = properties.get('input_mdp_path', None)
+        self.output_mdp_path = properties.get('output_mdp_path', 'grompp.mdp')
+        self.output_top_path = properties.get('output_top_path', 'grompp.top')
+        #TODO REVIEW: When select is implemented.
         self.maxwarn = str(properties.get('maxwarn', 10))
         self.mdp = {k: str(v) for k, v in properties.get('mdp', dict()).items()}
-        # Common in all BB
-        self.gmx_path = properties.get('gmx_path','gmx')
-        self.global_log= properties.get('global_log', None)
-        self.prefix = properties.get('prefix',None)
-        self.step = properties.get('step',None)
-        self.path = properties.get('path','')
-        #TODO Check this two attributes
-        self.nsteps=''
-        self.dt=''
+        #TODO REVIEW:  this two attributes
+        self.nsteps = ''
+        self.dt = ''
 
+        # Properties common in all GROMACS BB
+        self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_version = get_gromacs_version(self.gmx_path)
+
+        # Properties common in all BB
+        self.can_write_console_log = properties.get('can_write_console_log', True)
+        self.global_log = properties.get('global_log', None)
+        self.prefix = properties.get('prefix', None)
+        self.step = properties.get('step', None)
+        self.path = properties.get('path', '')
 
     def create_mdp(self):
-        """Creates an MDP file using the properties file settings
-        """
-
-        mdp_list=[]
-        self.output_mdp_path=fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_mdp_path)
-
+        """Creates an MDP file using the properties file settings"""
+        mdp_list = []
+        self.output_mdp_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_mdp_path)
 
         sim_type = self.mdp.get('type', 'minimization')
         minimization = (sim_type == 'minimization')
@@ -75,7 +85,7 @@ class Grompp(object):
 
         # Run parameters
         mdp_list.append("\n;Run parameters")
-        self.nsteps= self.mdp.pop('nsteps', '5000')
+        self.nsteps = self.mdp.pop('nsteps', '5000')
         mdp_list.append("nsteps = " + self.nsteps)
         if minimization:
             mdp_list.append("integrator = " + self.mdp.pop('integrator', 'steep'))
@@ -83,17 +93,17 @@ class Grompp(object):
             mdp_list.append("emstep = " + self.mdp.pop('emstep', '0.01'))
         if md:
             mdp_list.append("integrator = " + self.mdp.pop('integrator', 'md'))
-            self.dt=self.mdp.pop('dt', '0.002')
+            self.dt = self.mdp.pop('dt', '0.002')
             mdp_list.append("dt = " + self.dt)
 
         # Output control
         if md:
             mdp_list.append("\n;Output control")
             if nvt or npt:
-                mdp_list.append("nstxout = " + self.mdp.pop('nstxout',   '500'))
-                mdp_list.append("nstvout = " + self.mdp.pop('nstvout',   '500'))
+                mdp_list.append("nstxout = " + self.mdp.pop('nstxout', '500'))
+                mdp_list.append("nstvout = " + self.mdp.pop('nstvout', '500'))
                 mdp_list.append("nstenergy = " + self.mdp.pop('nstenergy', '500'))
-                mdp_list.append("nstlog = " + self.mdp.pop('nstlog',    '500'))
+                mdp_list.append("nstlog = " + self.mdp.pop('nstlog', '500'))
                 mdp_list.append("nstcalcenergy = " + self.mdp.pop('nstcalcenergy', '100'))
                 mdp_list.append("nstcomm = " + self.mdp.pop('nstcomm', '100'))
                 mdp_list.append("nstxout-compressed = " + self.mdp.pop('nstxout-compressed', '1000'))
@@ -101,10 +111,10 @@ class Grompp(object):
                 mdp_list.append("compressed-x-grps = " + self.mdp.pop('compressed-x-grps', 'System'))
             if free:
                 mdp_list.append("nstcomm = " + self.mdp.pop('nstcomm', '100'))
-                mdp_list.append("nstxout = " + self.mdp.pop('nstxout',   '5000'))
-                mdp_list.append("nstvout = " + self.mdp.pop('nstvout',   '5000'))
+                mdp_list.append("nstxout = " + self.mdp.pop('nstxout', '5000'))
+                mdp_list.append("nstvout = " + self.mdp.pop('nstvout', '5000'))
                 mdp_list.append("nstenergy = " + self.mdp.pop('nstenergy', '5000'))
-                mdp_list.append("nstlog = " + self.mdp.pop('nstlog',    '5000'))
+                mdp_list.append("nstlog = " + self.mdp.pop('nstlog', '5000'))
                 mdp_list.append("nstcalcenergy = " + self.mdp.pop('nstcalcenergy', '100'))
                 mdp_list.append("nstxout-compressed = " + self.mdp.pop('nstxout-compressed', '1000'))
                 mdp_list.append("compressed-x-grps = " + self.mdp.pop('compressed-x-grps', 'System'))
@@ -202,31 +212,29 @@ class Grompp(object):
         return self.output_mdp_path
 
     def launch(self):
-        """Launches the execution of the GROMACS grompp module.
-        """
-        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
-        self.output_mdp_path = self.create_mdp() if self.input_mdp_path is None else self.input_mdp_path
-        self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
+        """Launches the execution of the GROMACS grompp module."""
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+        if self.gmx_version < 512:
+            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
-        if self.global_log is not None:
-            md = self.mdp.get('type', 'minimization')
-            if md != 'index' and md != 'free':
-                out_log.info('Will run a '+md+' md of ' + str(self.nsteps) +' steps')
-                self.global_log.info(fu.get_logs_prefix()+'Will run a '+md+' md of ' + str(self.nsteps) +' steps')
-            elif md == 'index':
-                out_log.info('Will create a TPR to be used as structure file')
-                self.global_log.info(fu.get_logs_prefix()+'Will create a TPR to be used as structure file')
-            else:
-                out_log.info('Will run a '+md+' md of ' + fu.human_readable_time(int(self.nsteps)*float(self.dt)))
-                self.global_log.info(fu.get_logs_prefix()+'Will run a '+md+' md of ' + fu.human_readable_time(int(self.nsteps)*float(self.dt)))
+        self.output_mdp_path = self.create_mdp() if not self.input_mdp_path else self.input_mdp_path
 
-        fu.unzip_top(zip_file=self.input_top_zip_path, top_file=self.output_top_path, out_log=out_log)
+        md = self.mdp.get('type', 'minimization')
+        if md not in ('index', 'free'):
+            fu.log('Will run a %s md of %s steps' % (md, self.nsteps), out_log, self.global_log)
+        elif md == 'index':
+            fu.log('Will create a TPR to be used as structure file')
+        else:
+            fu.log('Will run a %s md of %s' % (md, fu.human_readable_time(int(self.nsteps)*float(self.dt))), out_log, self.global_log)
+
+        top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
 
         cmd = [self.gmx_path, 'grompp',
                '-f', self.output_mdp_path,
                '-c', self.input_gro_path,
                '-r', self.input_gro_path,
-               '-p', self.output_top_path,
+               '-p', top_file,
                '-o', self.output_tpr_path,
                '-maxwarn', self.maxwarn]
 
@@ -247,17 +255,15 @@ def main():
     parser.add_argument('--input_top_zip_path', required=True)
     parser.add_argument('--output_tpr_path', required=True)
     parser.add_argument('--input_cpt_path', required=False)
-    ####
 
     args = parser.parse_args()
+    args.config = args.config or "{}"
+    properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
     if args.step:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
-    else:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
+        properties = properties[args.step]
 
     #Specific call of each building block
     Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path, output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path, properties=properties).launch()
-    ####
 
 if __name__ == '__main__':
     main()

@@ -10,6 +10,5 @@ class TestEditconf(object):
 
     def test_editconf(self):
         Editconf(properties=self.properties, **self.paths).launch()
-        assert fx.not_empty(self.paths['input_gro_path'])
         assert fx.not_empty(self.paths['output_gro_path'])
         assert fx.equal(self.paths['output_gro_path'], self.paths['ref_output_gro_path'])

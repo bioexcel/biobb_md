@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
+
+"""Module containing the Pdb2gmx class and the command line interface."""
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
+from biobb_md.gromacs.common import get_gromacs_version
+from biobb_md.gromacs.common import GromacsVersionError
 
 class Pdb2gmx(object):
-    """Wrapper class for the GROMACS pdb2gmx module.
+    """Wrapper class for the GROMACS pdb2gmx (http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html) module.
 
     Args:
         input_pdb_path (str): Path to the input PDB file.
@@ -21,29 +25,41 @@ class Pdb2gmx(object):
     """
 
     def __init__(self, input_pdb_path, output_gro_path,
-                 output_top_zip_path, properties, **kwargs):
+                 output_top_zip_path, properties=None, **kwargs):
+        properties = properties or {}
+
+        # Input/Output files
         self.input_pdb_path = input_pdb_path
         self.output_gro_path = output_gro_path
         self.output_top_zip_path = output_top_zip_path
+
         # Properties specific for BB
-        self.output_top_path = properties.get('output_top_path','p2g.top')
-        self.output_itp_path = properties.get('output_itp_path','p2g.itp')
-        self.water_type = properties.get('water_type','spce')
-        self.force_field = properties.get('force_field','amber99sb-ildn')
-        self.ignh = properties.get('ignh',False)
-        # Common in all BB
-        self.gmx_path = properties.get('gmx_path','gmx')
-        self.global_log= properties.get('global_log', None)
-        self.prefix = properties.get('prefix',None)
-        self.step = properties.get('step',None)
-        self.path = properties.get('path','')
+        self.output_top_path = properties.get('output_top_path', 'p2g.top')
+        self.output_itp_path = properties.get('output_itp_path', 'p2g.itp')
+        self.water_type = properties.get('water_type', 'spce')
+        self.force_field = properties.get('force_field', 'amber99sb-ildn')
+        self.ignh = properties.get('ignh', False)
+
+        # Properties common in all GROMACS BB
+        self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_version = get_gromacs_version(self.gmx_path)
+
+        # Properties common in all BB
+        self.can_write_console_log = properties.get('can_write_console_log', True)
+        self.global_log = properties.get('global_log', None)
+        self.prefix = properties.get('prefix', None)
+        self.step = properties.get('step', None)
+        self.path = properties.get('path', '')
 
     def launch(self):
-        """Launches the execution of the GROMACS pdb2gmx module.
-        """
-        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step)
-        self.output_top_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_top_path)
-        self.output_itp_path = fu.create_name(path=self.path, prefix=self.prefix, step=self.step, name=self.output_itp_path)
+        """Launches the execution of the GROMACS pdb2gmx module."""
+        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+        if self.gmx_version < 512:
+            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+
+        self.output_top_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_top_path)
+        self.output_itp_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_itp_path)
 
         cmd = [self.gmx_path, "pdb2gmx",
                "-f", self.input_pdb_path,
@@ -59,10 +75,8 @@ class Pdb2gmx(object):
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
 
         # zip topology
-        out_log.info('Compressing topology to: '+self.output_top_zip_path)
-        if self.global_log:
-            self.global_log.info(fu.get_logs_prefix()+'Compressing topology to: '+self.output_top_zip_path)
-        fu.zip_top(zip_file=self.output_top_zip_path, prefix=self.prefix, top_file=self.output_top_path, out_log=out_log)
+        fu.log('Compressing topology to: %s' % self.output_top_zip_path, out_log, self.global_log)
+        fu.zip_top(zip_file=self.output_top_zip_path, top_file=self.output_top_path, out_log=out_log)
 
         return returncode
 
@@ -76,17 +90,15 @@ def main():
     parser.add_argument('--input_pdb_path', required=True)
     parser.add_argument('--output_gro_path', required=True)
     parser.add_argument('--output_top_zip_path', required=True)
-    ####
 
     args = parser.parse_args()
+    args.config = args.config or "{}"
+    properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
     if args.step:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
-    else:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
+        properties = properties[args.step]
 
     #Specific call of each building block
     Pdb2gmx(input_pdb_path=args.input_pdb_path, output_gro_path=args.output_gro_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
-    ####
 
 if __name__ == '__main__':
     main()
