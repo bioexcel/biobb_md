@@ -1,9 +1,9 @@
 from biobb_common.tools import test_fixtures as fx
-from gromacs.grompp import Grompp
+from biobb_md.gromacs.grompp import Grompp
 from biobb_md.gromacs.common import gmx_check
 
 
-class TestGrompp(object):
+class TestGrompp():
     def setUp(self):
         fx.test_setup(self,'grompp')
 

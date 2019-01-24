@@ -1,13 +1,12 @@
 from biobb_common.tools import test_fixtures as fx
-from gromacs.solvate import Solvate
+from biobb_md.gromacs.solvate import Solvate
 
-class TestSolvate(object):
+class TestSolvate():
     def setUp(self):
         fx.test_setup(self,'solvate')
 
     def tearDown(self):
-        #fx.test_teardown(self)
-        pass
+        fx.test_teardown(self)
 
     def test_solvate(self):
         returncode = Solvate(properties=self.properties, **self.paths).launch()

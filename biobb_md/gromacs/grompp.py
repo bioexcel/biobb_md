@@ -10,7 +10,7 @@ from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
-class Grompp(object):
+class Grompp():
     """Wrapper of the GROMACS grompp module.
     The GROMACS preprocessor module needs to be feeded with the input system
     and the dynamics parameters to create a portable binary run input file TPR.

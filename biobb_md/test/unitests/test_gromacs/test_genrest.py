@@ -1,8 +1,8 @@
 from biobb_common.tools import test_fixtures as fx
-from gromacs.genrestr import Genrestr
+from biobb_md.gromacs.genrestr import Genrestr
 
 
-class TestGenrestr(object):
+class TestGenrestr():
     def setUp(self):
         fx.test_setup(self,'genrestr')
 

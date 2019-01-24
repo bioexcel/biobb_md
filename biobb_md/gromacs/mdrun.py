@@ -8,7 +8,7 @@ from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
-class Mdrun(object):
+class Mdrun():
     """Wrapper of the GROMACS of the mdrun module.
 
     Args:

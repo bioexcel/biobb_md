@@ -1,7 +1,7 @@
 from biobb_common.tools import test_fixtures as fx
-from gromacs.pdb2gmx import Pdb2gmx
+from biobb_md.gromacs.pdb2gmx import Pdb2gmx
 
-class TestPdb2gmx(object):
+class TestPdb2gmx():
     def setUp(self):
         fx.test_setup(self,'pdb2gmx')
 

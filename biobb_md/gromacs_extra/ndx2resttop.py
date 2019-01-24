@@ -7,7 +7,7 @@ import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 
-class Ndx2resttop(object):
+class Ndx2resttop():
     """Generate a restrained topology from an index NDX file.
 
     Args:

@@ -1,7 +1,7 @@
 from biobb_common.tools import test_fixtures as fx
-from gromacs.editconf import Editconf
+from biobb_md.gromacs.editconf import Editconf
 
-class TestEditconf(object):
+class TestEditconf():
     def setUp(self):
         fx.test_setup(self,'editconf')
 

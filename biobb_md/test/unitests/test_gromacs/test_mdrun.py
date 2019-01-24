@@ -1,8 +1,8 @@
 from biobb_common.tools import test_fixtures as fx
-from gromacs.mdrun import Mdrun
+from biobb_md.gromacs.mdrun import Mdrun
 from biobb_md.gromacs.common import gmx_rms
 
-class TestMdrun(object):
+class TestMdrun():
     def setUp(self):
         fx.test_setup(self,'mdrun')
 

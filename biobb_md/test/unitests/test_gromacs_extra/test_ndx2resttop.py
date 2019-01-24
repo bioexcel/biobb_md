@@ -1,7 +1,7 @@
 from biobb_common.tools import test_fixtures as fx
-from gromacs_extra.ndx2resttop import Ndx2resttop
+from biobb_md.gromacs_extra.ndx2resttop import Ndx2resttop
 
-class TestNdx2resttop(object):
+class TestNdx2resttop():
     def setUp(self):
         fx.test_setup(self,'ndx2resttop')
 

@@ -1,7 +1,7 @@
 from biobb_common.tools import test_fixtures as fx
-from gromacs.genion import Genion
+from biobb_md.gromacs.genion import Genion
 
-class TestGenion(object):
+class TestGenion():
     def setUp(self):
         fx.test_setup(self,'genion')
 
