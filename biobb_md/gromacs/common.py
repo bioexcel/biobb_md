@@ -1,6 +1,7 @@
 """ Common functions for package biobb_md.gromacs """
 import os
 import re
+import shutil
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
 
@@ -33,6 +34,7 @@ def get_gromacs_version(gmx="gmx"):
         while len(version) < 3:
             version += '0'
 
+    shutil.rmtree(unique_dir)
     return int(version)
 
 
@@ -62,14 +64,25 @@ def gmx_check(file_a, file_b, gmx='gmx'):
     cmd_wrapper.CmdWrapper(cmd).launch()
     print("Result file: %s" % os.path.abspath(check_result))
     with open(check_result, 'r') as check_file:
-        if file_a.endswith(".tpr"):
-            for line_num, line in enumerate(check_file):
-                if not line.startswith('comparing'):
-                    print('Discrepance found in line %d: %s' % (line_num, line))
-                    return False
-        else:
-            for line in check_file:
-                if line.strip() and not line.strip() == "Both files read correctly":
-                    return False
+        for line_num, line in enumerate(check_file):
+            if not line.startswith('comparing'):
+                print('Discrepance found in line %d: %s' % (line_num, line))
+                return False
+    return True
 
+def gmx_rms(file_a, file_b, file_tpr, gmx='gmx', tolerance=0.5):
+    print("Comparing GROMACS files:")
+    print("FILE_A: %s" % os.path.abspath(file_a))
+    print("FILE_B: %s" % os.path.abspath(file_b))
+    rmsd_result = 'rmsd.xvg'
+    cmd = ['echo', '\"Protein Protein\"', '|',
+           gmx, 'rms', '-s', file_tpr, '-f', file_a, '-f2', file_b, '-xvg', 'none']
+    cmd_wrapper.CmdWrapper(cmd).launch()
+    print("Result file: %s" % os.path.abspath(rmsd_result))
+    with open(rmsd_result, 'r') as check_file:
+        for line in check_file:
+            time_step, rmsd = tuple(line.strip().split())
+            if float(rmsd) > tolerance:
+                print('RMSD: %s bigger than tolerance %g for time step %s' % (rmsd, tolerance, time_step))
+                return False
     return True

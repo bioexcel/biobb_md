@@ -76,7 +76,12 @@ class Mdrun(object):
             cmd.append('-cpo')
             cmd.append(self.output_cpt_path)
 
-        return cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+        if not self.output_xtc_path:
+            tmp_files = ['traj_comp.xtc']
+            removed_files = [f for f in tmp_files if fu.rm(f)]
+            fu.log('Removed: %s' % str(removed_files), out_log, self.global_log)
+        return returncode
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS mdrun module.")

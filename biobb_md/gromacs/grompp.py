@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 """Module containing the Grompp class and the command line interface."""
+import os
 import argparse
 from pathlib import Path
 from biobb_common.configuration import  settings
@@ -123,10 +124,10 @@ class Grompp(object):
         # Bond parameters
         if md:
             mdp_list.append("\n;Bond parameters")
-            mdp_list.append("constraint_algorithm = " + self.mdp.pop('constraint_algorithm', 'lincs'))
+            mdp_list.append("constraint-algorithm = " + self.mdp.pop('constraint-algorithm', 'lincs'))
             mdp_list.append("constraints = " + self.mdp.pop('constraints', 'all-bonds'))
-            mdp_list.append("lincs_iter = " + self.mdp.pop('lincs_iter', '1'))
-            mdp_list.append("lincs_order = " + self.mdp.pop('lincs_order', '4'))
+            mdp_list.append("lincs-iter = " + self.mdp.pop('lincs-iter', '1'))
+            mdp_list.append("lincs-order = " + self.mdp.pop('lincs-order', '4'))
             if nvt:
                 mdp_list.append("continuation = " + self.mdp.pop('continuation', 'no'))
             if npt or free:
@@ -136,7 +137,7 @@ class Grompp(object):
         # Neighbour searching
         mdp_list.append("\n;Neighbour searching")
         mdp_list.append("cutoff-scheme = " + self.mdp.pop('cutoff-scheme', 'Verlet'))
-        mdp_list.append("ns_type = " + self.mdp.pop('ns_type', 'grid'))
+        mdp_list.append("ns-type = " + self.mdp.pop('ns-type', 'grid'))
         mdp_list.append("rcoulomb = " + self.mdp.pop('rcoulomb', '1.0'))
         mdp_list.append("vdwtype = " + self.mdp.pop('vdwtype', 'cut-off'))
         mdp_list.append("rvdw = " + self.mdp.pop('rvdw', '1.0'))
@@ -147,20 +148,20 @@ class Grompp(object):
         mdp_list.append("\n;Eletrostatics")
         mdp_list.append("coulombtype = " + self.mdp.pop('coulombtype', 'PME'))
         if md:
-            mdp_list.append("pme_order = " + self.mdp.pop('pme_order', '4'))
+            mdp_list.append("pme-order = " + self.mdp.pop('pme-order', '4'))
             mdp_list.append("fourierspacing = " + self.mdp.pop('fourierspacing', '0.12'))
-            mdp_list.append("fourier_nx = " + self.mdp.pop('fourier_nx', '0'))
-            mdp_list.append("fourier_ny = " + self.mdp.pop('fourier_ny', '0'))
-            mdp_list.append("fourier_nz = " + self.mdp.pop('fourier_nz', '0'))
-            mdp_list.append("ewald_rtol = " + self.mdp.pop('ewald_rtol', '1e-5'))
+            mdp_list.append("fourier-nx = " + self.mdp.pop('fourier-nx', '0'))
+            mdp_list.append("fourier-ny = " + self.mdp.pop('fourier-ny', '0'))
+            mdp_list.append("fourier-nz = " + self.mdp.pop('fourier-nz', '0'))
+            mdp_list.append("ewald-rtol = " + self.mdp.pop('ewald-rtol', '1e-5'))
 
         # Temperature coupling
         if md:
             mdp_list.append("\n;Temperature coupling")
             mdp_list.append("tcoupl = " + self.mdp.pop('tcoupl', 'V-rescale'))
             mdp_list.append("tc-grps = " + self.mdp.pop('tc-grps', 'Protein Non-Protein'))
-            mdp_list.append("tau_t = " + self.mdp.pop('tau_t', '0.1	  0.1'))
-            mdp_list.append("ref_t = " + self.mdp.pop('ref_t', '300 	  300'))
+            mdp_list.append("tau-t = " + self.mdp.pop('tau-t', '0.1	  0.1'))
+            mdp_list.append("ref-t = " + self.mdp.pop('ref-t', '300 	  300'))
 
         # Pressure coupling
         if md:
@@ -170,10 +171,10 @@ class Grompp(object):
             if npt or free:
                 mdp_list.append("pcoupl = " + self.mdp.pop('pcoupl', 'Parrinello-Rahman'))
                 mdp_list.append("pcoupltype = " + self.mdp.pop('pcoupltype', 'isotropic'))
-                mdp_list.append("tau_p = " + self.mdp.pop('tau_p', '1.0'))
-                mdp_list.append("ref_p = " + self.mdp.pop('ref_p', '1.0'))
+                mdp_list.append("tau-p = " + self.mdp.pop('tau-p', '1.0'))
+                mdp_list.append("ref-p = " + self.mdp.pop('ref-p', '1.0'))
                 mdp_list.append("compressibility = " + self.mdp.pop('compressibility', '4.5e-5'))
-                mdp_list.append("refcoord_scaling = " + self.mdp.pop('refcoord_scaling', 'com'))
+                mdp_list.append("refcoord-scaling = " + self.mdp.pop('refcoord-scaling', 'com'))
 
 
         # Dispersion correction
@@ -185,11 +186,11 @@ class Grompp(object):
         if md:
             mdp_list.append("\n;Velocity generation")
             if nvt:
-                mdp_list.append("gen_vel = " + self.mdp.pop('gen_vel', 'yes'))
-                mdp_list.append("gen_temp = " + self.mdp.pop('gen_temp', '300'))
-                mdp_list.append("gen_seed = " + self.mdp.pop('gen_seed', '-1'))
+                mdp_list.append("gen-vel = " + self.mdp.pop('gen-vel', 'yes'))
+                mdp_list.append("gen-temp = " + self.mdp.pop('gen-temp', '300'))
+                mdp_list.append("gen-seed = " + self.mdp.pop('gen-seed', '-1'))
             if npt or free:
-                mdp_list.append("gen_vel = " + self.mdp.pop('gen_vel', 'no'))
+                mdp_list.append("gen-vel = " + self.mdp.pop('gen-vel', 'no'))
 
         #Periodic boundary conditions
         mdp_list.append("\n;Periodic boundary conditions")
@@ -201,9 +202,15 @@ class Grompp(object):
         mdp_list.insert(0, ";This mdp file has been created by the pymdsetup.gromacs_wrapper.grompp.create_mdp()")
 
         # Adding the rest of parameters in the config file to the MDP file
+        # if the parameter has already been added replace the value
+        parameter_keys = [parameter.split('=')[0].strip().replace('_','-') for parameter in mdp_list]
         for k, v in self.mdp.items():
-            if k != 'type':
-                mdp_list.append(str(k) + ' = '+str(v))
+            config_parameter_key = str(k).strip().replace('_','-')
+            if config_parameter_key != 'type':
+                if config_parameter_key in parameter_keys:
+                    mdp_list[parameter_keys.index(config_parameter_key)] = config_parameter_key + ' = '+str(v)
+                else:
+                    mdp_list.append(config_parameter_key + ' = '+str(v))
 
         with open(self.output_mdp_path, 'w') as mdp:
             for line in mdp_list:
@@ -242,7 +249,11 @@ class Grompp(object):
             cmd.append('-t')
             cmd.append(self.input_cpt_path)
 
-        return cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+        tmp_files = [os.path.dirname(top_file), self.output_mdp_path, 'mdout.mdp']
+        removed_files = [f for f in tmp_files if fu.rm(f)]
+        fu.log('Removed: %s' % str(removed_files), out_log, self.global_log)
+        return returncode
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.")

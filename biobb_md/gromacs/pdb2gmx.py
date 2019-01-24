@@ -58,6 +58,7 @@ class Pdb2gmx(object):
             raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
         fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
+
         self.output_top_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_top_path)
         self.output_itp_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_itp_path)
 
@@ -77,7 +78,9 @@ class Pdb2gmx(object):
         # zip topology
         fu.log('Compressing topology to: %s' % self.output_top_zip_path, out_log, self.global_log)
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=self.output_top_path, out_log=out_log)
-
+        tmp_files = [self.output_top_path, self.output_itp_path]
+        removed_files = [f for f in tmp_files if fu.rm(f)]
+        fu.log('Removed: %s' % str(removed_files), out_log, self.global_log)
         return returncode
 
 def main():

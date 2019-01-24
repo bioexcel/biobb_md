@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 """Module containing the Editconf class and the command line interface."""
+import os
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
@@ -65,6 +66,9 @@ class Solvate(object):
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
 
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=top_file, out_log=out_log)
+        tmp_files = [os.path.dirname(top_file)]
+        removed_files = [f for f in tmp_files if fu.rm(f)]
+        fu.log('Removed: %s' % str(removed_files), out_log, self.global_log)
         return returncode
 
 def main():
