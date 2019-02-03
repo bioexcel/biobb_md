@@ -1,6 +1,7 @@
 """ Common functions for package biobb_md.gromacs """
 import os
 import re
+import time
 import shutil
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
@@ -19,14 +20,17 @@ def get_gromacs_version(gmx="gmx"):
     unique_dir = fu.create_unique_dir()
     out_log, err_log = fu.get_logs(path=unique_dir, can_write_console=False)
     cmd = [gmx, "-version"]
-    cmd_wrapper.CmdWrapper(cmd, out_log, err_log).launch()
-    pattern = re.compile(r"GROMACS version:\s+(.+)")
-    with open(os.path.join(unique_dir, 'log.out'), 'r') as log_file:
-        for line in log_file:
-            version_str = pattern.match(line.strip())
-            if version_str:
-                break
-    version = version_str.group(1).strip().replace(".", "")
+    try:
+        cmd_wrapper.CmdWrapper(cmd, out_log, err_log).launch()
+        pattern = re.compile(r"GROMACS version:\s+(.+)")
+        with open(os.path.join(unique_dir, 'log.out'), 'r') as log_file:
+            for line in log_file:
+                version_str = pattern.match(line.strip())
+                if version_str:
+                    break
+        version = version_str.group(1).replace(".", "").replace("VERSION", "").strip()
+    except:
+        return 0
     if version.startswith("2"):
         while len(version) < 5:
             version += '0'
@@ -34,7 +38,12 @@ def get_gromacs_version(gmx="gmx"):
         while len(version) < 3:
             version += '0'
 
-    shutil.rmtree(unique_dir)
+    try:
+        shutil.rmtree(unique_dir)
+    except:
+        # Some file systems need more time to consolidate
+        time.sleep(2)
+        shutil.rmtree(unique_dir)
     return int(version)
 
 

@@ -96,7 +96,7 @@ class Genrestr():
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS genion module.")
-    parser.add_argument('--config', required=True)
+    parser.add_argument('--config', required=False)
     parser.add_argument('--system', required=False)
     parser.add_argument('--step', required=False)
 
@@ -109,9 +109,9 @@ def main():
 
     args = parser.parse_args()
     if args.step:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()[args.step]
+        properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()[args.step]
     else:
-        properties = settings.ConfReader(config=args.config, system=args.system).get_prop_dic()
+        properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()
 
     #Specific call of each building block
     Genrestr(input_structure_path=args.input_structure_path, input_ndx_path=args.input_ndx_path, input_top_zip_path=args.input_top_zip_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
