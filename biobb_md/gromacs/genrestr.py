@@ -108,10 +108,10 @@ def main():
     ####
 
     args = parser.parse_args()
+    config = args.config if args.config else None
+    properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()
     if args.step:
-        properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()[args.step]
-    else:
-        properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()
+        properties = properties[args.step]
 
     #Specific call of each building block
     Genrestr(input_structure_path=args.input_structure_path, input_ndx_path=args.input_ndx_path, input_top_zip_path=args.input_top_zip_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
