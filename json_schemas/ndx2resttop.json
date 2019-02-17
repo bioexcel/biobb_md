@@ -1,0 +1,42 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://bioexcel.eu/biobb_md/json_schemas/0.1/ndx2resttop",
+    "title": "Generate a restrained topology from an index NDX file",
+    "type": "object",
+    "required": [
+        "input_ndx_path",
+        "input_top_zip_path",
+        "output_top_zip_path"
+    ],
+    "properties": {
+        "input_ndx_path": {
+            "type": "string",
+            "description": "Path to the input NDX index file."
+        },
+        "input_top_zip_path": {
+            "type": "string",
+            "description": "Path the input TOP topology in zip format."
+        },
+        "output_top_zip_path": {
+            "type": "string",
+            "description": "Path the output TOP topology in zip format."
+        },
+        "properties": {
+            "type": "object",
+            "properties": {
+                "force_constants": {
+                    "type": "string",
+                    "default": "500 500 500",
+                    "description": "Array of three floats defining the force constants."
+                },
+                "ref_rest_chain_triplet_list": {
+                    "type": "string",
+                    "default": "None",
+                    "description": "Triplet list composed by (reference group, restrain group, chain) list."
+                }
+            }
+        }
+    },
+    "additionalProperties": false
+}
+    
