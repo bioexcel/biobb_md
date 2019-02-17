@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "http://bioexcel.eu/biobb_md/json_schemas/0.1/editconf",
+    "$id": "http://bioexcel.eu/biobb_md/json_schemas/0.1/pdb2gmx",
     "title": "Wrapper class for the GROMACS pdb2gmx (http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html) module",
     "type": "object",
     "required": [
