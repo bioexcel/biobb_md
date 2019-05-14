@@ -44,6 +44,9 @@ class Editconf():
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
 
+        # Check the properties
+        fu.check_properties(self, properties)
+
     def launch(self):
         """Launches the execution of the GROMACS editconf module."""
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
@@ -68,14 +71,15 @@ class Editconf():
         return command.launch()
 
 def main():
-    parser = argparse.ArgumentParser(description="Wrapper of the GROMACS editconf module.")
-    parser.add_argument('--config', required=False)
-    parser.add_argument('--system', required=False)
-    parser.add_argument('--step', required=False)
+    parser = argparse.ArgumentParser(description="Wrapper of the GROMACS editconf module.", formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
+    parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
+    parser.add_argument('--system', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/system_step.html' for help")
+    parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/system_step.html' for help")
 
     #Specific args of each building block
-    parser.add_argument('--input_gro_path', required=True)
-    parser.add_argument('--output_gro_path', required=True)
+    required_args = parser.add_argument_group('required arguments')
+    required_args.add_argument('--input_gro_path', required=True)
+    required_args.add_argument('--output_gro_path', required=True)
 
     args = parser.parse_args()
     config = args.config if args.config else None

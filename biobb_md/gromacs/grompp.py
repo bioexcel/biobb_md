@@ -23,6 +23,7 @@ class Grompp():
         input_top_zip_path (str): Path the input GROMACS topology TOP and ITP files in zip format.
         output_tpr_path (str): Path to the output portable binary run file TPR.
         input_cpt_path (str)[Optional]: Path to the input GROMACS checkpoint file CPT.
+        input_ndx_path (str)[Optional]: Path to the input GROMACS index files NDX.
         properties (dic):
             | - **input_mdp_path** (*str*) - (None) Path of the input MDP file.
             | - **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
@@ -34,14 +35,17 @@ class Grompp():
     """
 
     def __init__(self, input_gro_path, input_top_zip_path,
-                 output_tpr_path, input_cpt_path=None, properties=None, **kwargs):
+                 output_tpr_path, input_cpt_path=None,
+                 input_ndx_path=None, properties=None, **kwargs):
         properties = properties or {}
 
         # Input/Output files
         self.input_gro_path = input_gro_path
         self.input_top_zip_path = input_top_zip_path
         self.output_tpr_path = output_tpr_path
+        # Optional files
         self.input_cpt_path = input_cpt_path
+        self.input_ndx_path = input_ndx_path
 
         # Properties specific for BB
         self.input_mdp_path = properties.get('input_mdp_path', None)
@@ -64,6 +68,9 @@ class Grompp():
         self.prefix = properties.get('prefix', None)
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
+
+        # Check the properties
+        fu.check_properties(self, properties)
 
     def create_mdp(self):
         """Creates an MDP file using the properties file settings"""
@@ -248,24 +255,31 @@ class Grompp():
         if self.input_cpt_path and Path(self.input_cpt_path).exists():
             cmd.append('-t')
             cmd.append(self.input_cpt_path)
+        if self.input_ndx_path and Path(self.input_ndx_path).exists():
+            cmd.append('-n')
+            cmd.append(self.input_ndx_path)
 
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
-        tmp_files = [os.path.dirname(top_file), self.output_mdp_path, 'mdout.mdp']
+        tmp_files = [os.path.dirname(top_file), 'mdout.mdp']
+        if not self.input_mdp_path:
+            tmp_files.append(self.output_mdp_path)
         removed_files = [f for f in tmp_files if fu.rm(f)]
         fu.log('Removed: %s' % str(removed_files), out_log, self.global_log)
         return returncode
 
 def main():
-    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.")
-    parser.add_argument('--config', required=False)
-    parser.add_argument('--system', required=False)
-    parser.add_argument('--step', required=False)
+    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.", formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
+    parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
+    parser.add_argument('--system', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/system_step.html' for help")
+    parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/system_step.html' for help")
 
     #Specific args of each building block
-    parser.add_argument('--input_gro_path', required=True)
-    parser.add_argument('--input_top_zip_path', required=True)
-    parser.add_argument('--output_tpr_path', required=True)
+    required_args = parser.add_argument_group('required arguments')
+    required_args.add_argument('--input_gro_path', required=True)
+    required_args.add_argument('--input_top_zip_path', required=True)
+    required_args.add_argument('--output_tpr_path', required=True)
     parser.add_argument('--input_cpt_path', required=False)
+    parser.add_argument('--input_ndx_path', required=False)
 
     args = parser.parse_args()
     config = args.config if args.config else None
@@ -274,7 +288,7 @@ def main():
         properties = properties[args.step]
 
     #Specific call of each building block
-    Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path, output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path, properties=properties).launch()
+    Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path, output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path, input_ndx_path=args.input_ndx_path, properties=properties).launch()
 
 if __name__ == '__main__':
     main()

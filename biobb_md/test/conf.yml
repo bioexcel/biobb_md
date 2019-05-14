@@ -74,3 +74,10 @@ ndx2resttop:
     ref_output_top_zip_path: file:test_reference_dir/gromacs_extra/ref_ndx2resttop.zip
   properties:
     ref_rest_chain_triplet_list: ( Chain_A, Chain_A_noMut, A ), ( Chain_B, Chain_B_noMut, B ), ( Chain_C, Chain_C_noMut, C ), ( Chain_D, Chain_D_noMut, D )
+
+appendligand:
+  paths:
+    input_itp_path: file:test_data_dir/gromacs_extra/pep_ligand.itp
+    input_top_zip_path: file:test_data_dir/gromacs_extra/ndx2resttop.zip
+    output_top_zip_path: output_top_zip.zip
+    ref_output_top_zip_path: file:test_reference_dir/gromacs_extra/ref_appendligand.zip

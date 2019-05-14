@@ -6,8 +6,7 @@ class TestNdx2resttop():
         fx.test_setup(self,'ndx2resttop')
 
     def tearDown(self):
-        #fx.test_teardown(self)
-        pass
+        fx.test_teardown(self)
 
     def test_ndx2resttop(self):
         returncode= Ndx2resttop(properties=self.properties, **self.paths).launch()

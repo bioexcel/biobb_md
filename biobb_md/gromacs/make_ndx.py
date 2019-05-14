@@ -43,6 +43,9 @@ class MakeNdx():
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
 
+        # Check the properties
+        fu.check_properties(self, properties)
+
     def launch(self):
         """Launches the execution of the GROMACS make_ndx module."""
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
@@ -62,14 +65,15 @@ class MakeNdx():
         return cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
 
 def main():
-    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS make_ndx module.")
-    parser.add_argument('--config', required=False)
-    parser.add_argument('--system', required=False)
-    parser.add_argument('--step', required=False)
+    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS make_ndx module.", formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
+    parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
+    parser.add_argument('--system', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/system_step.html' for help")
+    parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/system_step.html' for help")
 
     #Specific args of each building block
-    parser.add_argument('--input_structure_path', required=True)
-    parser.add_argument('--output_ndx_path', required=True)
+    required_args = parser.add_argument_group('required arguments')
+    required_args.add_argument('--input_structure_path', required=True)
+    required_args.add_argument('--output_ndx_path', required=True)
     parser.add_argument('--input_ndx_path', required=False)
 
     args = parser.parse_args()
