@@ -19,7 +19,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(exclude=['docs', 'test']),
     install_requires=['biobb_common==1.1.6'],
-    python_requires='>=3',
+    python_requires='==3.6.*',
     classifiers=(
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3",
