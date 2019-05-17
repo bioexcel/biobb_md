@@ -88,8 +88,9 @@ class Mdrun():
                 mpi_cmd.append('-np')
                 mpi_cmd.append(str(self.mpi_np))
             if self.mpi_hostlist:
-                mpi_cmd.append('-H')
+                mpi_cmd.append('-hostfile')
                 mpi_cmd.append(self.mpi_hostlist)
+            cmd = mpi_cmd + cmd
         if self.output_xtc_path:
             cmd.append('-x')
             cmd.append(self.output_xtc_path)
