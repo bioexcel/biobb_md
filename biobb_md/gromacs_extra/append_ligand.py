@@ -86,7 +86,7 @@ class AppendLigand():
         with open(new_top, 'w') as new_top_f:
             new_top_f.write("".join(top_lines))
 
-        shutil.copy2(self.input_itp_path,top_dir)
+        shutil.copy2(self.input_itp_path, top_dir)
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=new_top, out_log=out_log)
         return 0
 
