@@ -74,13 +74,19 @@ class AppendLigand():
 
         molecules_pattern = r'\[ molecules \]'
         inside_molecules_section = False
+        index_molecule = None
+        molecule_string = moleculetype+(20-len(moleculetype))*' '+'1'+'\n'
         for index, line in enumerate(top_lines):
             if re.search(molecules_pattern, line):
                 inside_molecules_section = True
                 continue
-            if inside_molecules_section and not line.startswith(';'):
+            if inside_molecules_section and not line.startswith(';') and line.startswith('\n'):
+                index_molecule = index
                 break
-        top_lines.insert(index, moleculetype+(20-len(moleculetype))*' '+'1'+'\n')
+        if index_molecule:
+            top_lines.insert(index, molecule_string)
+        else:
+            top_lines.append(molecule_string)
 
         new_top = fu.create_name(path=top_dir, prefix=self.prefix, step=self.step, name='ligand.top')
         with open(new_top, 'w') as new_top_f:
