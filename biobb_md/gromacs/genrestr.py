@@ -19,7 +19,6 @@ class Genrestr():
         input_top_zip_path (str): Path the input TOP topology in zip format.
         output_top_zip_path (str): Path the output TOP topology in zip format.
         properties (dic):
-            | - **output_top_path** (*str*) - ("restrain.top") Path the output TOP file.
             | - **output_itp_path** (*str*) - ("restrain.itp") Path to the output include for topology ITP file.
             | - **force_constants** (*str*) - ("500 500 500") Array of three floats defining the force constants
             | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
@@ -38,7 +37,6 @@ class Genrestr():
 
         # Properties specific for BB
         self.output_itp_path = properties.get('output_itp_path','restrain.itp')
-        self.output_top_path = properties.get('output_top_path','restrain.top')
         self.force_constants = str(properties.get('force_constants','500 500 500'))
         self.restricted_group = properties.get('restricted_group', 'system')
 
@@ -82,13 +80,13 @@ class Genrestr():
         with open(top_file, 'r') as fin:
             for line in fin:
                 if line.startswith('#ifdef POSRES'):
-                    itp_name = re.findall('"([^"]*)"',next(fin))[0]
+                    itp_name = re.findall('"([^"]*)"', next(fin))[0]
                     break
         # Overwrite the content of the ITP file in the topology with the
         # content of the ITP file created with genrest.
         with open(self.output_itp_path, 'r') as fin:
             data = fin.read().splitlines(True)
-        with open(os.path.join(os.path.dirname(top_file),itp_name), 'w') as fout:
+        with open(os.path.join(os.path.dirname(top_file), itp_name), 'w') as fout:
             fout.writelines(data)
         # Remove the ITP file created with genrest.
         os.remove(self.output_itp_path)

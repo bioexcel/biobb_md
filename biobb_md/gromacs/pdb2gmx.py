@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 """Module containing the Pdb2gmx class and the command line interface."""
+import os
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
@@ -41,6 +42,7 @@ class Pdb2gmx():
         self.ignh = properties.get('ignh', False)
 
         # Properties common in all GROMACS BB
+        self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
         self.gmx_version = get_gromacs_version(self.gmx_path)
 
@@ -62,8 +64,8 @@ class Pdb2gmx():
         fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
 
-        self.output_top_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_top_path)
-        self.output_itp_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_itp_path)
+        self.output_top_path = fu.create_name(step=self.step, name=self.output_top_path)
+        self.output_itp_path = fu.create_name(step=self.step, name=self.output_itp_path)
 
         cmd = [self.gmx_path, "pdb2gmx",
                "-f", self.input_pdb_path,
@@ -75,8 +77,12 @@ class Pdb2gmx():
 
         if self.ignh:
             cmd.append("-ignh")
+        new_env = None
+        if self.gmxlib:
+            new_env = os.environ.copy()
+            new_env['GMXLIB'] = self.gmxlib
 
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
 
         # zip topology
         fu.log('Compressing topology to: %s' % self.output_top_zip_path, out_log, self.global_log)

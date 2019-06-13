@@ -59,6 +59,7 @@ class Grompp():
         self.dt = ''
 
         # Properties common in all GROMACS BB
+        self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
         self.gmx_version = get_gromacs_version(self.gmx_path)
 
@@ -259,7 +260,12 @@ class Grompp():
             cmd.append('-n')
             cmd.append(self.input_ndx_path)
 
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+        new_env = None
+        if self.gmxlib:
+            new_env = os.environ.copy()
+            new_env['GMXLIB'] = self.gmxlib
+
+        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
         tmp_files = [os.path.dirname(top_file), 'mdout.mdp']
         if not self.input_mdp_path:
             tmp_files.append(self.output_mdp_path)
