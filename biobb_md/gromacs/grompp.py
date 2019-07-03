@@ -273,6 +273,7 @@ class Grompp():
 
             cmd = [self.docker_path, 'run',
                    '-v', unique_dir+':'+self.docker_volume_path,
+                   '--user', str(os.getuid()),
                    self.docker_image,
                    self.gmx_path, 'grompp',
                    '-f', docker_output_mdp_path,
