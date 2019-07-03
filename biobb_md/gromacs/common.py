@@ -38,12 +38,13 @@ def get_gromacs_version(gmx="gmx"):
         while len(version) < 3:
             version += '0'
 
-    try:
-        shutil.rmtree(unique_dir)
-    except:
-        # Some file systems need more time to consolidate
-        time.sleep(2)
-        shutil.rmtree(unique_dir)
+    fu.rm(unique_dir)
+    # try:
+    #     shutil.rmtree(unique_dir)
+    # except:
+    #     # Some file systems need more time to consolidate
+    #     time.sleep(10)
+    #     shutil.rmtree(unique_dir)
     return int(version)
 
 
