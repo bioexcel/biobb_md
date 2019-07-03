@@ -95,7 +95,7 @@ class Genion():
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=top_file, out_log=out_log)
         tmp_files = [os.path.dirname(top_file)]
         removed_files = [f for f in tmp_files if fu.rm(f)]
-        fu.log('Removed: %s' % str(removed_files), out_log, self.global_log)
+        fu.log('Removed: %s' % str(removed_files), out_log)
         return returncode
 
 def main():

@@ -105,7 +105,7 @@ class Mdrun():
         if not self.output_xtc_path:
             tmp_files = ['traj_comp.xtc']
             removed_files = [f for f in tmp_files if fu.rm(f)]
-            fu.log('Removed: %s' % str(removed_files), out_log, self.global_log)
+            fu.log('Removed: %s' % str(removed_files), out_log)
         return returncode
 
 def main():

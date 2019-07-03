@@ -3,6 +3,7 @@
 """Module containing the Grompp class and the command line interface."""
 import os
 import argparse
+import shutil
 from pathlib import Path
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
@@ -70,13 +71,19 @@ class Grompp():
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
 
+        # Docker Specific
+        self.docker_path = properties.get('docker_path')
+        self.docker_image = properties.get('docker_image', 'mmbirb/pmx')
+        self.docker_volume_path = properties.get('docker_volume_path', '/inout')
+
         # Check the properties
         fu.check_properties(self, properties)
 
     def create_mdp(self):
         """Creates an MDP file using the properties file settings"""
         mdp_list = []
-        self.output_mdp_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_mdp_path)
+
+        self.output_mdp_path = fu.create_name(path=fu.create_unique_dir(), name=self.output_mdp_path)
 
         sim_type = self.mdp.get('type', 'minimization')
         minimization = (sim_type == 'minimization')
@@ -253,12 +260,42 @@ class Grompp():
                '-o', self.output_tpr_path,
                '-maxwarn', self.maxwarn]
 
+        if self.docker_path:
+            unique_dir = os.path.abspath(fu.create_unique_dir())
+            shutil.copy2(self.output_mdp_path, unique_dir)
+            docker_output_mdp_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_mdp_path))
+            shutil.copy2(self.input_gro_path, unique_dir)
+            docker_input_gro_path = os.path.join(self.docker_volume_path, os.path.basename(self.input_gro_path))
+            top_dir = os.path.basename(os.path.dirname(top_file))
+            shutil.copytree(top_dir, os.path.join(unique_dir,top_dir))
+            docker_top_file = os.path.join(self.docker_volume_path, top_dir, os.path.basename(top_file))
+            docker_output_tpr_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_tpr_path))
+
+            cmd = [self.docker_path, 'run',
+                   '-v', unique_dir+':'+self.docker_volume_path,
+                   self.docker_image,
+                   self.gmx_path, 'grompp',
+                   '-f', docker_output_mdp_path,
+                   '-c', docker_input_gro_path,
+                   '-r', docker_input_gro_path,
+                   '-p', docker_top_file,
+                   '-o', docker_output_tpr_path,
+                   '-maxwarn', self.maxwarn]
+
         if self.input_cpt_path and Path(self.input_cpt_path).exists():
             cmd.append('-t')
-            cmd.append(self.input_cpt_path)
+            if self.docker_path:
+                shutil.copy2(self.input_cpt_path, unique_dir)
+                cmd.append(os.path.join(self.docker_path, os.path.basename(self.input_cpt_path)))
+            else:
+                cmd.append(self.input_cpt_path)
         if self.input_ndx_path and Path(self.input_ndx_path).exists():
             cmd.append('-n')
-            cmd.append(self.input_ndx_path)
+            if self.docker_path:
+                shutil.copy2(self.input_ndx_path, unique_dir)
+                cmd.append(os.path.join(self.docker_volume_path, os.path.basename(self.input_ndx_path)))
+            else:
+                cmd.append(self.input_ndx_path)
 
         new_env = None
         if self.gmxlib:
@@ -266,11 +303,14 @@ class Grompp():
             new_env['GMXLIB'] = self.gmxlib
 
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
-        tmp_files = [os.path.dirname(top_file), 'mdout.mdp']
-        if not self.input_mdp_path:
-            tmp_files.append(self.output_mdp_path)
+
+        if self.docker_path:
+            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_mdp_path)), self.output_mdp_path)
+            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_tpr_path)), self.output_tpr_path)
+
+        tmp_files = [os.path.dirname(top_file)]
         removed_files = [f for f in tmp_files if fu.rm(f)]
-        fu.log('Removed: %s' % str(removed_files), out_log, self.global_log)
+        fu.log('Removed: %s' % str(removed_files), out_log)
         return returncode
 
 def main():
