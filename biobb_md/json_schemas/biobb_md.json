@@ -11,47 +11,47 @@
         {
             "block" : "Pdb2gmx", 
             "tool" : "gmx pdb2gmx", 
-            "desc" : "Creates a compressed (ZIP) Gromacs topology (TOP and ITP files) from a given PDB file."
+            "desc" : "Creates a compressed (ZIP) GROMACS topology (TOP and ITP files) from a given PDB file."
         }, 
         {
             "block" : "Editconf", 
             "tool" : "gmx editconf", 
-            "desc" : "Creates a Gromacs structure file (GRO) adding the information of the solvent box to the input structure file."
+            "desc" : "Creates a GROMACS structure file (GRO) adding the information of the solvent box to the input structure file."
         }, 
         {
             "block" : "Genion", 
             "tool" : "gmx genion", 
-            "desc" : "Creates a new compressed Gromacs topology adding ions until reaching the desired concentration to the input compressed Gromacs topology. "
+            "desc" : "Creates a new compressed GROMACS topology adding ions until reaching the desired concentration to the input compressed GROMACS topology. "
         }, 
         {
             "block" : "Genrestr", 
             "tool" : "gmx genrestr", 
-            "desc" : "Creates a new Gromacs compressed topology applying the indicated force restrains to the given input compressed topology."
+            "desc" : "Creates a new GROMACS compressed topology applying the indicated force restrains to the given input compressed topology."
         }, 
         {
             "block" : "Grompp", 
             "tool" : "gmx grompp", 
-            "desc" : "Creates a Gromacs portable binary run input file (TPR) applying the desired properties from the input compressed Gromacs topology."
+            "desc" : "Creates a GROMACS portable binary run input file (TPR) applying the desired properties from the input compressed GROMACS topology."
         }, 
         {
             "block" : "Mdrun", 
             "tool" : "gmx mdrun", 
-            "desc" : "Performs molecular dynamics simulations from an input Gromacs TPR file."
+            "desc" : "Performs molecular dynamics simulations from an input GROMACS TPR file."
         }, 
         {
-            "block" : "Make_ndx", 
+            "block" : "MakeNdx", 
             "tool" : "gmx make_ndx", 
-            "desc" : "Creates a Gromacs index file (NDX) from an input selection and an input Gromacs structure file."
+            "desc" : "Creates a GROMACS index file (NDX) from an input selection and an input GROMACS structure file."
         }, 
         {
             "block" : "Solvate", 
             "tool" : "gmx solvate", 
-            "desc" : "Creates a new compressed Gromacs topology file adding solvent molecules to a given input compressed Gromacs topology file."
+            "desc" : "Creates a new compressed GROMACS topology file adding solvent molecules to a given input compressed GROMACS topology file."
         }, 
         {
             "block" : "Ndx2resttop", 
-            "tool" : "own tool", 
-            "desc" : "Creates a new Gromacs compressed topology applying the force restrains to the input groups in the input index file to the given input compressed topology."
+            "tool" : "in house", 
+            "desc" : "Creates a new GROMACS compressed topology applying the force restrains to the input groups in the input index file to the given input compressed topology."
         }
     ],
     "dep_pypi" : [
@@ -61,12 +61,12 @@
     "dep_conda" : [
         "python ==3.6.*", 
         "biobb_common ==1.1.6",
-        "gromacs ==2019.1"
+        "GROMACS ==2019.1"
     ],
     "keywords" : [
         "md", 
         "molecular",
         "dynamics",
-        "gromacs"
+        "GROMACS"
     ]
 }
