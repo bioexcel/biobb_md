@@ -281,6 +281,7 @@ class Grompp():
                    '-r', docker_input_gro_path,
                    '-p', docker_top_file,
                    '-o', docker_output_tpr_path,
+                   '-po', os.path.join(self.docker_volume_path, 'mdout.mdp'),
                    '-maxwarn', self.maxwarn]
 
         if self.input_cpt_path and Path(self.input_cpt_path).exists():
