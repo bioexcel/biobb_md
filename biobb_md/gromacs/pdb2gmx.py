@@ -89,7 +89,7 @@ class Pdb2gmx():
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=self.output_top_path, out_log=out_log)
         tmp_files = [self.output_top_path, self.output_itp_path]
         removed_files = [f for f in tmp_files if fu.rm(f)]
-        fu.log('Removed: %s' % str(removed_files), out_log, self.global_log)
+        fu.log('Removed: %s' % str(removed_files), out_log)
         return returncode
 
 def main():
