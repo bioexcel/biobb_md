@@ -3,6 +3,7 @@
 """Module containing the Pdb2gmx class and the command line interface."""
 import os
 import argparse
+import shutil
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
@@ -36,7 +37,7 @@ class Pdb2gmx():
 
         # Properties specific for BB
         self.output_top_path = properties.get('output_top_path', 'p2g.top')
-        self.output_itp_path = properties.get('output_itp_path', 'p2g.itp')
+        self.output_itp_path = properties.get('output_itp_path', 'posre.itp')
         self.water_type = properties.get('water_type', 'spce')
         self.force_field = properties.get('force_field', 'amber99sb-ildn')
         self.ignh = properties.get('ignh', False)
@@ -44,7 +45,8 @@ class Pdb2gmx():
         # Properties common in all GROMACS BB
         self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
-        self.gmx_version = get_gromacs_version(self.gmx_path)
+        if not properties.get('docker_path'):
+            self.gmx_version = get_gromacs_version(self.gmx_path)
 
         # Properties common in all BB
         self.can_write_console_log = properties.get('can_write_console_log', True)
@@ -53,15 +55,21 @@ class Pdb2gmx():
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
 
+        # Docker Specific
+        self.docker_path = properties.get('docker_path')
+        self.docker_image = properties.get('docker_image', 'mmbirb/pmx')
+        self.docker_volume_path = properties.get('docker_volume_path', '/inout')
+
         # Check the properties
         fu.check_properties(self, properties)
 
     def launch(self):
         """Launches the execution of the GROMACS pdb2gmx module."""
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
-        if self.gmx_version < 512:
-            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+        if not self.docker_path:
+            if self.gmx_version < 512:
+                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
 
         self.output_top_path = fu.create_name(step=self.step, name=self.output_top_path)
@@ -75,6 +83,25 @@ class Pdb2gmx():
                "-ff", self.force_field,
                "-i", self.output_itp_path]
 
+        if self.docker_path:
+            unique_dir = os.path.abspath(fu.create_unique_dir())
+            shutil.copy2(self.input_pdb_path, unique_dir)
+            docker_input_pdb_path = os.path.join(self.docker_volume_path, os.path.basename(self.input_pdb_path))
+            docker_output_gro_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_gro_path))
+            docker_output_top_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_top_path))
+
+            cmd = [self.docker_path, 'run',
+                   '-v', unique_dir+':'+self.docker_volume_path,
+                   '--user', str(os.getuid()),
+                   self.docker_image,
+                   self.gmx_path, "pdb2gmx",
+                   "-f", docker_input_pdb_path,
+                   "-o", docker_output_gro_path,
+                   "-p", docker_output_top_path,
+                   "-water", self.water_type,
+                   "-ff", self.force_field,
+                   "-i", os.path.basename(self.output_itp_path)]
+
         if self.ignh:
             cmd.append("-ignh")
         new_env = None
@@ -83,6 +110,10 @@ class Pdb2gmx():
             new_env['GMXLIB'] = self.gmxlib
 
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
+
+        if self.docker_path:
+            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_gro_path)), self.output_gro_path)
+            self.output_top_path = os.path.join(unique_dir, os.path.basename(self.output_top_path))
 
         # zip topology
         fu.log('Compressing topology to: %s' % self.output_top_zip_path, out_log, self.global_log)

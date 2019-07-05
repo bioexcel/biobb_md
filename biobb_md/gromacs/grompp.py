@@ -62,7 +62,8 @@ class Grompp():
         # Properties common in all GROMACS BB
         self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
-        self.gmx_version = get_gromacs_version(self.gmx_path)
+        if not properties.get('docker_path'):
+            self.gmx_version = get_gromacs_version(self.gmx_path)
 
         # Properties common in all BB
         self.can_write_console_log = properties.get('can_write_console_log', True)
@@ -236,9 +237,10 @@ class Grompp():
     def launch(self):
         """Launches the execution of the GROMACS grompp module."""
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
-        if self.gmx_version < 512:
-            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+        if not self.docker_path:
+            if self.gmx_version < 512:
+                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
         self.output_mdp_path = self.create_mdp() if not self.input_mdp_path else self.input_mdp_path
 
