@@ -8,7 +8,8 @@ class TestGrompp():
         fx.test_setup(self,'grompp')
 
     def tearDown(self):
-        fx.test_teardown(self)
+        #fx.test_teardown(self)
+        pass
 
     def test_grompp(self):
         returncode = Grompp(properties=self.properties, **self.paths).launch()

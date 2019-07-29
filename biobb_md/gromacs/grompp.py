@@ -71,6 +71,9 @@ class Grompp():
         self.prefix = properties.get('prefix', None)
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
+        self.remove_tmp = properties.get('remove_tmp', True)
+        self.restart = properties.get('restart', False)
+        self.force = properties.get('force', False)
 
         # Docker Specific
         self.docker_path = properties.get('docker_path')
@@ -80,11 +83,11 @@ class Grompp():
         # Check the properties
         fu.check_properties(self, properties)
 
-    def create_mdp(self):
+    def create_mdp(self, path=None):
         """Creates an MDP file using the properties file settings"""
         mdp_list = []
 
-        self.output_mdp_path = fu.create_name(path=fu.create_unique_dir(), name=self.output_mdp_path)
+        self.output_mdp_path = path
 
         sim_type = self.mdp.get('type', 'minimization')
         minimization = (sim_type == 'minimization')
@@ -236,13 +239,32 @@ class Grompp():
 
     def launch(self):
         """Launches the execution of the GROMACS grompp module."""
+        tmp_files = []
+        mdout = 'mdout.mdp'
+        tmp_files.append(mdout)
+
+        #Create local logs
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+        #Check GROMACS version
         if not self.docker_path:
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
             fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
-        self.output_mdp_path = self.create_mdp() if not self.input_mdp_path else self.input_mdp_path
+        #Restart if needed
+        if self.restart and not self.force:
+            output_file_list = [self.output_tpr_path]
+            if fu.check_complete_files(output_file_list):
+                fu.log('Restart is enabled, this step will the skipped', out_log, global_log)
+                return 0
+
+
+        if self.input_mdp_path:
+            self.output_mdp_path = self.input_mdp_path
+        else:
+            mdp_dir = fu.create_unique_dir()
+            tmp_files.append(mdp_dir)
+            self.output_mdp_path = self.create_mdp(path=os.path.join(mdp_dir, self.output_mdp_path))
 
         md = self.mdp.get('type', 'minimization')
         if md not in ('index', 'free'):
@@ -253,6 +275,7 @@ class Grompp():
             fu.log('Will run a %s md of %s' % (md, fu.human_readable_time(int(self.nsteps)*float(self.dt))), out_log, self.global_log)
 
         top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
+        tmp_files.append(os.path.dirname(top_file))
 
         cmd = [self.gmx_path, 'grompp',
                '-f', self.output_mdp_path,
@@ -260,6 +283,7 @@ class Grompp():
                '-r', self.input_gro_path,
                '-p', top_file,
                '-o', self.output_tpr_path,
+               '-po', mdout,
                '-maxwarn', self.maxwarn]
 
         if self.docker_path:
@@ -269,7 +293,7 @@ class Grompp():
             shutil.copy2(self.input_gro_path, unique_dir)
             docker_input_gro_path = os.path.join(self.docker_volume_path, os.path.basename(self.input_gro_path))
             top_dir = os.path.basename(os.path.dirname(top_file))
-            shutil.copytree(top_dir, os.path.join(unique_dir,top_dir))
+            shutil.copytree(top_dir, os.path.join(unique_dir, top_dir))
             docker_top_file = os.path.join(self.docker_volume_path, top_dir, os.path.basename(top_file))
             docker_output_tpr_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_tpr_path))
 
@@ -283,7 +307,7 @@ class Grompp():
                    '-r', docker_input_gro_path,
                    '-p', docker_top_file,
                    '-o', docker_output_tpr_path,
-                   '-po', os.path.join(self.docker_volume_path, 'mdout.mdp'),
+                   '-po', os.path.join(self.docker_volume_path, mdout),
                    '-maxwarn', self.maxwarn]
 
         if self.input_cpt_path and Path(self.input_cpt_path).exists():
@@ -312,9 +336,9 @@ class Grompp():
             shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_mdp_path)), self.output_mdp_path)
             shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_tpr_path)), self.output_tpr_path)
 
-        tmp_files = [os.path.dirname(top_file)]
-        removed_files = [f for f in tmp_files if fu.rm(f)]
-        fu.log('Removed: %s' % str(removed_files), out_log)
+        if self.remove_tmp:
+            fu.rm_file_list(tmp_files)
+
         return returncode
 
 def main():
