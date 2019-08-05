@@ -43,16 +43,28 @@ class Editconf():
         self.prefix = properties.get('prefix', None)
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
+        self.remove_tmp = properties.get('remove_tmp', True)
+        self.restart = properties.get('restart', False)
 
         # Check the properties
         fu.check_properties(self, properties)
 
     def launch(self):
         """Launches the execution of the GROMACS editconf module."""
+        #Create local logs
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+
+        #Check GROMACS version
         if self.gmx_version < 512:
             raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
         fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+
+        #Restart if needed
+        if self.restart:
+            output_file_list = [self.output_gro_path]
+            if fu.check_complete_files(output_file_list):
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, global_log)
+                return 0
 
         cmd = [self.gmx_path, 'editconf',
                '-f', self.input_gro_path,

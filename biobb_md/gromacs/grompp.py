@@ -73,7 +73,6 @@ class Grompp():
         self.path = properties.get('path', '')
         self.remove_tmp = properties.get('remove_tmp', True)
         self.restart = properties.get('restart', False)
-        self.force = properties.get('force', False)
 
         # Docker Specific
         self.docker_path = properties.get('docker_path')
@@ -252,10 +251,10 @@ class Grompp():
             fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
         #Restart if needed
-        if self.restart and not self.force:
+        if self.restart:
             output_file_list = [self.output_tpr_path]
             if fu.check_complete_files(output_file_list):
-                fu.log('Restart is enabled, this step will the skipped', out_log, global_log)
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, global_log)
                 return 0
 
 
