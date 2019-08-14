@@ -80,11 +80,11 @@ class AppendLigand():
             if re.search(molecules_pattern, line):
                 inside_molecules_section = True
                 continue
-            if inside_molecules_section and not line.startswith(';') and line.startswith('\n'):
+            if inside_molecules_section and not line.startswith(';') and line.startswith('Protein'):
                 index_molecule = index
                 break
         if index_molecule:
-            top_lines.insert(index, molecule_string)
+            top_lines.insert(index+1, molecule_string)
         else:
             top_lines.append(molecule_string)
 
