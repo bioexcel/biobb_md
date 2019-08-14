@@ -54,6 +54,8 @@ class Pdb2gmx():
         self.prefix = properties.get('prefix', None)
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
+        self.remove_tmp = properties.get('remove_tmp', True)
+        self.restart = properties.get('restart', False)
 
         # Docker Specific
         self.docker_path = properties.get('docker_path')
@@ -65,12 +67,22 @@ class Pdb2gmx():
 
     def launch(self):
         """Launches the execution of the GROMACS pdb2gmx module."""
+        tmp_files = []
+
+        #Create local logs
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+        #Check GROMACS version
         if not self.docker_path:
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
             fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
+        #Restart if needed
+        if self.restart:
+            output_file_list = [self.output_top_zip_path]
+            if fu.check_complete_files(output_file_list):
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
+                return 0
 
         self.output_top_path = fu.create_name(step=self.step, name=self.output_top_path)
         self.output_itp_path = fu.create_name(step=self.step, name=self.output_itp_path)
@@ -118,9 +130,12 @@ class Pdb2gmx():
         # zip topology
         fu.log('Compressing topology to: %s' % self.output_top_zip_path, out_log, self.global_log)
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=self.output_top_path, out_log=out_log)
-        tmp_files = [self.output_top_path, self.output_itp_path]
-        removed_files = [f for f in tmp_files if fu.rm(f)]
-        fu.log('Removed: %s' % str(removed_files), out_log)
+
+        if self.remove_tmp:
+            tmp_files.append(self.output_top_path)
+            tmp_files.append(self.output_itp_path)
+            fu.rm_file_list(tmp_files)
+        
         return returncode
 
 def main():

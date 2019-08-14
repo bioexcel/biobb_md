@@ -88,7 +88,9 @@ class AppendLigand():
         else:
             top_lines.append(molecule_string)
 
-        new_top = fu.create_name(path=top_dir, prefix=self.prefix, step=self.step, name='ligand.top')
+        #new_top = fu.create_name(path=top_dir, prefix=self.prefix, step=self.step, name='ligand.top')
+        new_top = fu.create_name(path=top_dir, name=self.step+'_'+'ligand.top')
+        #fu.create_name(step=self.step, name=self.output_top_path)
         with open(new_top, 'w') as new_top_f:
             new_top_f.write("".join(top_lines))
 

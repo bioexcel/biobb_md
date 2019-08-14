@@ -51,6 +51,8 @@ class Editconf():
 
     def launch(self):
         """Launches the execution of the GROMACS editconf module."""
+        tmp_files = []
+
         #Create local logs
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
 
@@ -63,7 +65,7 @@ class Editconf():
         if self.restart:
             output_file_list = [self.output_gro_path]
             if fu.check_complete_files(output_file_list):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, global_log)
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
                 return 0
 
         cmd = [self.gmx_path, 'editconf',
@@ -79,8 +81,12 @@ class Editconf():
         fu.log("Distance of the box to molecule: %6.2f" % self.distance_to_molecule, out_log, self.global_log)
         fu.log("Box type: %s" % self.box_type, out_log, self.global_log)
 
-        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
-        return command.launch()
+        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+
+        if self.remove_tmp:
+            fu.rm_file_list(tmp_files)
+
+        return returncode
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper of the GROMACS editconf module.", formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))

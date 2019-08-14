@@ -254,7 +254,7 @@ class Grompp():
         if self.restart:
             output_file_list = [self.output_tpr_path]
             if fu.check_complete_files(output_file_list):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, global_log)
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
                 return 0
 
 
