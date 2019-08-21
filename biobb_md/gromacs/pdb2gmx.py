@@ -23,6 +23,7 @@ class Pdb2gmx():
             | - **water_type** (*str*) - ("spce") Water molecule type. Valid values: tip3p, spce, etc.
             | - **force_field** (*str*) - ("amber99sb-ildn") Force field to be used during the conversion. Valid values: amber99sb-ildn, oplsaa, etc.
             | - **ignh** (*bool*) - (False) Should pdb2gmx ignore the hidrogens in the original structure.
+            | - **his** (*str*) - (None) Histidine protonation array.
             | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
     """
 
@@ -41,6 +42,7 @@ class Pdb2gmx():
         self.water_type = properties.get('water_type', 'spce')
         self.force_field = properties.get('force_field', 'amber99sb-ildn')
         self.ignh = properties.get('ignh', False)
+        self.his = properties.get('his', None)
 
         # Properties common in all GROMACS BB
         self.gmxlib = properties.get('gmxlib', None)
@@ -86,7 +88,7 @@ class Pdb2gmx():
 
         self.output_top_path = fu.create_name(step=self.step, name=self.output_top_path)
         self.output_itp_path = fu.create_name(step=self.step, name=self.output_itp_path)
-
+        cmd_docker = []
         cmd = [self.gmx_path, "pdb2gmx",
                "-f", self.input_pdb_path,
                "-o", self.output_gro_path,
@@ -95,18 +97,19 @@ class Pdb2gmx():
                "-ff", self.force_field,
                "-i", self.output_itp_path]
 
+
         if self.docker_path:
             unique_dir = os.path.abspath(fu.create_unique_dir())
             shutil.copy2(self.input_pdb_path, unique_dir)
             docker_input_pdb_path = os.path.join(self.docker_volume_path, os.path.basename(self.input_pdb_path))
             docker_output_gro_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_gro_path))
             docker_output_top_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_top_path))
-
-            cmd = [self.docker_path, 'run',
+            cmd_docker = [self.docker_path, 'run',
                    '-v', unique_dir+':'+self.docker_volume_path,
                    '--user', str(os.getuid()),
-                   self.docker_image,
-                   self.gmx_path, "pdb2gmx",
+                   self.docker_image]
+
+            cmd = [self.gmx_path, "pdb2gmx",
                    "-f", docker_input_pdb_path,
                    "-o", docker_output_gro_path,
                    "-p", docker_output_top_path,
@@ -114,6 +117,12 @@ class Pdb2gmx():
                    "-ff", self.force_field,
                    "-i", os.path.basename(self.output_itp_path)]
 
+        if self.his:
+            cmd.append("-his")
+            cmd = ['echo', self.his, '|'] + cmd
+            if self.docker_path:
+                cmd = [ '"' + " ".join(cmd) + '"']
+                cmd_docker.extend(['/bin/bash', '-c']) 
         if self.ignh:
             cmd.append("-ignh")
         new_env = None
@@ -121,7 +130,7 @@ class Pdb2gmx():
             new_env = os.environ.copy()
             new_env['GMXLIB'] = self.gmxlib
 
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
+        returncode = cmd_wrapper.CmdWrapper(cmd_docker + cmd, out_log, err_log, self.global_log, new_env).launch()
 
         if self.docker_path:
             shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_gro_path)), self.output_gro_path)
@@ -135,7 +144,7 @@ class Pdb2gmx():
             tmp_files.append(self.output_top_path)
             tmp_files.append(self.output_itp_path)
             fu.rm_file_list(tmp_files)
-        
+
         return returncode
 
 def main():
