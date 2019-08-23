@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 """Module containing the Genrestr class and the command line interface."""
-import re
-import os
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
@@ -34,7 +32,7 @@ class Genrestr():
         self.output_itp_path = output_itp_path
 
         # Properties specific for BB
-        self.force_constants = str(properties.get('force_constants','500 500 500'))
+        self.force_constants = str(properties.get('force_constants', '500 500 500'))
         self.restrained_group = properties.get('restrained_group', 'system')
 
         # Properties common in all GROMACS BB
@@ -58,7 +56,7 @@ class Genrestr():
             raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
         fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
-        fu.log('Adding restraints for atoms in group: %s using a force constant of: %s' % (self.restricted_group, self.force_constants), out_log, self.global_log)
+        fu.log('Adding restraints for atoms in group: %s using a force constant of: %s' % (self.restrained_group, self.force_constants), out_log, self.global_log)
 
         cmd = ['echo', '\"'+self.restrained_group+'\"', '|',
                self.gmx_path, "genrestr",
