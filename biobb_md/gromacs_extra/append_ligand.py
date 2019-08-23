@@ -69,11 +69,6 @@ class AppendLigand():
             top_lines.insert(index+8,'#endif'+'\n')
             top_lines.insert(index+9,'\n')
 
-        # ; Ligand position restraints
-        #ifdef self.posres_name
-        #include \"os.path.basename(self.input_posres_itp_path)\"
-        #endif
-
         inside_moleculetype_section = False
         with open(self.input_itp_path, 'r') as itp_file:
             moleculetype_pattern = r'\[ moleculetype \]'
@@ -112,6 +107,7 @@ class AppendLigand():
             new_top_f.write("".join(top_lines))
 
         shutil.copy2(self.input_itp_path, top_dir)
+        shutil.copy2(self.input_posres_itp_path, top_dir)
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=new_top, out_log=out_log)
         return 0
 
