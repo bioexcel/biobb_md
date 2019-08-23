@@ -62,11 +62,12 @@ class AppendLigand():
         top_lines.insert(index+2,'; Including ligand ITP\n')
         top_lines.insert(index+3, '#include "' + itp_name + '"\n')
         top_lines.insert(index+4,'\n')
-        top_lines.insert(index+5,'; Ligand position restraints'+'\n')
-        top_lines.insert(index+6,'#ifdef '+self.posres_name+'\n')
-        top_lines.insert(index+7,'#include "'+os.path.basename(self.input_posres_itp_path)+'"\n')
-        top_lines.insert(index+8,'#endif'+'\n')
-        top_lines.insert(index+9,'\n')
+        if self.input_posres_itp_path:
+            top_lines.insert(index+5,'; Ligand position restraints'+'\n')
+            top_lines.insert(index+6,'#ifdef '+self.posres_name+'\n')
+            top_lines.insert(index+7,'#include "'+os.path.basename(self.input_posres_itp_path)+'"\n')
+            top_lines.insert(index+8,'#endif'+'\n')
+            top_lines.insert(index+9,'\n')
 
         # ; Ligand position restraints
         #ifdef self.posres_name
