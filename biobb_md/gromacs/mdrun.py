@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 """Module containing the MDrun class and the command line interface."""
+import os
+import argparse
+import shutil
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
@@ -26,6 +29,9 @@ class Mdrun():
             | - **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
             | - **mpi_np** (*str*) - (None) Number of MPI processes. Usually an integer bigger than 1.
             | - **mpi_hostlist** (*str*) - (None) Path to the MPI hostlist file.
+            | - **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
+            | - **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+
     """
 
     def __init__(self, input_tpr_path, output_trr_path,
@@ -63,18 +69,34 @@ class Mdrun():
         self.prefix = properties.get('prefix', None)
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
+        self.remove_tmp = properties.get('remove_tmp', True)
+        self.restart = properties.get('restart', False)
+
+        # Docker Specific
+        self.docker_path = properties.get('docker_path')
+        self.docker_image = properties.get('docker_image', 'mmbirb/pmx')
+        self.docker_volume_path = properties.get('docker_volume_path', '/inout')
 
         # Check the properties
         fu.check_properties(self, properties)
 
     def launch(self):
         """Launches the execution of the GROMACS mdrun module."""
+        tmp_files = []
+
+        #Create local logs
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+
+        #Check GROMACS version
         if not self.mpi_bin:
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
             fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
+        #Create restart file list
+        output_file_list = [self.output_trr_path, self.output_gro_path, self.output_edr_path, self.output_log_path]
+
+        cmd_docker = []
         cmd = [self.gmx_path, 'mdrun',
                '-s', self.input_tpr_path,
                '-o', self.output_trr_path,
@@ -94,18 +116,84 @@ class Mdrun():
         if self.output_xtc_path:
             cmd.append('-x')
             cmd.append(self.output_xtc_path)
+            output_file_list.append(self.output_xtc_path)
         if self.output_cpt_path:
             cmd.append('-cpo')
             cmd.append(self.output_cpt_path)
+            output_file_list.append(self.output_cpt_path)
         if self.output_dhdl_path:
             cmd.append('-dhdl')
             cmd.append(self.output_dhdl_path)
+            output_file_list.append(self.output_dhdl_path)
 
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
-        if not self.output_xtc_path:
-            tmp_files = ['traj_comp.xtc']
-            removed_files = [f for f in tmp_files if fu.rm(f)]
-            fu.log('Removed: %s' % str(removed_files), out_log)
+        #Restart if needed
+        if self.restart:
+            if fu.check_complete_files(output_file_list):
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
+                return 0
+
+        if self.docker_path:
+            fu.log('Docker execution enabled', out_log)
+            unique_dir = os.path.abspath(fu.create_unique_dir())
+            shutil.copy2(self.input_tpr_path, unique_dir)
+            docker_input_tpr_path = os.path.join(self.docker_volume_path, os.path.basename(self.input_tpr_path))
+            docker_output_trr_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_trr_path))
+            docker_output_gro_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_gro_path))
+            docker_output_edr_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_edr_path))
+            docker_output_log_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_log_path))
+
+            cmd_docker = [self.docker_path, 'run', '-v', unique_dir+':'+self.docker_volume_path, '--user', str(os.getuid()), self.docker_image]
+
+            cmd = [self.gmx_path, 'mdrun',
+                   '-s', docker_input_tpr_path,
+                   '-o', docker_output_trr_path,
+                   '-c', docker_output_gro_path,
+                   '-e', docker_output_edr_path,
+                   '-g', docker_output_log_path,
+                   '-nt', self.num_threads]
+            if self.mpi_bin:
+                mpi_cmd = [self.mpi_bin]
+                if self.mpi_np:
+                    mpi_cmd.append('-np')
+                    mpi_cmd.append(str(self.mpi_np))
+                if self.mpi_hostlist:
+                    mpi_cmd.append('-hostfile')
+                    mpi_cmd.append(self.mpi_hostlist)
+                cmd = mpi_cmd + cmd
+
+            if self.output_xtc_path:
+                docker_output_xtc_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_xtc_path))
+                cmd.append('-x')
+                cmd.append(docker_output_xtc_path)
+            if self.output_cpt_path:
+                docker_output_cpt_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_cpt_path))
+                cmd.append('-cpo')
+                cmd.append(docker_output_cpt_path)
+            if self.output_dhdl_path:
+                docker_output_dhdl_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_dhdl_path))
+                cmd.append('-dhdl')
+                cmd.append(docker_output_dhdl_path)
+
+            cmd = ['"' + " ".join(cmd) + '"']
+            cmd_docker.extend(['/bin/bash', '-c'])
+
+        returncode = cmd_wrapper.CmdWrapper(cmd_docker + cmd, out_log, err_log, self.global_log).launch()
+
+        if self.docker_path:
+            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_trr_path)), self.output_trr_path)
+            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_gro_path)), self.output_gro_path)
+            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_edr_path)), self.output_edr_path)
+            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_log_path)), self.output_log_path)
+            if self.output_xtc_path:
+                shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_xtc_path)), self.output_xtc_path)
+            if self.output_cpt_path:
+                shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_cpt_path)), self.output_cpt_path)
+            if self.output_dhdl_path:
+                shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_dhdl_path)), self.output_dhdl_path)
+
+        if self.remove_tmp:
+            fu.rm_file_list(tmp_files)
+
         return returncode
 
 def main():

@@ -33,11 +33,11 @@ class Grompp():
             | - **output_top_path** (*str*) - ("grompp.top") Path the output topology TOP file.
             | - **maxwarn** (*int*) - (10) Maximum number of allowed warnings.
             | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
+            | - **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
+            | - **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
     """
 
-    def __init__(self, input_gro_path, input_top_zip_path,
-                 output_tpr_path, input_cpt_path=None,
-                 input_ndx_path=None, properties=None, **kwargs):
+    def __init__(self, input_gro_path, input_top_zip_path, output_tpr_path, input_cpt_path=None, input_ndx_path=None, properties=None, **kwargs):
         properties = properties or {}
 
         # Input/Output files
@@ -244,6 +244,7 @@ class Grompp():
 
         #Create local logs
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+
         #Check GROMACS version
         if not self.docker_path:
             if self.gmx_version < 512:
@@ -256,7 +257,6 @@ class Grompp():
             if fu.check_complete_files(output_file_list):
                 fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
                 return 0
-
 
         if self.input_mdp_path:
             self.output_mdp_path = self.input_mdp_path

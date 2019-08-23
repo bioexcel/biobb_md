@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 """Module containing the Editconf class and the command line interface."""
+import os
 import argparse
+import shutil
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.command_wrapper import cmd_wrapper
@@ -19,6 +21,8 @@ class Editconf():
             | - **box_type** (*str*) - ("cubic") Geometrical shape of the solvent box. Available box types: (http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html) -bt option.
             | - **center_molecule** (*bool*) - (True) Center molecule in the box.
             | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
+            | - **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
+            | - **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
     """
 
     def __init__(self, input_gro_path, output_gro_path, properties=None, **kwargs):
@@ -45,6 +49,11 @@ class Editconf():
         self.path = properties.get('path', '')
         self.remove_tmp = properties.get('remove_tmp', True)
         self.restart = properties.get('restart', False)
+
+        # Docker Specific
+        self.docker_path = properties.get('docker_path')
+        self.docker_image = properties.get('docker_image', 'mmbirb/pmx')
+        self.docker_volume_path = properties.get('docker_volume_path', '/inout')
 
         # Check the properties
         fu.check_properties(self, properties)
@@ -74,6 +83,21 @@ class Editconf():
                '-d', str(self.distance_to_molecule),
                '-bt', self.box_type]
 
+        if self.docker_path:
+            unique_dir = os.path.abspath(fu.create_unique_dir())
+            shutil.copy2(self.input_gro_path, unique_dir)
+            docker_input_gro_path = os.path.join(self.docker_volume_path, os.path.basename(self.input_gro_path))
+            docker_output_gro_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_gro_path))
+            cmd = [self.docker_path, 'run',
+                   '-v', unique_dir+':'+self.docker_volume_path,
+                   '--user', str(os.getuid()),
+                   self.docker_image,
+                   self.gmx_path, 'editconf',
+                   '-f', docker_input_gro_path,
+                   '-o', docker_output_gro_path,
+                   '-d', str(self.distance_to_molecule),
+                   '-bt', self.box_type]
+
         if self.center_molecule:
             cmd.append('-c')
             fu.log('Centering molecule in the box.', out_log, self.global_log)
@@ -82,6 +106,9 @@ class Editconf():
         fu.log("Box type: %s" % self.box_type, out_log, self.global_log)
 
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+
+        if self.docker_path:
+            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_gro_path)), self.output_gro_path)
 
         if self.remove_tmp:
             fu.rm_file_list(tmp_files)

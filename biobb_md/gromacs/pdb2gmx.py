@@ -25,6 +25,8 @@ class Pdb2gmx():
             | - **ignh** (*bool*) - (False) Should pdb2gmx ignore the hidrogens in the original structure.
             | - **his** (*str*) - (None) Histidine protonation array.
             | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
+            | - **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
+            | - **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
     """
 
     def __init__(self, input_pdb_path, output_gro_path,
@@ -122,7 +124,7 @@ class Pdb2gmx():
             cmd = ['echo', self.his, '|'] + cmd
             if self.docker_path:
                 cmd = [ '"' + " ".join(cmd) + '"']
-                cmd_docker.extend(['/bin/bash', '-c']) 
+                cmd_docker.extend(['/bin/bash', '-c'])
         if self.ignh:
             cmd.append("-ignh")
         new_env = None
