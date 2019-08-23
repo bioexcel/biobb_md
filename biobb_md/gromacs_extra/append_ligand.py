@@ -19,15 +19,18 @@ class AppendLigand():
         properties (dic):
     """
 
-    def __init__(self, input_top_zip_path, input_itp_path, output_top_zip_path, properties=None, **kwargs):
+    def __init__(self, input_top_zip_path, input_itp_path, output_top_zip_path, input_posres_itp_path=None, properties=None, **kwargs):
         properties = properties or {}
 
         # Input/Output files
         self.input_top_zip_path = input_top_zip_path
         self.input_itp_path = input_itp_path
         self.output_top_zip_path = output_top_zip_path
+        #Optional files
+        self.input_posres_itp_path = input_posres_itp_path
 
         # Properties specific for BB
+        self.posres_name = properties.get('posres_name','POSRES_LIGAND')
 
         # Properties common in all BB
         self.can_write_console_log = properties.get('can_write_console_log', True)
@@ -59,6 +62,16 @@ class AppendLigand():
         top_lines.insert(index+2,'; Including ligand ITP\n')
         top_lines.insert(index+3, '#include "' + itp_name + '"\n')
         top_lines.insert(index+4,'\n')
+        top_lines.insert(index+5,'; Ligand position restraints'+'\n')
+        top_lines.insert(index+6,'#ifdef '+self.posres_name+'\n')
+        top_lines.insert(index+7,'#include "'+os.path.basename(self.input_posres_itp_path)+'"\n')
+        top_lines.insert(index+8,'#endif'+'\n')
+        top_lines.insert(index+9,'\n')
+
+        # ; Ligand position restraints
+        #ifdef self.posres_name
+        #include \"os.path.basename(self.input_posres_itp_path)\"
+        #endif
 
         inside_moleculetype_section = False
         with open(self.input_itp_path, 'r') as itp_file:
@@ -89,7 +102,10 @@ class AppendLigand():
             top_lines.append(molecule_string)
 
         #new_top = fu.create_name(path=top_dir, prefix=self.prefix, step=self.step, name='ligand.top')
-        new_top = fu.create_name(path=top_dir, name=self.step+'_'+'ligand.top')
+        new_top_name = 'ligand.top'
+        if self.step:
+            name = self.step+'_'+new_top_name
+        new_top = fu.create_name(path=top_dir, name=new_top_name)
         #fu.create_name(step=self.step, name=self.output_top_path)
         with open(new_top, 'w') as new_top_f:
             new_top_f.write("".join(top_lines))
