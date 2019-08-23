@@ -39,6 +39,7 @@ class Genrestr():
         self.output_itp_path = properties.get('output_itp_path','restrain.itp')
         self.force_constants = str(properties.get('force_constants','500 500 500'))
         self.restricted_group = properties.get('restricted_group', 'system')
+        self.itp_name = properties.get('itp_name', None)
 
         # Properties common in all GROMACS BB
         self.gmx_path = properties.get('gmx_path', 'gmx')
@@ -76,17 +77,18 @@ class Genrestr():
         returncode = command.launch()
 
         top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
-        # Find ITP file name in the topology
-        with open(top_file, 'r') as fin:
-            for line in fin:
-                if line.startswith('#ifdef POSRES'):
-                    itp_name = re.findall('"([^"]*)"', next(fin))[0]
-                    break
+        if not self.itp_name:
+            # Find ITP file name in the topology
+            with open(top_file, 'r') as fin:
+                for line in fin:
+                    if line.startswith('#ifdef POSRES'):
+                        self.itp_name = re.findall('"([^"]*)"', next(fin))[0]
+                        break
         # Overwrite the content of the ITP file in the topology with the
         # content of the ITP file created with genrest.
         with open(self.output_itp_path, 'r') as fin:
             data = fin.read().splitlines(True)
-        with open(os.path.join(os.path.dirname(top_file), itp_name), 'w') as fout:
+        with open(os.path.join(os.path.dirname(top_file), self.itp_name), 'w') as fout:
             fout.writelines(data)
         # Remove the ITP file created with genrest.
         os.remove(self.output_itp_path)
