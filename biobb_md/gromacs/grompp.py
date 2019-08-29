@@ -62,6 +62,12 @@ class Grompp():
         # Properties common in all GROMACS BB
         self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_nobackup = properties.get('gmx_nobackup', True)
+        self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
+        if self.gmx_nobackup:
+            self.gmx_path += ' -nobackup'
+        if self.gmx_nocopyright:
+            self.gmx_path += ' -nocopyright'
         if not properties.get('docker_path'):
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
@@ -337,7 +343,7 @@ class Grompp():
             shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_tpr_path)), self.output_tpr_path)
 
         if self.remove_tmp:
-            fu.rm_file_list(tmp_files)
+            fu.rm_file_list(tmp_files, out_log=out_log)
 
         return returncode
 

@@ -17,6 +17,9 @@ class AppendLigand():
         input_itp_path (str): Path to the ligand ITP file to be inserted in the topology.
         output_top_zip_path (str): Path/Name the output topology TOP and ITP files zipball.
         properties (dic):
+            | - **posres_name** (*str*) - ("POSRES_LIGAND") String to be included in the ifdef clause.
+            | - **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
+            | - **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
     """
 
     def __init__(self, input_top_zip_path, input_itp_path, output_top_zip_path, input_posres_itp_path=None, properties=None, **kwargs):
@@ -38,16 +41,30 @@ class AppendLigand():
         self.prefix = properties.get('prefix', None)
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
+        self.remove_tmp = properties.get('remove_tmp', True)
+        self.restart = properties.get('restart', False)
 
         # Check the properties
         fu.check_properties(self, properties)
 
     def launch(self):
         """Launches the execution of the GROMACS editconf module."""
+        tmp_files = []
+
+        #Create local logs
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
 
+        #Restart if needed
+        if self.restart:
+            output_file_list = [self.output_top_zip_path]
+            if fu.check_complete_files(output_file_list):
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
+                return 0
+
+        # Unzip topology
         top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
         top_dir = os.path.dirname(top_file)
+        tmp_files.append(top_dir)
         itp_name = os.path.basename(self.input_itp_path)
 
         with open(top_file, 'r') as top_f:
@@ -107,8 +124,16 @@ class AppendLigand():
             new_top_f.write("".join(top_lines))
 
         shutil.copy2(self.input_itp_path, top_dir)
-        shutil.copy2(self.input_posres_itp_path, top_dir)
+        if self.input_posres_itp_path:
+            shutil.copy2(self.input_posres_itp_path, top_dir)
+
+        # zip topology
+        fu.log('Compressing topology to: %s' % self.output_top_zip_path, out_log, self.global_log)
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=new_top, out_log=out_log)
+
+        if self.remove_tmp:
+            fu.rm_file_list(tmp_files, out_log=out_log)
+
         return 0
 
 def main():

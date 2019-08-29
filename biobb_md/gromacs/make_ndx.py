@@ -34,6 +34,12 @@ class MakeNdx():
 
         # Properties common in all GROMACS BB
         self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_nobackup = properties.get('gmx_nobackup', True)
+        self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
+        if self.gmx_nobackup:
+            self.gmx_path += ' -nobackup'
+        if self.gmx_nocopyright:
+            self.gmx_path += ' -nocopyright'
         self.gmx_version = get_gromacs_version(self.gmx_path)
 
         # Properties common in all BB

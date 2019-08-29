@@ -38,8 +38,16 @@ class Editconf():
         self.center_molecule = properties.get('center_molecule', True)
 
         # Properties common in all GROMACS BB
+        self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
-        self.gmx_version = get_gromacs_version(self.gmx_path)
+        self.gmx_nobackup = properties.get('gmx_nobackup', True)
+        self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
+        if self.gmx_nobackup:
+            self.gmx_path += ' -nobackup'
+        if self.gmx_nocopyright:
+            self.gmx_path += ' -nocopyright'
+        if not properties.get('docker_path'):
+            self.gmx_version = get_gromacs_version(self.gmx_path)
 
         # Properties common in all BB
         self.can_write_console_log = properties.get('can_write_console_log', True)
@@ -66,9 +74,10 @@ class Editconf():
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
 
         #Check GROMACS version
-        if self.gmx_version < 512:
-            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+        if not self.docker_path:
+            if self.gmx_version < 512:
+                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
         #Restart if needed
         if self.restart:
@@ -106,13 +115,18 @@ class Editconf():
         fu.log("Distance of the box to molecule: %6.2f" % self.distance_to_molecule, out_log, self.global_log)
         fu.log("Box type: %s" % self.box_type, out_log, self.global_log)
 
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+        new_env = None
+        if self.gmxlib:
+            new_env = os.environ.copy()
+            new_env['GMXLIB'] = self.gmxlib
+
+        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, self.gmxlib).launch()
 
         if self.docker_path:
             shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_gro_path)), self.output_gro_path)
 
         if self.remove_tmp:
-            fu.rm_file_list(tmp_files)
+            fu.rm_file_list(tmp_files, out_log=out_log)
 
         return returncode
 

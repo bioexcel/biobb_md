@@ -49,6 +49,12 @@ class Pdb2gmx():
         # Properties common in all GROMACS BB
         self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_nobackup = properties.get('gmx_nobackup', True)
+        self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
+        if self.gmx_nobackup:
+            self.gmx_path += ' -nobackup'
+        if self.gmx_nocopyright:
+            self.gmx_path += ' -nocopyright'
         if not properties.get('docker_path'):
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
@@ -124,7 +130,7 @@ class Pdb2gmx():
             cmd.append("-his")
             cmd = ['echo', self.his, '|'] + cmd
             if self.docker_path:
-                cmd = [ '"' + " ".join(cmd) + '"']
+                cmd = ['"' + " ".join(cmd) + '"']
                 cmd_docker.extend(['/bin/bash', '-c'])
         if self.ignh:
             cmd.append("-ignh")
@@ -136,17 +142,18 @@ class Pdb2gmx():
         returncode = cmd_wrapper.CmdWrapper(cmd_docker + cmd, out_log, err_log, self.global_log, new_env).launch()
 
         if self.docker_path:
+            tmp_files.append(unique_dir)
             shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_gro_path)), self.output_gro_path)
             self.output_top_path = os.path.join(unique_dir, os.path.basename(self.output_top_path))
 
         # zip topology
         fu.log('Compressing topology to: %s' % self.output_top_zip_path, out_log, self.global_log)
-        fu.zip_top(zip_file=self.output_top_zip_path, top_file=self.output_top_path, out_log=out_log)
+        tmp_files.extend(fu.zip_top(zip_file=self.output_top_zip_path, top_file=self.output_top_path, out_log=out_log))
 
         if self.remove_tmp:
             tmp_files.append(self.output_top_path)
             tmp_files.append(self.output_itp_path)
-            fu.rm_file_list(tmp_files)
+            fu.rm_file_list(tmp_files, out_log=out_log)
 
         return returncode
 

@@ -36,12 +36,17 @@ class Solvate():
         self.output_top_zip_path = output_top_zip_path
 
         # Properties specific for BB
-        self.output_top_path = properties.get('output_top_path','solvate.top')
-        self.input_solvent_gro_path = properties.get('input_solvent_gro_path','spc216.gro')
+        self.input_solvent_gro_path = properties.get('input_solvent_gro_path', 'spc216.gro')
 
         # Properties common in all GROMACS BB
         self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
+        self.gmx_nobackup = properties.get('gmx_nobackup', True)
+        self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
+        if self.gmx_nobackup:
+            self.gmx_path += ' -nobackup'
+        if self.gmx_nocopyright:
+            self.gmx_path += ' -nocopyright'
         if not properties.get('docker_path'):
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
@@ -82,7 +87,10 @@ class Solvate():
                 fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
                 return 0
 
+        # Unzip topology
         top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
+        tmp_files.append(os.path.dirname(top_file))
+
         cmd_docker = []
         cmd = [self.gmx_path, 'solvate',
                '-cp', self.input_solute_gro_path,
@@ -118,15 +126,17 @@ class Solvate():
         returncode = cmd_wrapper.CmdWrapper(cmd_docker + cmd, out_log, err_log, self.global_log, new_env).launch()
 
         if self.docker_path:
+            tmp_files.append(unique_dir)
             shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_gro_path)), self.output_gro_path)
-            self.output_top_path = os.path.join(unique_dir, os.path.basename(self.output_top_path))
+            top_file = os.path.join(unique_dir, top_dir, os.path.basename(top_file))
 
         # zip topology
         fu.log('Compressing topology to: %s' % self.output_top_zip_path, out_log, self.global_log)
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=top_file, out_log=out_log)
-        tmp_files = [os.path.dirname(top_file)]
-        removed_files = [f for f in tmp_files if fu.rm(f)]
-        fu.log('Removed: %s' % str(removed_files), out_log)
+
+        if self.remove_tmp:
+            fu.rm_file_list(tmp_files, out_log=out_log)
+
         return returncode
 
 def main():

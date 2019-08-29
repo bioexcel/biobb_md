@@ -2,6 +2,7 @@
 
 """Module containing the Genion class and the command line interface."""
 import os
+import shutil
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
@@ -24,6 +25,8 @@ class Genion():
             | - **concentration** (*float*) - (0.05) Concentration of the ions in (mol/liter).
             | - **seed** (*int*) - (1993) Seed for random number generator.
             | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
+            | - **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
+            | - **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
     """
 
     def __init__(self, input_tpr_path, output_gro_path, input_top_zip_path,
@@ -37,15 +40,23 @@ class Genion():
         self.output_top_zip_path = output_top_zip_path
 
         # Properties specific for BB
-        self.output_top_path = properties.get('output_top_path','gio.top')
-        self.replaced_group = properties.get('replaced_group','SOL')
-        self.neutral = properties.get('neutral',False)
-        self.concentration = properties.get('concentration',0.05)
-        self.seed = properties.get('seed',1993)
+        self.output_top_path = properties.get('output_top_path', 'gio.top')
+        self.replaced_group = properties.get('replaced_group', 'SOL')
+        self.neutral = properties.get('neutral', False)
+        self.concentration = properties.get('concentration', 0.05)
+        self.seed = properties.get('seed', 1993)
 
         # Properties common in all GROMACS BB
+        self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
-        self.gmx_version = get_gromacs_version(self.gmx_path)
+        self.gmx_nobackup = properties.get('gmx_nobackup', True)
+        self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
+        if self.gmx_nobackup:
+            self.gmx_path += ' -nobackup'
+        if self.gmx_nocopyright:
+            self.gmx_path += ' -nocopyright'
+        if not properties.get('docker_path'):
+            self.gmx_version = get_gromacs_version(self.gmx_path)
 
         # Properties common in all BB
         self.can_write_console_log = properties.get('can_write_console_log', True)
@@ -53,29 +64,70 @@ class Genion():
         self.prefix = properties.get('prefix', None)
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
+        self.remove_tmp = properties.get('remove_tmp', True)
+        self.restart = properties.get('restart', False)
+
+        # Docker Specific
+        self.docker_path = properties.get('docker_path')
+        self.docker_image = properties.get('docker_image', 'mmbirb/pmx')
+        self.docker_volume_path = properties.get('docker_volume_path', '/inout')
 
         # Check the properties
         fu.check_properties(self, properties)
 
     def launch(self):
         """Launches the execution of the GROMACS genion module."""
+        tmp_files = []
+
+        #Create local logs
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
-        if self.gmx_version < 512:
-            raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-        fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+
+        #Check GROMACS version
+        if not self.docker_path:
+            if self.gmx_version < 512:
+                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
         if self.concentration:
             fu.log('To reach up %g mol/litre concentration' % self.concentration, out_log, self.global_log)
 
+        #Restart if needed
+        if self.restart:
+            output_file_list = [self.output_gro_path, self.output_top_zip_path]
+            if fu.check_complete_files(output_file_list):
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
+                return 0
+
         # Unzip topology to topology_out
         top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
+        tmp_files.append(os.path.dirname(top_file))
 
+        cmd_docker = []
         cmd = ['echo', '\"'+self.replaced_group+'\"', '|',
                self.gmx_path, 'genion',
                '-s', self.input_tpr_path,
                '-o', self.output_gro_path,
                '-p', top_file]
 
+        if self.docker_path:
+            fu.log('Docker execution enabled', out_log)
+            unique_dir = os.path.abspath(fu.create_unique_dir())
+            shutil.copy2(self.input_tpr_path, unique_dir)
+            docker_input_tpr_path = os.path.join(self.docker_volume_path, os.path.basename(self.input_tpr_path))
+            top_dir = os.path.basename(os.path.dirname(top_file))
+            shutil.copytree(top_dir, os.path.join(unique_dir, top_dir))
+            docker_top_file = os.path.join(self.docker_volume_path, top_dir, os.path.basename(top_file))
+            docker_output_gro_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_gro_path))
+            cmd_docker = [self.docker_path, 'run',
+                          '-v', unique_dir+':'+self.docker_volume_path,
+                          '--user', str(os.getuid()),
+                          self.docker_image]
+
+            cmd = ['echo', '\"'+self.replaced_group+'\"', '|',
+                   self.gmx_path, 'genion',
+                   '-s', docker_input_tpr_path,
+                   '-o', docker_output_gro_path,
+                   '-p', docker_top_file]
 
         if self.neutral:
             cmd.append('-neutral')
@@ -88,14 +140,29 @@ class Genion():
             cmd.append('-seed')
             cmd.append(str(self.seed))
 
-        command = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log)
-        returncode = command.launch()
+        if self.docker_path:
+            cmd = ['"' + " ".join(cmd) + '"']
+            cmd_docker.extend(['/bin/bash', '-c'])
 
-        # zip new_topology
+        new_env = None
+        if self.gmxlib:
+            new_env = os.environ.copy()
+            new_env['GMXLIB'] = self.gmxlib
+
+        returncode = cmd_wrapper.CmdWrapper(cmd_docker + cmd, out_log, err_log, self.global_log, new_env).launch()
+
+        if self.docker_path:
+            tmp_files.append(unique_dir)
+            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_gro_path)), self.output_gro_path)
+            top_file = os.path.join(unique_dir, top_dir, os.path.basename(top_file))
+
+
+        # zip topology
+        fu.log('Compressing topology to: %s' % self.output_top_zip_path, out_log, self.global_log)
         fu.zip_top(zip_file=self.output_top_zip_path, top_file=top_file, out_log=out_log)
-        tmp_files = [os.path.dirname(top_file)]
-        removed_files = [f for f in tmp_files if fu.rm(f)]
-        fu.log('Removed: %s' % str(removed_files), out_log)
+        if self.remove_tmp:
+            fu.rm_file_list(tmp_files, out_log=out_log)
+
         return returncode
 
 def main():
