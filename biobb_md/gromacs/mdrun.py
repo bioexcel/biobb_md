@@ -58,9 +58,14 @@ class Mdrun():
         self.mpi_np = properties.get('mpi_np')
         self.mpi_hostlist = properties.get('mpi_hostlist')
 
+        # Docker Specific
+        self.docker_path = properties.get('docker_path')
+        self.docker_image = properties.get('docker_image', 'mmbirb/pmx')
+        self.docker_volume_path = properties.get('docker_volume_path', '/inout')
+
         # Properties common in all GROMACS BB
         self.gmx_path = properties.get('gmx_path', 'gmx')
-        if not self.mpi_bin:
+        if (not self.mpi_bin) and (not self.docker_path):
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
         # Properties common in all BB
@@ -71,11 +76,6 @@ class Mdrun():
         self.path = properties.get('path', '')
         self.remove_tmp = properties.get('remove_tmp', True)
         self.restart = properties.get('restart', False)
-
-        # Docker Specific
-        self.docker_path = properties.get('docker_path')
-        self.docker_image = properties.get('docker_image', 'mmbirb/pmx')
-        self.docker_volume_path = properties.get('docker_volume_path', '/inout')
 
         # Check the properties
         fu.check_properties(self, properties)
@@ -88,7 +88,7 @@ class Mdrun():
         out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
 
         #Check GROMACS version
-        if not self.mpi_bin:
+        if (not self.mpi_bin) and (not self.docker_path):
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
             fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)

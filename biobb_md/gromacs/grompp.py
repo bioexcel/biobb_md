@@ -286,6 +286,7 @@ class Grompp():
                '-maxwarn', self.maxwarn]
 
         if self.docker_path:
+            fu.log('Docker execution enabled', out_log)
             unique_dir = os.path.abspath(fu.create_unique_dir())
             shutil.copy2(self.output_mdp_path, unique_dir)
             docker_output_mdp_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_mdp_path))

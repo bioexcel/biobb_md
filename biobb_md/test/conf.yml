@@ -113,6 +113,20 @@ solvate:
     ref_output_gro_path: file:test_reference_dir/gromacs/ref_solvate.gro
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_solvate.zip
 
+solvate_docker:
+  paths:
+    input_solute_gro_path: file:test_data_dir/gromacs/solvate.gro
+    output_gro_path: output_gro.gro
+    input_top_zip_path: file:test_data_dir/gromacs/solvate.zip
+    output_top_zip_path: output_top_zip.zip
+    ref_output_gro_path: file:test_reference_dir/gromacs/ref_solvate_docker.gro
+    ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_solvate_docker.zip
+  properties:
+    docker_path: docker
+    docker_image: pmx_image
+
+
+
 ndx2resttop:
   paths:
     input_ndx_path: file:test_data_dir/gromacs_extra/ndx2resttop.ndx

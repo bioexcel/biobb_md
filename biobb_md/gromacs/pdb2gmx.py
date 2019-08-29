@@ -101,6 +101,7 @@ class Pdb2gmx():
 
 
         if self.docker_path:
+            fu.log('Docker execution enabled', out_log)
             unique_dir = os.path.abspath(fu.create_unique_dir())
             shutil.copy2(self.input_pdb_path, unique_dir)
             docker_input_pdb_path = os.path.join(self.docker_volume_path, os.path.basename(self.input_pdb_path))
