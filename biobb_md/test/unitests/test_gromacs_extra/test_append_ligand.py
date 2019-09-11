@@ -6,8 +6,8 @@ class TestAppendLigand():
         fx.test_setup(self,'appendligand')
 
     def tearDown(self):
-        pass
-        #fx.test_teardown(self)
+        #pass
+        fx.test_teardown(self)
 
     def test_append_ligand(self):
         returncode= AppendLigand(properties=self.properties, **self.paths).launch()

@@ -6,6 +6,7 @@ class TestEditconf():
         fx.test_setup(self,'editconf')
 
     def tearDown(self):
+        #pass
         fx.test_teardown(self)
 
     def test_editconf(self):

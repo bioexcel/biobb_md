@@ -6,6 +6,7 @@ class TestEditconfDocker():
         fx.test_setup(self,'editconf_docker')
 
     def tearDown(self):
+        #pass
         fx.test_teardown(self)
 
     def test_editconf_docker(self):

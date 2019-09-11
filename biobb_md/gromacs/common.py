@@ -4,6 +4,7 @@ import re
 import time
 import shutil
 from biobb_common.tools import file_utils as fu
+from biobb_common.tools.file_utils import launchlogger
 from biobb_common.command_wrapper import cmd_wrapper
 
 def get_gromacs_version(gmx="gmx"):
@@ -46,7 +47,7 @@ class GromacsVersionError(Exception):
     """ Exception Raised when the installed version of GROMACS is not
         compatible with the current function.
     """
-    pass
+    #pass
 
 def gmx_check(file_a, file_b, gmx='gmx'):
     print("Comparing GROMACS files:")

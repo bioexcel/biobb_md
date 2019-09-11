@@ -7,6 +7,7 @@ import shutil
 from pathlib import Path
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
+from biobb_common.tools.file_utils import launchlogger
 from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
@@ -242,14 +243,17 @@ class Grompp():
 
         return self.output_mdp_path
 
+    @launchlogger
     def launch(self):
         """Launches the execution of the GROMACS grompp module."""
         tmp_files = []
         mdout = 'mdout.mdp'
         tmp_files.append(mdout)
 
-        #Create local logs
-        out_log, err_log = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+
+        # Get local loggers from launchlogger decorator
+        out_log = getattr(self, 'out_log', None)
+        err_log = getattr(self, 'err_log', None)
 
         #Check GROMACS version
         if not self.docker_path:
@@ -339,6 +343,7 @@ class Grompp():
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
 
         if self.docker_path:
+            tmp_files.append(unique_dir)
             shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_mdp_path)), self.output_mdp_path)
             shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_tpr_path)), self.output_tpr_path)
 

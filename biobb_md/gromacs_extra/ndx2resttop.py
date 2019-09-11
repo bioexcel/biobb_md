@@ -6,6 +6,7 @@ import fnmatch
 import argparse
 from biobb_common.configuration import  settings
 from biobb_common.tools import file_utils as fu
+from biobb_common.tools.file_utils import launchlogger
 
 class Ndx2resttop():
     """Generate a restrained topology from an index NDX file.
@@ -42,6 +43,7 @@ class Ndx2resttop():
         # Check the properties
         fu.check_properties(self, properties)
 
+    @launchlogger
     def launch(self):
         """Launch the topology generation."""
         out_log, _ = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)

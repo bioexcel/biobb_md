@@ -8,6 +8,7 @@ class TestGrompp():
         fx.test_setup(self,'grompp_docker')
 
     def tearDown(self):
+        #pass
         fx.test_teardown(self)
 
     def test_grompp(self):

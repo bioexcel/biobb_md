@@ -7,6 +7,7 @@ class TestMdrun():
         fx.test_setup(self,'mdrun')
 
     def tearDown(self):
+        #pass
         fx.test_teardown(self)
 
     def test_mdrun(self):

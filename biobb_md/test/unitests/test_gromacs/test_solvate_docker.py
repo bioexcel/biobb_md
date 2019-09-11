@@ -6,6 +6,7 @@ class TestSolvateDocker():
         fx.test_setup(self,'solvate_docker')
 
     def tearDown(self):
+        #pass
         fx.test_teardown(self)
 
     def test_solvate(self):
