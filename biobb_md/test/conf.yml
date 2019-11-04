@@ -106,8 +106,8 @@ mdrun_docker:
     output_log_path: output_log_path.log
     ref_output_trr_path: file:test_reference_dir/gromacs/ref_mdrun.trr
   properties:
-    docker_path: docker
-    docker_image: pmx_image
+    container_path: docker
+    container_image: pmx_image
 
 make_ndx:
   paths:

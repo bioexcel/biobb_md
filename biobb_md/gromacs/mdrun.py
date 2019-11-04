@@ -43,15 +43,18 @@ class Mdrun:
         properties = properties or {}
 
         # Input/Output files
-        self.input_tpr_path = input_tpr_path
-        self.output_trr_path = output_trr_path
-        self.output_gro_path = output_gro_path
-        self.output_edr_path = output_edr_path
-        self.output_log_path = output_log_path
+        self.io_dict = {"in": {}, "out": {}}
+        # Input
+        self.io_dict["in"]["input_tpr_path"] = input_tpr_path
+        # Output
+        self.io_dict["out"]["output_trr_path"] = output_trr_path
+        self.io_dict["out"]["output_gro_path"] = output_gro_path
+        self.io_dict["out"]["output_edr_path"] = output_edr_path
+        self.io_dict["out"]["output_log_path"] = output_log_path
         # Optional files
-        self.output_xtc_path = output_xtc_path
-        self.output_cpt_path = output_cpt_path
-        self.output_dhdl_path = output_dhdl_path
+        self.io_dict["out"]["output_xtc_path"] = output_xtc_path
+        self.io_dict["out"]["output_cpt_path"] = output_cpt_path
+        self.io_dict["out"]["output_dhdl_path"] = output_dhdl_path
 
         # Properties specific for BB
         self.num_threads = str(properties.get('num_threads', 0))
@@ -104,16 +107,22 @@ class Mdrun:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
             fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
-        # Create restart file list
-        output_file_list = [self.output_trr_path, self.output_gro_path, self.output_edr_path, self.output_log_path]
+        # Restart if needed
+        if self.restart:
+            if fu.check_complete_files(self.io_dict["out"].values()):
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
+                return 0
+
+        container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
         cmd = [self.gmx_path, 'mdrun',
-               '-s', self.input_tpr_path,
-               '-o', self.output_trr_path,
-               '-c', self.output_gro_path,
-               '-e', self.output_edr_path,
-               '-g', self.output_log_path,
+               '-s', container_io_dict["in"]["input_tpr_path"],
+               '-o', container_io_dict["out"]["output_trr_path"],
+               '-c', container_io_dict["out"]["output_gro_path"],
+               '-e', container_io_dict["out"]["output_edr_path"],
+               '-g', container_io_dict["out"]["output_log_path"],
                '-nt', self.num_threads]
+
         if self.mpi_bin:
             mpi_cmd = [self.mpi_bin]
             if self.mpi_np:
@@ -123,84 +132,24 @@ class Mdrun:
                 mpi_cmd.append('-hostfile')
                 mpi_cmd.append(self.mpi_hostlist)
             cmd = mpi_cmd + cmd
-        if self.output_xtc_path:
+        if container_io_dict["out"].get("output_xtc_path"):
             cmd.append('-x')
-            cmd.append(self.output_xtc_path)
-            output_file_list.append(self.output_xtc_path)
-        if self.output_cpt_path:
+            cmd.append(container_io_dict["out"]["output_xtc_path"])
+        if container_io_dict["out"].get("output_cpt_path"):
             cmd.append('-cpo')
-            cmd.append(self.output_cpt_path)
-            output_file_list.append(self.output_cpt_path)
-        if self.output_dhdl_path:
+            cmd.append(container_io_dict["out"]["output_cpt_path"])
+        if container_io_dict["out"].get("output_dhdl_path"):
             cmd.append('-dhdl')
-            cmd.append(self.output_dhdl_path)
-            output_file_list.append(self.output_dhdl_path)
+            cmd.append(container_io_dict["out"]["output_dhdl_path"])
 
-        # Restart if needed
-        if self.restart:
-            if fu.check_complete_files(output_file_list):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
-                return 0
-
-        if self.container_path:
-            unique_dir = os.path.abspath(fu.create_unique_dir())
-            shutil.copy2(self.input_tpr_path, unique_dir)
-            container_input_tpr_path = os.path.join(self.container_volume_path, os.path.basename(self.input_tpr_path))
-            container_output_trr_path = os.path.join(self.container_volume_path, os.path.basename(self.output_trr_path))
-            container_output_gro_path = os.path.join(self.container_volume_path, os.path.basename(self.output_gro_path))
-            container_output_edr_path = os.path.join(self.container_volume_path, os.path.basename(self.output_edr_path))
-            container_output_log_path = os.path.join(self.container_volume_path, os.path.basename(self.output_log_path))
-
-            cmd = [self.gmx_path, 'mdrun',
-                   '-s', container_input_tpr_path,
-                   '-o', container_output_trr_path,
-                   '-c', container_output_gro_path,
-                   '-e', container_output_edr_path,
-                   '-g', container_output_log_path,
-                   '-nt', self.num_threads]
-            if self.mpi_bin:
-                mpi_cmd = [self.mpi_bin]
-                if self.mpi_np:
-                    mpi_cmd.append('-np')
-                    mpi_cmd.append(str(self.mpi_np))
-                if self.mpi_hostlist:
-                    mpi_cmd.append('-hostfile')
-                    mpi_cmd.append(self.mpi_hostlist)
-                cmd = mpi_cmd + cmd
-
-            if self.output_xtc_path:
-                container_output_xtc_path = os.path.join(self.container_volume_path, os.path.basename(self.output_xtc_path))
-                cmd.append('-x')
-                cmd.append(container_output_xtc_path)
-            if self.output_cpt_path:
-                container_output_cpt_path = os.path.join(self.container_volume_path, os.path.basename(self.output_cpt_path))
-                cmd.append('-cpo')
-                cmd.append(container_output_cpt_path)
-            if self.output_dhdl_path:
-                container_output_dhdl_path = os.path.join(self.container_volume_path, os.path.basename(self.output_dhdl_path))
-                cmd.append('-dhdl')
-                cmd.append(container_output_dhdl_path)
-
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path, host_volume=unique_dir, container_volume=self.container_volume_path, user_uid=self.container_user_id, container_image=self.container_image, out_log=out_log, global_log=self.global_log)
+        cmd = fu.create_cmd_line(cmd, container_path=self.container_path, host_volume=container_io_dict.get("unique_dir"), container_volume=self.container_volume_path, user_uid=self.container_user_id, container_image=self.container_image, out_log=out_log, global_log=self.global_log)
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
-
-        if self.container_path:
-            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_trr_path)), self.output_trr_path)
-            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_gro_path)), self.output_gro_path)
-            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_edr_path)), self.output_edr_path)
-            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_log_path)), self.output_log_path)
-            if self.output_xtc_path:
-                shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_xtc_path)), self.output_xtc_path)
-            if self.output_cpt_path:
-                shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_cpt_path)), self.output_cpt_path)
-            if self.output_dhdl_path:
-                shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_dhdl_path)), self.output_dhdl_path)
+        fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
         if self.remove_tmp:
             fu.rm_file_list(tmp_files, out_log=out_log)
 
         return returncode
-
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS mdrun module.",
