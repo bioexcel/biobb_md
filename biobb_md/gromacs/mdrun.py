@@ -146,6 +146,8 @@ class Mdrun:
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
+        tmp_files.append(container_io_dict.get("unique_dir"))
+
         if self.remove_tmp:
             fu.rm_file_list(tmp_files, out_log=out_log)
 
