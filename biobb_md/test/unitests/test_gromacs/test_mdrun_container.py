@@ -4,7 +4,7 @@ from biobb_md.gromacs.common import gmx_rms
 
 class TestMdrunDocker():
     def setUp(self):
-        fx.test_setup(self,'mdrun_docker')
+        fx.test_setup(self,'mdrun_container')
 
     def tearDown(self):
         #pass

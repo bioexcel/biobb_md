@@ -2,7 +2,6 @@
 
 """Module containing the MDrun class and the command line interface."""
 import os
-import shutil
 import argparse
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
@@ -13,7 +12,7 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Mdrun:
-    """Wrapper of the GROMACS of the mdrun module.
+    """Wrapper of the GROMACS of the mdrun (http://manual.gromacs.org/current/onlinehelp/gmx-mdrun.html) module.
 
     Args:
         input_tpr_path (str): Path to the portable binary run input file TPR.
@@ -25,13 +24,17 @@ class Mdrun:
         output_cpt_path (str)[Optional]: Path to the output GROMACS checkpoint file CPT.
         output_dhdl_path (str)[Optional]: Path to the output dhdl.xvg file only used when free energy calculation is turned on.
         properties (dic):
-            | - **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
-            | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
-            | - **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
-            | - **mpi_np** (*str*) - (None) Number of MPI processes. Usually an integer bigger than 1.
-            | - **mpi_hostlist** (*str*) - (None) Path to the MPI hostlist file.
-            | - **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
-            | - **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+            * **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
+            * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
+            * **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
+            * **mpi_np** (*str*) - (None) Number of MPI processes. Usually an integer bigger than 1.
+            * **mpi_hostlist** (*str*) - (None) Path to the MPI hostlist file.
+            * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
+            * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+            * **container_path** (*string*) - (None)  Path to the binary executable of your container.
+            * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
+            * **container_volume_path** (*string*) - ("/tmp") Path to an internal directory in the container.
+            * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
 
     """
 
@@ -43,18 +46,11 @@ class Mdrun:
         properties = properties or {}
 
         # Input/Output files
-        self.io_dict = {"in": {}, "out": {}}
-        # Input
-        self.io_dict["in"]["input_tpr_path"] = input_tpr_path
-        # Output
-        self.io_dict["out"]["output_trr_path"] = output_trr_path
-        self.io_dict["out"]["output_gro_path"] = output_gro_path
-        self.io_dict["out"]["output_edr_path"] = output_edr_path
-        self.io_dict["out"]["output_log_path"] = output_log_path
-        # Optional files
-        self.io_dict["out"]["output_xtc_path"] = output_xtc_path
-        self.io_dict["out"]["output_cpt_path"] = output_cpt_path
-        self.io_dict["out"]["output_dhdl_path"] = output_dhdl_path
+        self.io_dict = {
+            "in": {"input_tpr_path": input_tpr_path},
+            "out": {"output_trr_path": output_trr_path, "output_gro_path": output_gro_path, "output_edr_path": output_edr_path, "output_log_path": output_log_path,
+                    "output_xtc_path": output_xtc_path, "output_cpt_path": output_cpt_path, "output_dhdl_path": output_dhdl_path}
+        }
 
         # Properties specific for BB
         self.num_threads = str(properties.get('num_threads', 0))
@@ -64,8 +60,8 @@ class Mdrun:
 
         # container Specific
         self.container_path = properties.get('container_path')
-        self.container_image = properties.get('container_image', 'mmbirb/pmx')
-        self.container_volume_path = properties.get('container_volume_path', '/inout')
+        self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
+        self.container_volume_path = properties.get('container_volume_path', '/tmp')
         self.container_user_id = properties.get('user_id', str(os.getuid()))
 
         # Properties common in all GROMACS BB
@@ -95,7 +91,6 @@ class Mdrun:
     def launch(self):
         """Launches the execution of the GROMACS mdrun module."""
         tmp_files = []
-        unique_dir = None
 
         # Get local loggers from launchlogger decorator
         out_log = getattr(self, 'out_log', None)
@@ -146,10 +141,12 @@ class Mdrun:
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
+        tmp_files.append(container_io_dict.get("unique_dir"))
         if self.remove_tmp:
             fu.rm_file_list(tmp_files, out_log=out_log)
 
         return returncode
+
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS mdrun module.",
@@ -181,7 +178,8 @@ def main():
     Mdrun(input_tpr_path=args.input_tpr_path, output_trr_path=args.output_trr_path,
           output_gro_path=args.output_gro_path, output_edr_path=args.output_edr_path,
           output_log_path=args.output_log_path, output_xtc_path=args.output_xtc_path,
-          output_cpt_path=args.output_cpt_path, output_dhdl_path=args.output_dhdl_path, properties=properties).launch()
+          output_cpt_path=args.output_cpt_path, output_dhdl_path=args.output_dhdl_path,
+          properties=properties).launch()
 
 
 if __name__ == '__main__':

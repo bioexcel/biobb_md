@@ -29,14 +29,17 @@ editconf:
     output_gro_path: output_gro.gro
     ref_output_gro_path: file:test_reference_dir/gromacs/ref_editconf.gro
 
-editconf_docker:
+editconf_container:
   paths:
     input_gro_path: file:test_data_dir/gromacs/editconf.gro
     output_gro_path: output_gro.gro
     ref_output_gro_path: file:test_reference_dir/gromacs/ref_editconf.gro
   properties:
-    docker_path: docker
-    docker_image: pmx_image
+    container_path: docker
+    #container_path: singularity
+    container_image: gromacs/gromacs:latest
+    #container_image: gromacs.simg
+    container_volume_path: /tmp
 
 genion:
   paths:
@@ -97,7 +100,7 @@ mdrun:
     output_log_path: output_log_path.log
     ref_output_trr_path: file:test_reference_dir/gromacs/ref_mdrun.trr
 
-mdrun_docker:
+mdrun_container:
   paths:
     input_tpr_path: file:test_data_dir/gromacs/mdrun.tpr
     output_trr_path: output_trr_path.trr
@@ -107,7 +110,10 @@ mdrun_docker:
     ref_output_trr_path: file:test_reference_dir/gromacs/ref_mdrun.trr
   properties:
     container_path: docker
-    container_image: pmx_image
+    #container_path: singularity
+    container_image: gromacs/gromacs:latest
+    #container_image: gromacs.simg
+    container_volume_path: /tmp
 
 make_ndx:
   paths:
