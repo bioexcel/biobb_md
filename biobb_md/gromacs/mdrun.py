@@ -62,7 +62,7 @@ class Mdrun:
         self.container_path = properties.get('container_path')
         self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
         self.container_volume_path = properties.get('container_volume_path', '/tmp')
-        self.container_user_id = properties.get('user_id', str(os.getuid()))
+        self.container_user_id = properties.get('container_user_id', str(os.getuid()))
 
         # Properties common in all GROMACS BB
         self.gmx_path = properties.get('gmx_path', 'gmx')
@@ -142,7 +142,7 @@ class Mdrun:
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
         tmp_files.append(container_io_dict.get("unique_dir"))
-        
+
         if self.remove_tmp:
             fu.rm_file_list(tmp_files, out_log=out_log)
 

@@ -3,11 +3,11 @@ from biobb_md.gromacs.genion import Genion
 
 class TestGenionDocker():
     def setUp(self):
-        fx.test_setup(self,'genion_docker')
+        fx.test_setup(self, 'genion_container')
 
     def tearDown(self):
-        #pass
-        fx.test_teardown(self)
+        pass
+        #fx.test_teardown(self)
 
     def test_genion_docker(self):
         returncode= Genion(properties=self.properties, **self.paths).launch()

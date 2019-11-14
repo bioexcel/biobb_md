@@ -50,7 +50,7 @@ genion:
     output_top_zip_path: output_top_zip.zip
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_genion.zip
 
-genion_docker:
+genion_container:
   paths:
     input_tpr_path: file:test_data_dir/gromacs/genion.tpr
     output_gro_path: output_gro.gro
@@ -59,8 +59,14 @@ genion_docker:
     output_top_zip_path: output_top_zip.zip
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_genion.zip
   properties:
-    docker_path: docker
-    docker_image: pmx_image
+    container_path: docker
+    #container_path: singularity
+    #container_image: gromacs/gromacs:latest
+    #container_image: gromacs.simg
+    container_image: pmx_image
+    #container_volume_path: /tmp
+    container_user_id: "root"
+
 
 genrestr:
   paths:
