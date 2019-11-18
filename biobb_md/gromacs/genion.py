@@ -61,7 +61,7 @@ class Genion:
         self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
         self.container_volume_path = properties.get('container_volume_path', '/data')
         self.container_working_dir = properties.get('container_working_dir')
-        self.container_user_id = properties.get('container_user_id', str(os.getuid()))
+        self.container_user_id = properties.get('container_user_id')
         self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
 
         # Properties common in all GROMACS BB
@@ -143,7 +143,14 @@ class Genion:
             new_env = os.environ.copy()
             new_env['GMXLIB'] = self.gmxlib
 
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path, host_volume=container_io_dict.get("unique_dir"), container_volume=self.container_volume_path, container_working_dir=self.container_working_dir, container_user_uid=self.container_user_id, container_shell_path=self.container_shell_path, container_image=self.container_image, out_log=out_log, global_log=self.global_log)
+        cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
+                                 host_volume=container_io_dict.get("unique_dir"),
+                                 container_volume=self.container_volume_path,
+                                 container_working_dir=self.container_working_dir,
+                                 container_user_uid=self.container_user_id,
+                                 container_shell_path=self.container_shell_path,
+                                 container_image=self.container_image,
+                                 out_log=out_log, global_log=self.global_log)
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
@@ -155,7 +162,6 @@ class Genion:
         fu.zip_top(zip_file=self.io_dict["out"]["output_top_zip_path"], top_file=top_file, out_log=out_log)
 
         tmp_files.append(container_io_dict.get("unique_dir"))
-
         if self.remove_tmp:
             fu.rm_file_list(tmp_files, out_log=out_log)
 

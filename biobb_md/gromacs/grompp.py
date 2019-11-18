@@ -27,27 +27,34 @@ class Grompp():
         input_cpt_path (str)[Optional]: Path to the input GROMACS checkpoint file CPT.
         input_ndx_path (str)[Optional]: Path to the input GROMACS index files NDX.
         properties (dic):
-            | - **input_mdp_path** (*str*) - (None) Path of the input MDP file.
-            | - **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
-                | - **type** (*str*) - ("minimization") Default options for the mdp file. Valid values: minimization, nvt, npt, free, index
-            | - **output_mdp_path** (*str*) - ("grompp.mdp") Path of the output MDP file.
-            | - **output_top_path** (*str*) - ("grompp.top") Path the output topology TOP file.
-            | - **maxwarn** (*int*) - (10) Maximum number of allowed warnings.
-            | - **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
-            | - **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
-            | - **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+            * **input_mdp_path** (*str*) - (None) Path of the input MDP file.
+            * **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
+            * * **type** (*str*) - ("minimization") Default options for the mdp file. Valid values: minimization, nvt, npt, free, index
+            * **output_mdp_path** (*str*) - ("grompp.mdp") Path of the output MDP file.
+            * **output_top_path** (*str*) - ("grompp.top") Path the output topology TOP file.
+            * **maxwarn** (*int*) - (10) Maximum number of allowed warnings.
+            * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
+            * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
+            * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+            * **container_path** (*string*) - (None)  Path to the binary executable of your container.
+            * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
+            * **container_volume_path** (*string*) - ("/data") Path to an internal directory in the container.
+            * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
+            * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
+            * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
     """
 
-    def __init__(self, input_gro_path, input_top_zip_path, output_tpr_path, input_cpt_path=None, input_ndx_path=None, properties=None, **kwargs):
+    def __init__(self, input_gro_path, input_top_zip_path, output_tpr_path,
+                 input_cpt_path=None, input_ndx_path=None, properties=None, **kwargs):
         properties = properties or {}
 
         # Input/Output files
-        self.input_gro_path = input_gro_path
+        self.io_dict = {
+            "in": {"input_gro_path": input_gro_path, "input_cpt_path": input_cpt_path, "input_ndx_path": input_ndx_path},
+            "out": {"output_tpr_path": output_tpr_path}
+        }
+        # Should not be copied inside container
         self.input_top_zip_path = input_top_zip_path
-        self.output_tpr_path = output_tpr_path
-        # Optional files
-        self.input_cpt_path = input_cpt_path
-        self.input_ndx_path = input_ndx_path
 
         # Properties specific for BB
         self.input_mdp_path = properties.get('input_mdp_path', None)
@@ -60,6 +67,14 @@ class Grompp():
         self.nsteps = ''
         self.dt = ''
 
+        # container Specific
+        self.container_path = properties.get('container_path')
+        self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
+        self.container_volume_path = properties.get('container_volume_path', '/data')
+        self.container_working_dir = properties.get('container_working_dir')
+        self.container_user_id = properties.get('container_user_id')
+        self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
+
         # Properties common in all GROMACS BB
         self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
@@ -69,7 +84,7 @@ class Grompp():
             self.gmx_path += ' -nobackup'
         if self.gmx_nocopyright:
             self.gmx_path += ' -nocopyright'
-        if not properties.get('docker_path'):
+        if not self.container_path:
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
         # Properties common in all BB
@@ -80,11 +95,6 @@ class Grompp():
         self.path = properties.get('path', '')
         self.remove_tmp = properties.get('remove_tmp', True)
         self.restart = properties.get('restart', False)
-
-        # Docker Specific
-        self.docker_path = properties.get('docker_path')
-        self.docker_image = properties.get('docker_image', 'mmbirb/pmx')
-        self.docker_volume_path = properties.get('docker_volume_path', '/inout')
 
         # Check the properties
         fu.check_properties(self, properties)
@@ -158,7 +168,6 @@ class Grompp():
             if npt or free:
                 mdp_list.append("continuation = " + self.mdp.pop('continuation', 'yes'))
 
-
         # Neighbour searching
         mdp_list.append("\n;Neighbour searching")
         mdp_list.append("cutoff-scheme = " + self.mdp.pop('cutoff-scheme', 'Verlet'))
@@ -201,7 +210,6 @@ class Grompp():
                 mdp_list.append("compressibility = " + self.mdp.pop('compressibility', '4.5e-5'))
                 mdp_list.append("refcoord-scaling = " + self.mdp.pop('refcoord-scaling', 'com'))
 
-
         # Dispersion correction
         if md:
             mdp_list.append("\n;Dispersion correction")
@@ -217,7 +225,7 @@ class Grompp():
             if npt or free:
                 mdp_list.append("gen-vel = " + self.mdp.pop('gen-vel', 'no'))
 
-        #Periodic boundary conditions
+        # Periodic boundary conditions
         mdp_list.append("\n;Periodic boundary conditions")
         mdp_list.append("pbc = " + self.mdp.pop('pbc', 'xyz'))
 
@@ -250,23 +258,28 @@ class Grompp():
         mdout = 'mdout.mdp'
         tmp_files.append(mdout)
 
-
         # Get local loggers from launchlogger decorator
         out_log = getattr(self, 'out_log', None)
         err_log = getattr(self, 'err_log', None)
 
-        #Check GROMACS version
-        if not self.docker_path:
+        # Check GROMACS version
+        if not self.container_path:
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
             fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
 
-        #Restart if needed
+        # Restart if needed
         if self.restart:
-            output_file_list = [self.output_tpr_path]
-            if fu.check_complete_files(output_file_list):
+            if fu.check_complete_files(self.io_dict["out"].values()):
                 fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
                 return 0
+
+        # Unzip topology to topology_out
+        top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
+        top_dir = os.path.dirname(top_file)
+        tmp_files.append(top_dir)
+
+        container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
         if self.input_mdp_path:
             self.output_mdp_path = self.input_mdp_path
@@ -283,74 +296,61 @@ class Grompp():
         else:
             fu.log('Will run a %s md of %s' % (md, fu.human_readable_time(int(self.nsteps)*float(self.dt))), out_log, self.global_log)
 
-        top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
-        tmp_files.append(os.path.dirname(top_file))
+        if self.container_path:
+            fu.log('Container execution enabled', out_log)
+
+            shutil.copy2(self.output_mdp_path, container_io_dict.get("unique_dir"))
+            self.output_mdp_path = os.path.join(self.container_volume_path, os.path.basename(self.output_mdp_path))
+
+            shutil.copytree(top_dir, os.path.join(container_io_dict.get("unique_dir"), os.path.basename(top_dir)))
+            top_file = os.path.join(self.container_volume_path, os.path.basename(top_dir), os.path.basename(top_file))
 
         cmd = [self.gmx_path, 'grompp',
                '-f', self.output_mdp_path,
-               '-c', self.input_gro_path,
-               '-r', self.input_gro_path,
+               '-c', container_io_dict["in"]["input_gro_path"],
+               '-r', container_io_dict["in"]["input_gro_path"],
                '-p', top_file,
-               '-o', self.output_tpr_path,
+               '-o', container_io_dict["out"]["output_tpr_path"],
                '-po', mdout,
                '-maxwarn', self.maxwarn]
 
-        if self.docker_path:
-            fu.log('Docker execution enabled', out_log)
-            unique_dir = os.path.abspath(fu.create_unique_dir())
-            shutil.copy2(self.output_mdp_path, unique_dir)
-            docker_output_mdp_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_mdp_path))
-            shutil.copy2(self.input_gro_path, unique_dir)
-            docker_input_gro_path = os.path.join(self.docker_volume_path, os.path.basename(self.input_gro_path))
-            top_dir = os.path.basename(os.path.dirname(top_file))
-            shutil.copytree(top_dir, os.path.join(unique_dir, top_dir))
-            docker_top_file = os.path.join(self.docker_volume_path, top_dir, os.path.basename(top_file))
-            docker_output_tpr_path = os.path.join(self.docker_volume_path, os.path.basename(self.output_tpr_path))
-
-            cmd = [self.docker_path, 'run',
-                   '-v', unique_dir+':'+self.docker_volume_path,
-                   '--user', str(os.getuid()),
-                   self.docker_image,
-                   self.gmx_path, 'grompp',
-                   '-f', docker_output_mdp_path,
-                   '-c', docker_input_gro_path,
-                   '-r', docker_input_gro_path,
-                   '-p', docker_top_file,
-                   '-o', docker_output_tpr_path,
-                   '-po', os.path.join(self.docker_volume_path, mdout),
-                   '-maxwarn', self.maxwarn]
-
-        if self.input_cpt_path and Path(self.input_cpt_path).exists():
+        if container_io_dict["in"].get("input_cpt_path") and Path(container_io_dict["in"]["input_cpt_path"]).exists():
             cmd.append('-t')
-            if self.docker_path:
-                shutil.copy2(self.input_cpt_path, unique_dir)
-                cmd.append(os.path.join(self.docker_path, os.path.basename(self.input_cpt_path)))
+            if self.container_path:
+                shutil.copy2(container_io_dict["in"]["input_cpt_path"], container_io_dict.get("unique_dir"))
+                cmd.append(os.path.join(self.container_volume_path, os.path.basename(container_io_dict["in"]["input_cpt_path"])))
             else:
-                cmd.append(self.input_cpt_path)
-        if self.input_ndx_path and Path(self.input_ndx_path).exists():
+                cmd.append(container_io_dict["in"]["input_cpt_path"])
+        if container_io_dict["in"].get("input_ndx_path") and Path(container_io_dict["in"]["input_ndx_path"]).exists():
             cmd.append('-n')
-            if self.docker_path:
-                shutil.copy2(self.input_ndx_path, unique_dir)
-                cmd.append(os.path.join(self.docker_volume_path, os.path.basename(self.input_ndx_path)))
+            if self.container_path:
+                shutil.copy2(container_io_dict["in"]["input_ndx_path"], container_io_dict.get("unique_dir"))
+                cmd.append(os.path.join(self.container_volume_path, os.path.basename(container_io_dict["in"]["input_ndx_path"])))
             else:
-                cmd.append(self.input_ndx_path)
+                cmd.append(container_io_dict["in"]["input_ndx_path"])
 
         new_env = None
         if self.gmxlib:
             new_env = os.environ.copy()
             new_env['GMXLIB'] = self.gmxlib
 
+        cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
+                                 host_volume=container_io_dict.get("unique_dir"),
+                                 container_volume=self.container_volume_path,
+                                 container_working_dir=self.container_working_dir,
+                                 container_user_uid=self.container_user_id,
+                                 container_shell_path=self.container_shell_path,
+                                 container_image=self.container_image,
+                                 out_log=out_log, global_log=self.global_log)
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
+        fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
-        if self.docker_path:
-            tmp_files.append(unique_dir)
-            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_mdp_path)), self.output_mdp_path)
-            shutil.copy2(os.path.join(unique_dir, os.path.basename(self.output_tpr_path)), self.output_tpr_path)
-
+        tmp_files.append(container_io_dict.get("unique_dir"))
         if self.remove_tmp:
             fu.rm_file_list(tmp_files, out_log=out_log)
 
         return returncode
+
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.", formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))

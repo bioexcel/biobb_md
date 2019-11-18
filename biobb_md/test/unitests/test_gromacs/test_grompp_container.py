@@ -5,7 +5,7 @@ from biobb_md.gromacs.common import gmx_check
 
 class TestGrompp():
     def setUp(self):
-        fx.test_setup(self,'grompp_docker')
+        fx.test_setup(self, 'grompp_container')
 
     def tearDown(self):
         #pass

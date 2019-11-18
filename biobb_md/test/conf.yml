@@ -75,6 +75,21 @@ genrestr:
     output_itp_path: output_itp.itp
     ref_output_itp_path: file:test_reference_dir/gromacs/ref_genrestr.itp
 
+genrestr_container:
+  paths:
+    input_structure_path: file:test_data_dir/gromacs/genrestr.gro
+    input_ndx_path: file:test_data_dir/gromacs/genrestr.ndx
+    output_itp_path: output_itp.itp
+    ref_output_itp_path: file:test_reference_dir/gromacs/ref_genrestr.itp
+  properties:
+    container_path: docker
+    #container_path: singularity
+    container_image: gromacs/gromacs:latest
+    #container_image: gromacs.simg
+    #container_image: pmx_image
+    container_volume_path: /data
+    container_working_dir: /data
+
 grompp:
   paths:
     input_gro_path: file:test_data_dir/gromacs/grompp.gro
@@ -85,7 +100,7 @@ grompp:
     mdp:
       ld-seed: '1'
 
-grompp_docker:
+grompp_container:
   paths:
     input_gro_path: file:test_data_dir/gromacs/grompp.gro
     input_top_zip_path: file:test_data_dir/gromacs/grompp.zip
@@ -94,8 +109,13 @@ grompp_docker:
   properties:
     mdp:
       ld-seed: '1'
-    docker_path: docker
-    docker_image: pmx_image
+    container_path: docker
+    #container_path: singularity
+    #container_image: gromacs/gromacs:latest
+    #container_image: gromacs.simg
+    container_image: pmx_image
+    container_volume_path: /data
+    container_working_dir: /data
 
 mdrun:
   paths:
