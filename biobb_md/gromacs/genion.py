@@ -31,8 +31,10 @@ class Genion:
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
             * **container_path** (*string*) - (None)  Path to the binary executable of your container.
             * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
-            * **container_volume_path** (*string*) - ("/tmp") Path to an internal directory in the container.
+            * **container_volume_path** (*string*) - ("/data") Path to an internal directory in the container.
+            * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
             * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
+            * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
     """
 
     def __init__(self, input_tpr_path, output_gro_path, input_top_zip_path,
@@ -57,8 +59,10 @@ class Genion:
         # container Specific
         self.container_path = properties.get('container_path')
         self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
-        self.container_volume_path = properties.get('container_volume_path', '/tmp')
+        self.container_volume_path = properties.get('container_volume_path', '/data')
+        self.container_working_dir = properties.get('container_working_dir')
         self.container_user_id = properties.get('container_user_id', str(os.getuid()))
+        self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
 
         # Properties common in all GROMACS BB
         self.gmxlib = properties.get('gmxlib', None)
@@ -83,14 +87,6 @@ class Genion:
 
         # Check the properties
         fu.check_properties(self, properties)
-
-    def read_last_lines(self, filename, no_of_lines=10):
-        file = open(filename, 'r')
-        lines = file.readlines()
-        last_lines = lines[-no_of_lines:]
-        for line in last_lines:
-            print(line)
-        file.close()
 
     @launchlogger
     def launch(self):
@@ -121,18 +117,14 @@ class Genion:
         container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
         if self.container_path:
-            import subprocess
-            subprocess.call(['chmod', '-R', '+rwx', top_file])
             shutil.copytree(top_dir, os.path.join(container_io_dict.get("unique_dir"), os.path.basename(top_dir)))
             top_file = os.path.join(self.container_volume_path, os.path.basename(top_dir), os.path.basename(top_file))
-            print("\n topfile abans")
-            print(top_file)
 
-        cmd = [' cp '+top_file+' /tmp/patata.top ; echo', '\"'+self.replaced_group+'\"', '|',
+        cmd = ['echo', '\"'+self.replaced_group+'\"', '|',
                self.gmx_path, 'genion',
                '-s', container_io_dict["in"]["input_tpr_path"],
                '-o', container_io_dict["out"]["output_gro_path"],
-               '-p', '/tmp/patata.top']
+               '-p', top_file]
 
         if self.neutral:
             cmd.append('-neutral')
@@ -151,27 +143,21 @@ class Genion:
             new_env = os.environ.copy()
             new_env['GMXLIB'] = self.gmxlib
 
-        cmd.append('; ls -lRth /tmp ; tail /tmp/*/*.top; tail /tmp/patata.top;')
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path, host_volume=container_io_dict.get("unique_dir"), container_volume=self.container_volume_path, user_uid=self.container_user_id, container_image=self.container_image, out_log=out_log, global_log=self.global_log)
+        cmd = fu.create_cmd_line(cmd, container_path=self.container_path, host_volume=container_io_dict.get("unique_dir"), container_volume=self.container_volume_path, container_working_dir=self.container_working_dir, container_user_uid=self.container_user_id, container_shell_path=self.container_shell_path, container_image=self.container_image, out_log=out_log, global_log=self.global_log)
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
         if self.container_path:
             top_file = os.path.join(container_io_dict.get("unique_dir"), os.path.basename(top_dir), os.path.basename(top_file))
-            print("\n topfile despres")
-            print(top_file)
-            self.read_last_lines(top_file)
 
         # zip topology
         fu.log('Compressing topology to: %s' % container_io_dict["out"]["output_top_zip_path"], out_log, self.global_log)
         fu.zip_top(zip_file=self.io_dict["out"]["output_top_zip_path"], top_file=top_file, out_log=out_log)
 
-        #tmp_files.append(container_io_dict.get("unique_dir"))
+        tmp_files.append(container_io_dict.get("unique_dir"))
 
-        #if self.remove_tmp:
-         #   fu.rm_file_list(tmp_files, out_log=out_log)
-
-
+        if self.remove_tmp:
+            fu.rm_file_list(tmp_files, out_log=out_log)
 
         return returncode
 
