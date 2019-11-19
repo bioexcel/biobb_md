@@ -147,6 +147,18 @@ make_ndx:
     output_ndx_path: output_ndx.ndx
     ref_output_ndx_path: file:test_reference_dir/gromacs/ref_make_ndx.ndx
 
+make_ndx_container:
+  paths:
+    input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
+    output_ndx_path: output_ndx.ndx
+    ref_output_ndx_path: file:test_reference_dir/gromacs/ref_make_ndx.ndx
+  properties:
+    container_path: docker
+    #container_path: singularity
+    container_image: gromacs/gromacs:latest
+    #container_image: gromacs.simg
+    container_volume_path: /tmp
+
 solvate:
   paths:
     input_solute_gro_path: file:test_data_dir/gromacs/solvate.gro
