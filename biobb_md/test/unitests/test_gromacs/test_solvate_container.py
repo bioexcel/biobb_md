@@ -6,8 +6,8 @@ class TestSolvateDocker():
         fx.test_setup(self,'solvate_container')
 
     def tearDown(self):
-        pass
-        #fx.test_teardown(self)
+        #pass
+        fx.test_teardown(self)
 
     def test_solvate(self):
         returncode = Solvate(properties=self.properties, **self.paths).launch()
