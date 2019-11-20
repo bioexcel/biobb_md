@@ -181,8 +181,15 @@ solvate_container:
     ref_output_gro_path: file:test_reference_dir/gromacs/ref_solvate_docker.gro
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_solvate_docker.zip
   properties:
-    docker_path: docker
-    docker_image: pmx_image
+    container_path: docker
+    #container_path: singularity
+    container_image: pmx_image
+    #container_image: gromacs/gromacs:latest
+    #container_image: gromacs.simg
+    container_volume_path: /inout
+    #container_working_dir: /data
+
+
 
 
 
