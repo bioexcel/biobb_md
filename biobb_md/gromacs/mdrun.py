@@ -33,8 +33,11 @@ class Mdrun:
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
             * **container_path** (*string*) - (None)  Path to the binary executable of your container.
             * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
-            * **container_volume_path** (*string*) - ("/tmp") Path to an internal directory in the container.
+            * **container_volume_path** (*string*) - ("/data") Path to an internal directory in the container.
+            * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
             * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
+            * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
+
 
     """
 
@@ -62,7 +65,9 @@ class Mdrun:
         self.container_path = properties.get('container_path')
         self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
         self.container_volume_path = properties.get('container_volume_path', '/tmp')
-        self.container_user_id = properties.get('container_user_id', str(os.getuid()))
+        self.container_working_dir = properties.get('container_working_dir')
+        self.container_user_id = properties.get('container_user_id')
+        self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
 
         # Properties common in all GROMACS BB
         self.gmx_path = properties.get('gmx_path', 'gmx')
@@ -137,7 +142,14 @@ class Mdrun:
             cmd.append('-dhdl')
             cmd.append(container_io_dict["out"]["output_dhdl_path"])
 
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path, host_volume=container_io_dict.get("unique_dir"), container_volume=self.container_volume_path, container_user_uid=self.container_user_id, container_image=self.container_image, out_log=out_log, global_log=self.global_log)
+        cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
+                                 host_volume=container_io_dict.get("unique_dir"),
+                                 container_volume=self.container_volume_path,
+                                 container_working_dir=self.container_working_dir,
+                                 container_user_uid=self.container_user_id,
+                                 container_shell_path=self.container_shell_path,
+                                 container_image=self.container_image,
+                                 out_log=out_log, global_log=self.global_log)
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
