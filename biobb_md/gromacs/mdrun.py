@@ -137,7 +137,7 @@ class Mdrun:
             cmd.append('-dhdl')
             cmd.append(container_io_dict["out"]["output_dhdl_path"])
 
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path, host_volume=container_io_dict.get("unique_dir"), container_volume=self.container_volume_path, user_uid=self.container_user_id, container_image=self.container_image, out_log=out_log, global_log=self.global_log)
+        cmd = fu.create_cmd_line(cmd, container_path=self.container_path, host_volume=container_io_dict.get("unique_dir"), container_volume=self.container_volume_path, container_user_uid=self.container_user_id, container_image=self.container_image, out_log=out_log, global_log=self.global_log)
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 

@@ -3,7 +3,7 @@ from biobb_md.gromacs.solvate import Solvate
 
 class TestSolvateDocker():
     def setUp(self):
-        fx.test_setup(self,'solvate_docker')
+        fx.test_setup(self,'solvate_container')
 
     def tearDown(self):
         #pass
