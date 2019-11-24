@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-"""Module containing the Pdb2gmx class and the command line interface."""
+"""Module containing the Select class and the command line interface."""
 import os
 import argparse
-import shutil
-from biobb_common.configuration import  settings
+import pathlib as pl
+from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
 from biobb_common.command_wrapper import cmd_wrapper
@@ -12,20 +12,15 @@ from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
 
-class Pdb2gmx:
-    """Wrapper class for the GROMACS pdb2gmx (http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html) module.
+class Select:
+    """Wrapper of the GROMACS select (http://manual.gromacs.org/current/onlinehelp/gmx-select.html) module.
 
     Args:
-        input_pdb_path (str): Path to the input PDB file.
-        output_gro_path (str): Path to the output GRO file.
-        output_top_zip_path (str): Path the output TOP topology in zip format.
+        input_structure_path (str): Path to the input GRO/PDB/TPR file.
+        output_ndx_path (str): Path to the output index NDX file.
+        input_ndx_path (str)[Optional]: Path to the input index NDX file.
         properties (dic):
-            * **output_top_path** (*str*) - ("p2g.top") Path of the output TOP file.
-            * **output_itp_path** (*str*) - ("p2g.itp") Path of the output itp file.
-            * **water_type** (*str*) - ("spce") Water molecule type. Valid values: tip3p, spce, etc.
-            * **force_field** (*str*) - ("amber99sb-ildn") Force field to be used during the conversion. Valid values: amber99sb-ildn, oplsaa, etc.
-            * **ignh** (*bool*) - (False) Should pdb2gmx ignore the hidrogens in the original structure.
-            * **his** (*str*) - (None) Histidine protonation array.
+            * **selection** (*str*) - ("a CA C N O") Heavy atoms. Atom selection string.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
@@ -37,23 +32,17 @@ class Pdb2gmx:
             * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
     """
 
-    def __init__(self, input_pdb_path, output_gro_path,
-                 output_top_zip_path, properties=None, **kwargs):
+    def __init__(self, input_structure_path, output_ndx_path, input_ndx_path=None, properties=None, **kwargs):
         properties = properties or {}
 
         # Input/Output files
         self.io_dict = {
-            "in": {"input_pdb_path": input_pdb_path},
-            "out": {"output_gro_path": output_gro_path, "output_top_zip_path": output_top_zip_path}
+            "in": {"input_structure_path": input_structure_path},
+            "out": {"output_ndx_path": output_ndx_path, "input_ndx_path": input_ndx_path}
         }
 
         # Properties specific for BB
-        self.output_top_path = properties.get('output_top_path', 'p2g.top')
-        self.output_itp_path = properties.get('output_itp_path', 'posre.itp')
-        self.water_type = properties.get('water_type', 'spce')
-        self.force_field = properties.get('force_field', 'amber99sb-ildn')
-        self.ignh = properties.get('ignh', False)
-        self.his = properties.get('his', None)
+        self.selection = properties.get('selection', "a CA C N O")
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -89,7 +78,7 @@ class Pdb2gmx:
 
     @launchlogger
     def launch(self):
-        """Launches the execution of the GROMACS pdb2gmx module."""
+        """Launches the execution of the GROMACS select module."""
         tmp_files = []
 
         # Get local loggers from launchlogger decorator
@@ -110,49 +99,49 @@ class Pdb2gmx:
 
         container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
-        output_top_path = fu.create_name(step=self.step, name=self.output_top_path)
-        output_itp_path = fu.create_name(step=self.step, name=self.output_itp_path)
+        cmd = [self.gmx_path, 'select',
+               '-s', container_io_dict["in"]["input_structure_path"],
+               '-on', container_io_dict["out"]["output_ndx_path"]
+               ]
 
-        cmd = [self.gmx_path, "pdb2gmx",
-               "-f", container_io_dict["in"]["input_pdb_path"],
-               "-o", container_io_dict["out"]["output_gro_path"],
-               "-p", output_top_path,
-               "-water", self.water_type,
-               "-ff", self.force_field,
-               "-i", output_itp_path]
+        if container_io_dict["in"].get("input_ndx_path") and pl.Path(
+                container_io_dict["in"].get("input_ndx_path")).exists():
+            cmd.append('-n')
+            cmd.append(container_io_dict["in"].get("input_ndx_path"))
 
-        if self.his:
-            cmd.append("-his")
-            cmd = ['echo', self.his, '|'] + cmd
-        if self.ignh:
-            cmd.append("-ignh")
+        cmd.append('-select')
+        cmd.append("\'"+self.selection+"\'")
 
         new_env = None
         if self.gmxlib:
             new_env = os.environ.copy()
             new_env['GMXLIB'] = self.gmxlib
 
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
-                                 host_volume=container_io_dict.get("unique_dir"),
-                                 container_volume=self.container_volume_path,
-                                 container_working_dir=self.container_working_dir,
-                                 container_user_uid=self.container_user_id,
-                                 container_shell_path=self.container_shell_path,
-                                 container_image=self.container_image,
-                                 out_log=out_log, global_log=self.global_log)
+        if self.container_path:
+            if self.container_path.endswith('singularity'):
+                fu.log('Using Singularity image %s' % self.container_image, out_log, self.global_log)
+                cmd = [self.container_path, 'exec', '--bind',
+                                   container_io_dict.get("unique_dir") + ':' + self.container_volume_path,
+                                   self.container_image, " ".join(cmd)]
+
+            elif self.container_path.endswith('docker'):
+                fu.log('Using Docker image %s' % self.container_image, out_log, self.global_log)
+                docker_cmd = [self.container_path, 'run', ]
+                if self.container_working_dir:
+                    docker_cmd.append('-w')
+                    docker_cmd.append(self.container_working_dir)
+                if self.container_volume_path:
+                    docker_cmd.append('-v')
+                    docker_cmd.append(container_io_dict.get("unique_dir") + ':' + self.container_volume_path)
+                if self.container_user_id:
+                    docker_cmd.append('--user')
+                    docker_cmd.append(self.container_user_id)
+                docker_cmd.append(self.container_image)
+                docker_cmd.append(" ".join(cmd))
+                cmd = docker_cmd
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
-        if self.container_path:
-            output_top_path = os.path.join(container_io_dict.get("unique_dir"), output_top_path)
-
-        # zip topology
-        fu.log('Compressing topology to: %s' % container_io_dict["out"]["output_top_zip_path"], out_log,
-               self.global_log)
-        fu.zip_top(zip_file=self.io_dict["out"]["output_top_zip_path"], top_file=output_top_path, out_log=out_log)
-
-        tmp_files.append(self.output_top_path)
-        tmp_files.append(self.output_itp_path)
         tmp_files.append(container_io_dict.get("unique_dir"))
         if self.remove_tmp:
             fu.rm_file_list(tmp_files, out_log=out_log)
@@ -161,16 +150,17 @@ class Pdb2gmx:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Wrapper of the GROMACS pdb2gmx module.", formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
+    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS select module.",
+                                     formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
     parser.add_argument('--system', required=False, help="Common name for workflow properties set")
     parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/configuration.html")
 
-    #Specific args of each building block
+    # Specific args of each building block
     required_args = parser.add_argument_group('required arguments')
-    required_args.add_argument('--input_pdb_path', required=True)
-    required_args.add_argument('--output_gro_path', required=True)
-    required_args.add_argument('--output_top_zip_path', required=True)
+    required_args.add_argument('--input_structure_path', required=True)
+    required_args.add_argument('--output_ndx_path', required=True)
+    parser.add_argument('--input_ndx_path', required=False)
 
     args = parser.parse_args()
     config = args.config if args.config else None
@@ -178,8 +168,10 @@ def main():
     if args.step:
         properties = properties[args.step]
 
-    #Specific call of each building block
-    Pdb2gmx(input_pdb_path=args.input_pdb_path, output_gro_path=args.output_gro_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
+    # Specific call of each building block
+    Select(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path,
+           input_ndx_path=args.input_ndx_path, properties=properties).launch()
+
 
 if __name__ == '__main__':
     main()

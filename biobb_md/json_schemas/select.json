@@ -1,0 +1,35 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://bioexcel.eu/biobb_md/json_schemas/0.1/select",
+    "title": "Wrapper of the GROMACS select (http://manual.gromacs.org/current/onlinehelp/gmx-select.html) module",
+    "required": [
+        "input_structure_pat",
+        "output_ndx_path"
+    ],
+    "properties": {
+        "input_structure_path": {
+            "type": "string",
+            "description": "Path to the input GRO/PDB/TPR file."
+        },
+        "output_ndx_path": {
+            "type": "string",
+            "description": "Path to the output index NDX file."
+        },
+        "properties": {
+            "type": "object",
+            "properties": {
+                "selection": {
+                    "type": "string",
+                    "default": "CA C N O",
+                    "description": "Heavy atoms. Atom selection string."
+                },
+                "gmx_path": {
+                    "type": "string",
+                    "default": "gmx",
+                    "description": "Path to the GROMACS executable binary."
+                }
+            }
+        }
+    },
+    "additionalProperties": false
+}
