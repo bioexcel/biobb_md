@@ -63,7 +63,7 @@ class Editconf:
             self.gmx_path += ' -nobackup'
         if self.gmx_nocopyright:
             self.gmx_path += ' -nocopyright'
-        if not properties.get('docker_path'):
+        if not self.container_path:
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
         # Properties common in all BB
@@ -74,11 +74,6 @@ class Editconf:
         self.path = properties.get('path', '')
         self.remove_tmp = properties.get('remove_tmp', True)
         self.restart = properties.get('restart', False)
-
-        # Docker Specific
-        self.docker_path = properties.get('docker_path')
-        self.docker_image = properties.get('docker_image', 'mmbirb/pmx')
-        self.docker_volume_path = properties.get('docker_volume_path', '/inout')
 
         # Check the properties
         fu.check_properties(self, properties)
@@ -93,7 +88,7 @@ class Editconf:
         err_log = getattr(self, 'err_log', None)
 
         # Check GROMACS version
-        if not self.docker_path:
+        if not self.container_path:
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
             fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
@@ -164,7 +159,6 @@ def main():
     # Specific call of each building block
     Editconf(input_gro_path=args.input_gro_path, output_gro_path=args.output_gro_path,
              properties=properties).launch()
-
 
 if __name__ == '__main__':
     main()
