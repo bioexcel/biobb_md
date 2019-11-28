@@ -16,8 +16,8 @@ class Ndx2resttop():
         input_top_zip_path (str): Path the input TOP topology in zip format.
         output_top_zip_path (str): Path the output TOP topology in zip format.
         properties (dic):
-            | - **force_constants** (*float[3]*): ("500 500 500") Array of three floats defining the force constants.
-            | - **ref_rest_chain_triplet_list** (*str*): (None) Triplet list composed by (reference group, restrain group, chain) list.
+            | - **force_constants** (*float[3]*) - ("500 500 500") Array of three floats defining the force constants.
+            | - **ref_rest_chain_triplet_list** (*str*) - (None) Triplet list composed by (reference group, restrain group, chain) list.
     """
 
     def __init__(self, input_ndx_path, input_top_zip_path,

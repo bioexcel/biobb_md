@@ -1,0 +1,46 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/append_ligand",
+    "title": "This class takes a ligand ITP file and inserts it in a topology.",
+    "type": "object",
+    "required": [
+        "input_top_zip_path",
+        "input_itp_path",
+        "output_top_zip_path"
+    ],
+    "properties": {
+        "input_top_zip_path": {
+            "type": "string",
+            "description": "Path the input topology TOP and ITP files zipball."
+        },
+        "input_itp_path": {
+            "type": "string",
+            "description": "Path to the ligand ITP file to be inserted in the topology."
+        },
+        "output_top_zip_path": {
+            "type": "string",
+            "description": "Path/Name the output topology TOP and ITP files zipball."
+        },
+        "properties": {
+            "type": "object",
+            "properties": {
+                "posres_name": {
+                    "type": "string",
+                    "default": "POSRES_LIGAND",
+                    "description": "String to be included in the ifdef clause."
+                },
+                "remove_tmp": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "[WF property] Remove temporal files."
+                },
+                "restart": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "[WF property] Do not execute if output files exist."
+                }
+            }
+        }
+    },
+    "additionalProperties": false
+}
