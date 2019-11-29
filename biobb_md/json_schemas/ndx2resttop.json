@@ -26,7 +26,7 @@
             "properties": {
                 "force_constants": {
                     "type": "float[3]",
-                    "default": 500,
+                    "default": "500 500 500",
                     "description": "Array of three floats defining the force constants."
                 },
                 "ref_rest_chain_triplet_list": {

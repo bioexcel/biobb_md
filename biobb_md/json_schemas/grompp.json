@@ -1,0 +1,114 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/grompp",
+    "title": "Wrapper of the GROMACS grompp module.",
+    "type": "object",
+    "required": [
+        "input_gro_path",
+        "input_top_zip_path",
+        "output_tpr_path"
+    ],
+    "properties": {
+        "input_gro_path": {
+            "type": "string",
+            "description": "Path to the input GROMACS structure GRO file."
+        },
+        "input_top_zip_path": {
+            "type": "string",
+            "description": "Path the input GROMACS topology TOP and ITP files in zip format."
+        },
+        "output_tpr_path": {
+            "type": "string",
+            "description": "Path to the output portable binary run file TPR."
+        },
+        "input_cpt_path": {
+            "type": "string",
+            "description": "Path to the input GROMACS checkpoint file CPT."
+        },
+        "input_ndx_path": {
+            "type": "string",
+            "description": "Path to the input GROMACS index files NDX."
+        },
+        "properties": {
+            "type": "object",
+            "properties": {
+                "input_mdp_path": {
+                    "type": "string",
+                    "default": null,
+                    "description": "Path of the input MDP file."
+                },
+                "mdp": {
+                    "type": "dict",
+                    "default": "defaults dict",
+                    "description": "MDP options specification. (Used if *input_mdp_path* is None)"
+                },
+                "type": {
+                    "type": "string",
+                    "default": "minimization",
+                    "description": "Default options for the mdp file. Valid values: minimization, nvt, npt, free, index"
+                },
+                "output_mdp_path": {
+                    "type": "string",
+                    "default": "grompp.mdp",
+                    "description": "Path of the output MDP file."
+                },
+                "output_top_path": {
+                    "type": "string",
+                    "default": "grompp.top",
+                    "description": "Path the output topology TOP file."
+                },
+                "maxwarn": {
+                    "type": "number",
+                    "default": 10,
+                    "description": "Maximum number of allowed warnings."
+                },
+                "gmx_path": {
+                    "type": "string",
+                    "default": "gmx",
+                    "description": "Path to the GROMACS executable binary."
+                },
+                "remove_tmp": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "[WF property] Remove temporal files."
+                },
+                "restart": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "[WF property] Do not execute if output files exist."
+                },
+                "container_path": {
+                    "type": "string",
+                    "default": null,
+                    "description": " Path to the binary executable of your container."
+                },
+                "container_image": {
+                    "type": "string",
+                    "default": "gromacs/gromacs:latest",
+                    "description": "Container Image identifier."
+                },
+                "container_volume_path": {
+                    "type": "string",
+                    "default": "/data",
+                    "description": "Path to an internal directory in the container."
+                },
+                "container_working_dir": {
+                    "type": "string",
+                    "default": null,
+                    "description": "Path to the internal CWD in the container."
+                },
+                "container_user_id": {
+                    "type": "string",
+                    "default": null,
+                    "description": "User number id to be mapped inside the container."
+                },
+                "container_shell_path": {
+                    "type": "string",
+                    "default": "/bin/bash",
+                    "description": "Path to the binary executable of the container shell."
+                }
+            }
+        }
+    },
+    "additionalProperties": false
+}

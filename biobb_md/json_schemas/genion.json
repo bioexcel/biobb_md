@@ -1,0 +1,106 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/genion",
+    "title": "Wrapper class for the GROMACS genion (http://manual.gromacs.org/current/onlinehelp/gmx-genion.html) module.",
+    "type": "object",
+    "required": [
+        "input_tpr_path",
+        "output_gro_path",
+        "input_top_zip_path",
+        "output_top_zip_path"
+    ],
+    "properties": {
+        "input_tpr_path": {
+            "type": "string",
+            "description": "Path to the input portable run input TPR file."
+        },
+        "output_gro_path": {
+            "type": "string",
+            "description": "Path to the input structure GRO file."
+        },
+        "input_top_zip_path": {
+            "type": "string",
+            "description": "Path the input TOP topology in zip format."
+        },
+        "output_top_zip_path": {
+            "type": "string",
+            "description": "Path the output topology TOP and ITP files zipball."
+        },
+        "properties": {
+            "type": "object",
+            "properties": {
+                "output_top_path": {
+                    "type": "string",
+                    "default": "gio.top",
+                    "description": "Path the output topology TOP file."
+                },
+                "replaced_group": {
+                    "type": "string",
+                    "default": "SOL",
+                    "description": "Group of molecules that will be replaced by the solvent."
+                },
+                "neutral": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Neutralize the charge of the system."
+                },
+                "concentration": {
+                    "type": "float",
+                    "default": 0.05,
+                    "description": "Concentration of the ions in (mol/liter)."
+                },
+                "seed": {
+                    "type": "number",
+                    "default": 1993,
+                    "description": "Seed for random number generator."
+                },
+                "gmx_path": {
+                    "type": "string",
+                    "default": "gmx",
+                    "description": "Path to the GROMACS executable binary."
+                },
+                "remove_tmp": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "[WF property] Remove temporal files."
+                },
+                "restart": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "[WF property] Do not execute if output files exist."
+                },
+                "container_path": {
+                    "type": "string",
+                    "default": null,
+                    "description": " Path to the binary executable of your container."
+                },
+                "container_image": {
+                    "type": "string",
+                    "default": "gromacs/gromacs:latest",
+                    "description": "Container Image identifier."
+                },
+                "container_volume_path": {
+                    "type": "string",
+                    "default": "/data",
+                    "description": "Path to an internal directory in the container."
+                },
+                "container_working_dir": {
+                    "type": "string",
+                    "default": null,
+                    "description": "Path to the internal CWD in the container."
+                },
+                "container_user_id": {
+                    "type": "string",
+                    "default": null,
+                    "description": "User number id to be mapped inside the container."
+                },
+                "container_shell_path": {
+                    "type": "string",
+                    "default": "/bin/bash",
+                    "description": "Path to the binary executable of the container shell."
+                }
+            }
+        }
+    },
+    "additionalProperties": false
+}
