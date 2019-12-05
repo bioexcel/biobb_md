@@ -24,8 +24,8 @@ class Grompp():
         input_gro_path (str): Path to the input GROMACS structure GRO file.
         input_top_zip_path (str): Path the input GROMACS topology TOP and ITP files in zip format.
         output_tpr_path (str): Path to the output portable binary run file TPR.
-        input_cpt_path (str)[Optional]: Path to the input GROMACS checkpoint file CPT.
-        input_ndx_path (str)[Optional]: Path to the input GROMACS index files NDX.
+        input_cpt_path (str) (Optional): Path to the input GROMACS checkpoint file CPT.
+        input_ndx_path (str) (Optional): Path to the input GROMACS index files NDX.
         properties (dic):
             * **input_mdp_path** (*str*) - (None) Path of the input MDP file.
             * **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)

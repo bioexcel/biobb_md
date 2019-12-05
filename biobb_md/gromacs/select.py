@@ -18,7 +18,7 @@ class Select:
     Args:
         input_structure_path (str): Path to the input GRO/PDB/TPR file.
         output_ndx_path (str): Path to the output index NDX file.
-        input_ndx_path (str)[Optional]: Path to the input index NDX file.
+        input_ndx_path (str) (Optional): Path to the input index NDX file.
         properties (dic):
             * **selection** (*str*) - ("a CA C N O") Heavy atoms. Atom selection string.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.

@@ -20,9 +20,9 @@ class Mdrun:
         output_gro_path (str): Path to the output GROMACS structure GRO file.
         output_edr_path (str): Path to the output GROMACS portable energy file EDR.
         output_log_path (str): Path to the output GROMACS trajectory log file LOG.
-        output_xtc_path (str)[Optional]: Path to the GROMACS compressed trajectory file XTC.
-        output_cpt_path (str)[Optional]: Path to the output GROMACS checkpoint file CPT.
-        output_dhdl_path (str)[Optional]: Path to the output dhdl.xvg file only used when free energy calculation is turned on.
+        output_xtc_path (str) (Optional): Path to the GROMACS compressed trajectory file XTC.
+        output_cpt_path (str) (Optional): Path to the output GROMACS checkpoint file CPT.
+        output_dhdl_path (str) (Optional): Path to the output dhdl.xvg file only used when free energy calculation is turned on.
         properties (dic):
             * **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
