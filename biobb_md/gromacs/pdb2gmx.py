@@ -22,8 +22,8 @@ class Pdb2gmx:
         properties (dic):
             * **output_top_path** (*str*) - ("p2g.top") Path of the output TOP file.
             * **output_itp_path** (*str*) - ("p2g.itp") Path of the output itp file.
-            * **water_type** (*str*) - ("spce") Water molecule type. Valid values: tip3p, spce, etc.
-            * **force_field** (*str*) - ("amber99sb-ildn") Force field to be used during the conversion. Valid values: amber99sb-ildn, oplsaa, etc.
+            * **water_type** (*str*) - ("spce") Water molecule type. Valid values: spc, spce, tip3p, tip4p, tip5p, tips3p.
+            * **force_field** (*str*) - ("amber99sb-ildn") Force field to be used during the conversion. Valid values: gromos45a3, charmm27, gromos53a6, amber96, amber99, gromos43a2, gromos54a7, gromos43a1, amberGS, gromos53a5, amber99sb, amber03, amber99sb-ildn, oplsaa, amber94.
             * **ignh** (*bool*) - (False) Should pdb2gmx ignore the hidrogens in the original structure.
             * **his** (*str*) - (None) Histidine protonation array.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
@@ -35,6 +35,7 @@ class Pdb2gmx:
             * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
             * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
+
     """
 
     def __init__(self, input_pdb_path, output_gro_path,
