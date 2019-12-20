@@ -11,3 +11,11 @@ gromacs_extra.ndx2resttop module
     :members:
     :undoc-members:
     :show-inheritance:
+
+gromacs_extra.append_ligand module
+------------------
+
+.. automodule:: gromacs_extra.append_ligand
+    :members:
+    :undoc-members:
+    :show-inheritance:
