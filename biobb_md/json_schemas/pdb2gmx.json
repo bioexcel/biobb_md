@@ -37,12 +37,12 @@
                 "water_type": {
                     "type": "string",
                     "default": "spce",
-                    "description": "Water molecule type. Valid values: tip3p, spce, etc."
+                    "description": "Water molecule type. Valid values: spc, spce, tip3p, tip4p, tip5p, tips3p."
                 },
                 "force_field": {
                     "type": "string",
                     "default": "amber99sb-ildn",
-                    "description": "Force field to be used during the conversion. Valid values: amber99sb-ildn, oplsaa, etc."
+                    "description": "Force field to be used during the conversion. Valid values: gromos45a3, charmm27, gromos53a6, amber96, amber99, gromos43a2, gromos54a7, gromos43a1, amberGS, gromos53a5, amber99sb, amber03, amber99sb-ildn, oplsaa, amber94."
                 },
                 "ignh": {
                     "type": "boolean",
