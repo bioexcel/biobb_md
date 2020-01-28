@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/mdrun",
-    "title": "Wrapper of the GROMACS of the mdrun (http://manual.gromacs.org/current/onlinehelp/gmx-mdrun.html) module.",
+    "title": "Wrapper of the `GROMACS mdrun <http://manual.gromacs.org/current/onlinehelp/gmx-mdrun.html>`_ module.",
     "type": "object",
     "required": [
         "input_tpr_path",
@@ -13,35 +13,75 @@
     "properties": {
         "input_tpr_path": {
             "type": "string",
-            "description": "Path to the portable binary run input file TPR."
+            "description": "Path to the portable binary run input file TPR",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/mdrun.tpr",
+            "enum": [
+                ".*\\.tpr$"
+            ]
         },
         "output_trr_path": {
             "type": "string",
-            "description": "Path to the GROMACS uncompressed raw trajectory file TRR."
+            "description": "Path to the GROMACS uncompressed raw trajectory file TRR",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.trr",
+            "enum": [
+                ".*\\.trr$"
+            ]
         },
         "output_gro_path": {
             "type": "string",
-            "description": "Path to the output GROMACS structure GRO file."
+            "description": "Path to the output GROMACS structure GRO file",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.gro",
+            "enum": [
+                ".*\\.gro$"
+            ]
         },
         "output_edr_path": {
             "type": "string",
-            "description": "Path to the output GROMACS portable energy file EDR."
+            "description": "Path to the output GROMACS portable energy file EDR",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.edr",
+            "enum": [
+                ".*\\.edr$"
+            ]
         },
         "output_log_path": {
             "type": "string",
-            "description": "Path to the output GROMACS trajectory log file LOG."
+            "description": "Path to the output GROMACS trajectory log file LOG",
+            "filetype": "output",
+            "sample": null,
+            "enum": [
+                ".*\\.log$"
+            ]
         },
         "output_xtc_path": {
             "type": "string",
-            "description": "Path to the GROMACS compressed trajectory file XTC."
+            "description": "Path to the GROMACS compressed trajectory file XTC",
+            "filetype": "output",
+            "sample": null,
+            "enum": [
+                ".*\\.xtc$"
+            ]
         },
         "output_cpt_path": {
             "type": "string",
-            "description": "Path to the output GROMACS checkpoint file CPT."
+            "description": "Path to the output GROMACS checkpoint file CPT",
+            "filetype": "output",
+            "sample": null,
+            "enum": [
+                ".*\\.cpt$"
+            ]
         },
         "output_dhdl_path": {
             "type": "string",
-            "description": "Path to the output dhdl.xvg file only used when free energy calculation is turned on."
+            "description": "Path to the output dhdl",
+            "filetype": "output",
+            "sample": null,
+            "enum": [
+                ".*\\.xvg$"
+            ]
         },
         "properties": {
             "type": "object",

@@ -13,12 +13,12 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Pdb2gmx:
-    """Wrapper class for the GROMACS pdb2gmx (http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html) module.
+    """Wrapper class for the `GROMACS pdb2gmx <http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html>`_ module.
 
     Args:
-        input_pdb_path (str): Path to the input PDB file.
-        output_gro_path (str): Path to the output GRO file.
-        output_top_zip_path (str): Path the output TOP topology in zip format.
+        input_pdb_path (str): Path to the input PDB file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/egfr.pdb>`_. Accepted formats: pdb.
+        output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.gro>`_. Accepted formats: gro.
+        output_top_zip_path (str): Path the output TOP topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.zip>`_. Accepted formats: xip.
         properties (dic):
             * **output_top_path** (*str*) - ("p2g.top") Path of the output TOP file.
             * **output_itp_path** (*str*) - ("p2g.itp") Path of the output itp file.

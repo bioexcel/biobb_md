@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/genrestr",
-    "title": "Wrapper class for the GROMACS genrestr (http://manual.gromacs.org/current/onlinehelp/gmx-genrestr.html) module.",
+    "title": "Wrapper class for the `GROMACS genrestr <http://manual.gromacs.org/current/onlinehelp/gmx-genrestr.html>`_ module.",
     "type": "object",
     "required": [
         "input_structure_path",
@@ -11,15 +11,32 @@
     "properties": {
         "input_structure_path": {
             "type": "string",
-            "description": "Path to the input structure PDB, GRO or TPR format."
+            "description": "Path to the input structure PDB, GRO or TPR format",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.gro",
+            "enum": [
+                ".*\\.pdb$",
+                ".*\\.gro$",
+                ".*\\.tpr$"
+            ]
         },
         "input_ndx_path": {
             "type": "string",
-            "description": "Path to the input GROMACS index file, NDX format."
+            "description": "Path to the input GROMACS index file, NDX format",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.ndx",
+            "enum": [
+                ".*\\.ndx$"
+            ]
         },
         "output_itp_path": {
             "type": "string",
-            "description": "Path the output ITP topology file with restrains."
+            "description": "Path the output ITP topology file with restrains",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genrestr.itp",
+            "enum": [
+                ".*\\.itp$"
+            ]
         },
         "properties": {
             "type": "object",

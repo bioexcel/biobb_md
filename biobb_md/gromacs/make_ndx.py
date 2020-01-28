@@ -14,12 +14,12 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class MakeNdx:
-    """Wrapper of the GROMACS make_ndx (http://manual.gromacs.org/current/onlinehelp/gmx-make_ndx.html) module.
+    """Wrapper of the `GROMACS make_ndx <http://manual.gromacs.org/current/onlinehelp/gmx-make_ndx.html>`_ module.
 
     Args:
-        input_structure_path (str): Path to the input GRO/PDB/TPR file.
-        output_ndx_path (str): Path to the output index NDX file.
-        input_ndx_path (str) (Optional): Path to the input index NDX file.
+        input_structure_path (str): Path to the input GRO/PDB/TPR file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/make_ndx.tpr>`_. Accepted formats: gro, pdb, tpr.
+        output_ndx_path (str): Path to the output index NDX file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_make_ndx.ndx>`_. Accepted formats: ndx.
+        input_ndx_path (str) (Optional): Path to the input index NDX file. File type: input. Accepted formats: ndx.
         properties (dic):
             * **selection** (*str*) - ("a CA C N O") Heavy atoms. Atom selection string.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
