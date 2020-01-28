@@ -33,7 +33,7 @@
             "filetype": "output",
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.zip",
             "enum": [
-                ".*\\.xip$"
+                ".*\\.zip$"
             ]
         },
         "properties": {
