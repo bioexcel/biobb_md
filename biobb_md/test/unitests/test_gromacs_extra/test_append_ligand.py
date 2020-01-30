@@ -3,7 +3,7 @@ from biobb_md.gromacs_extra.append_ligand import AppendLigand
 
 class TestAppendLigand():
     def setUp(self):
-        fx.test_setup(self,'appendligand')
+        fx.test_setup(self,'append_ligand')
 
     def tearDown(self):
         #pass
