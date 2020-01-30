@@ -42,7 +42,7 @@
                 "posres_name": {
                     "type": "string",
                     "default": "POSRES_LIGAND",
-                    "description": "String to be included in the ifdef clause"
+                    "description": "String to be included in the ifdef clause."
                 },
                 "remove_tmp": {
                     "type": "boolean",
