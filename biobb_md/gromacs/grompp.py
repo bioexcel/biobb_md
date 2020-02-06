@@ -12,7 +12,8 @@ from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
-class Grompp():
+
+class Grompp:
     """Wrapper of the GROMACS grompp module.
     The GROMACS preprocessor module needs to be feeded with the input system
     and the dynamics parameters to create a portable binary run input file TPR.
@@ -160,7 +161,7 @@ class Grompp():
         if md:
             mdp_list.append("\n;Bond parameters")
             mdp_list.append("constraint-algorithm = " + self.mdp.pop('constraint-algorithm', 'lincs'))
-            mdp_list.append("constraints = " + self.mdp.pop('constraints', 'all-bonds'))
+            mdp_list.append("constraints = " + self.mdp.pop('constraints', 'h-bonds'))
             mdp_list.append("lincs-iter = " + self.mdp.pop('lincs-iter', '1'))
             mdp_list.append("lincs-order = " + self.mdp.pop('lincs-order', '4'))
             if nvt:
