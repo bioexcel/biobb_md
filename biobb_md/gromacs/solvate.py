@@ -13,13 +13,13 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Solvate:
-    """Wrapper of the GROMACS solvate (http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html) module.
+    """Wrapper of the `GROMACS solvate <http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html>`_ module.
 
     Args:
-        input_solute_gro_path (str): Path to the input GRO file.
-        output_gro_path (str): Path to the output GRO file.
-        input_top_zip_path (str): Path the input TOP topology in zip format.
-        output_top_zip_path (str): Path the output topology in zip format.
+        input_solute_gro_path (str): Path to the input GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/solvate.gro>`_. Accepted formats: gro.
+        output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_solvate.gro>`_. Accepted formats: gro.
+        input_top_zip_path (str): Path the input TOP topology in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/solvate.zip>`_. Accepted formats: zip.
+        output_top_zip_path (str): Path the output topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_solvate.zip>`_. Accepted formats: zip.
         properties (dic):
             * **intput_solvent_gro_path** (*str*) - ("spc216.gro") Path to the GRO file contanining the structure of the solvent.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.

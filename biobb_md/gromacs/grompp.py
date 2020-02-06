@@ -19,18 +19,18 @@ class Grompp:
     and the dynamics parameters to create a portable binary run input file TPR.
     The dynamics parameters are specified in the mdp section of the
     configuration YAML file. The parameter names and defaults are the same as
-    the ones in the official MDP specification: http://manual.gromacs.org/current/online/mdp_opt.html
+    the ones in the `official MDP specification <http://manual.gromacs.org/current/online/mdp_opt.html>`_.
 
     Args:
-        input_gro_path (str): Path to the input GROMACS structure GRO file.
-        input_top_zip_path (str): Path the input GROMACS topology TOP and ITP files in zip format.
-        output_tpr_path (str): Path to the output portable binary run file TPR.
-        input_cpt_path (str) (Optional): Path to the input GROMACS checkpoint file CPT.
-        input_ndx_path (str) (Optional): Path to the input GROMACS index files NDX.
+        input_gro_path (str): Path to the input GROMACS structure GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro>`_. Accepted formats: gro.
+        input_top_zip_path (str): Path the input GROMACS topology TOP and ITP files in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.zip>`_. Accepted formats: zip.
+        output_tpr_path (str): Path to the output portable binary run file TPR. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_grompp.tpr>`_. Accepted formats: tpr.
+        input_cpt_path (str) (Optional): Path to the input GROMACS checkpoint file CPT. File type: input. Accepted formats: cpt.
+        input_ndx_path (str) (Optional): Path to the input GROMACS index files NDX. File type: input. Accepted formats: ndx.
         properties (dic):
             * **input_mdp_path** (*str*) - (None) Path of the input MDP file.
             * **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
-            * * **type** (*str*) - ("minimization") Default options for the mdp file. Valid values: minimization, nvt, npt, free, index
+            * **type** (*str*) - ("minimization") Default options for the mdp file. Valid values: minimization, nvt, npt, free, index
             * **output_mdp_path** (*str*) - ("grompp.mdp") Path of the output MDP file.
             * **output_top_path** (*str*) - ("grompp.top") Path the output topology TOP file.
             * **maxwarn** (*int*) - (10) Maximum number of allowed warnings.

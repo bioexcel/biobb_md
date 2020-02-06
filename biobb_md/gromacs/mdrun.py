@@ -12,17 +12,17 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Mdrun:
-    """Wrapper of the GROMACS of the mdrun (http://manual.gromacs.org/current/onlinehelp/gmx-mdrun.html) module.
+    """Wrapper of the `GROMACS mdrun <http://manual.gromacs.org/current/onlinehelp/gmx-mdrun.html>`_ module.
 
     Args:
-        input_tpr_path (str): Path to the portable binary run input file TPR.
-        output_trr_path (str): Path to the GROMACS uncompressed raw trajectory file TRR.
-        output_gro_path (str): Path to the output GROMACS structure GRO file.
-        output_edr_path (str): Path to the output GROMACS portable energy file EDR.
-        output_log_path (str): Path to the output GROMACS trajectory log file LOG.
-        output_xtc_path (str) (Optional): Path to the GROMACS compressed trajectory file XTC.
-        output_cpt_path (str) (Optional): Path to the output GROMACS checkpoint file CPT.
-        output_dhdl_path (str) (Optional): Path to the output dhdl.xvg file only used when free energy calculation is turned on.
+        input_tpr_path (str): Path to the portable binary run input file TPR. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/mdrun.tpr>`_. Accepted formats: tpr.
+        output_trr_path (str): Path to the GROMACS uncompressed raw trajectory file TRR. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.trr>`_. Accepted formats: trr.
+        output_gro_path (str): Path to the output GROMACS structure GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.gro>`_. Accepted formats: gro.
+        output_edr_path (str): Path to the output GROMACS portable energy file EDR. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.edr>`_. Accepted formats: edr.
+        output_log_path (str): Path to the output GROMACS trajectory log file LOG. File type: output. Accepted formats: log.
+        output_xtc_path (str) (Optional): Path to the GROMACS compressed trajectory file XTC. File type: output. Accepted formats: xtc.
+        output_cpt_path (str) (Optional): Path to the output GROMACS checkpoint file CPT. File type: output. Accepted formats: cpt.
+        output_dhdl_path (str) (Optional): Path to the output dhdl.xvg file only used when free energy calculation is turned on. File type: output. Accepted formats: xvg.
         properties (dic):
             * **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.

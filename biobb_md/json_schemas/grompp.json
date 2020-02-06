@@ -11,23 +11,48 @@
     "properties": {
         "input_gro_path": {
             "type": "string",
-            "description": "Path to the input GROMACS structure GRO file."
+            "description": "Path to the input GROMACS structure GRO file",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro",
+            "enum": [
+                ".*\\.gro$"
+            ]
         },
         "input_top_zip_path": {
             "type": "string",
-            "description": "Path the input GROMACS topology TOP and ITP files in zip format."
+            "description": "Path the input GROMACS topology TOP and ITP files in zip format",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.zip",
+            "enum": [
+                ".*\\.zip$"
+            ]
         },
         "output_tpr_path": {
             "type": "string",
-            "description": "Path to the output portable binary run file TPR."
+            "description": "Path to the output portable binary run file TPR",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_grompp.tpr",
+            "enum": [
+                ".*\\.tpr$"
+            ]
         },
         "input_cpt_path": {
             "type": "string",
-            "description": "Path to the input GROMACS checkpoint file CPT."
+            "description": "Path to the input GROMACS checkpoint file CPT",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.cpt$"
+            ]
         },
         "input_ndx_path": {
             "type": "string",
-            "description": "Path to the input GROMACS index files NDX."
+            "description": "Path to the input GROMACS index files NDX",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.ndx$"
+            ]
         },
         "properties": {
             "type": "object",

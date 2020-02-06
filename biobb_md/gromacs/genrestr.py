@@ -12,12 +12,12 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Genrestr:
-    """Wrapper class for the GROMACS genrestr (http://manual.gromacs.org/current/onlinehelp/gmx-genrestr.html) module.
+    """Wrapper class for the `GROMACS genrestr <http://manual.gromacs.org/current/onlinehelp/gmx-genrestr.html>`_ module.
 
     Args:
-        input_structure_path (str): Path to the input structure PDB, GRO or TPR format.
-        input_ndx_path (str): Path to the input GROMACS index file, NDX format.
-        output_itp_path (str): Path the output ITP topology file with restrains.
+        input_structure_path (str): Path to the input structure PDB, GRO or TPR format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.gro>`_. Accepted formats: pdb, gro, tpr.
+        input_ndx_path (str): Path to the input GROMACS index file, NDX format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.ndx>`_. Accepted formats: ndx.
+        output_itp_path (str): Path the output ITP topology file with restrains. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genrestr.itp>`_. Accepted formats: itp.
         properties (dic):
             * **restrained_group** (*str*) - ("system") Index group that will be restrained.
             * **force_constants** (*str*) - ("500 500 500") Array of three floats defining the force constants
