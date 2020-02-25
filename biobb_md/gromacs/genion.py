@@ -13,13 +13,13 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Genion:
-    """Wrapper class for the GROMACS genion (http://manual.gromacs.org/current/onlinehelp/gmx-genion.html) module.
+    """Wrapper class for the `GROMACS genion <http://manual.gromacs.org/current/onlinehelp/gmx-genion.html>`_ module.
 
     Args:
-        input_tpr_path (str): Path to the input portable run input TPR file.
-        output_gro_path (str): Path to the input structure GRO file.
-        input_top_zip_path (str): Path the input TOP topology in zip format.
-        output_top_zip_path (str): Path the output topology TOP and ITP files zipball.
+        input_tpr_path (str): Path to the input portable run input TPR file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genion.tpr>`_. Accepted formats: tpr.
+        output_gro_path (str): Path to the input structure GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genion.gro>`_. Accepted formats: gro.
+        input_top_zip_path (str): Path the input TOP topology in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genion.zip>`_. Accepted formats: zip.
+        output_top_zip_path (str): Path the output topology TOP and ITP files zipball. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genion.zip>`_. Accepted formats: zip.
         properties (dic):
             * **output_top_path** (*str*) - ("gio.top") Path the output topology TOP file.
             * **replaced_group** (*str*) - ("SOL") Group of molecules that will be replaced by the solvent.

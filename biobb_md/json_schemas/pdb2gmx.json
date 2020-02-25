@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/pdb2gmx",
-    "title": "Wrapper class for the GROMACS pdb2gmx (http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html) module.",
+    "title": "Wrapper class for the `GROMACS pdb2gmx <http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html>`_ module.",
     "type": "object",
     "required": [
         "input_pdb_path",
@@ -11,15 +11,30 @@
     "properties": {
         "input_pdb_path": {
             "type": "string",
-            "description": "Path to the input PDB file."
+            "description": "Path to the input PDB file",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/egfr.pdb",
+            "enum": [
+                ".*\\.pdb$"
+            ]
         },
         "output_gro_path": {
             "type": "string",
-            "description": "Path to the output GRO file."
+            "description": "Path to the output GRO file",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.gro",
+            "enum": [
+                ".*\\.gro$"
+            ]
         },
         "output_top_zip_path": {
             "type": "string",
-            "description": "Path the output TOP topology in zip format."
+            "description": "Path the output TOP topology in zip format",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.zip",
+            "enum": [
+                ".*\\.zip$"
+            ]
         },
         "properties": {
             "type": "object",
@@ -37,12 +52,12 @@
                 "water_type": {
                     "type": "string",
                     "default": "spce",
-                    "description": "Water molecule type. Valid values: tip3p, spce, etc."
+                    "description": "Water molecule type. Valid values: spc, spce, tip3p, tip4p, tip5p, tips3p."
                 },
                 "force_field": {
                     "type": "string",
                     "default": "amber99sb-ildn",
-                    "description": "Force field to be used during the conversion. Valid values: amber99sb-ildn, oplsaa, etc."
+                    "description": "Force field to be used during the conversion. Valid values: gromos45a3, charmm27, gromos53a6, amber96, amber99, gromos43a2, gromos54a7, gromos43a1, amberGS, gromos53a5, amber99sb, amber03, amber99sb-ildn, oplsaa, amber94."
                 },
                 "ignh": {
                     "type": "boolean",

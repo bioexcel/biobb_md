@@ -222,7 +222,7 @@ ndx2resttop:
   properties:
     ref_rest_chain_triplet_list: ( Chain_A, Chain_A_noMut, A ), ( Chain_B, Chain_B_noMut, B ), ( Chain_C, Chain_C_noMut, C ), ( Chain_D, Chain_D_noMut, D )
 
-appendligand:
+append_ligand:
   paths:
     input_itp_path: file:test_data_dir/gromacs_extra/pep_ligand.itp
     input_top_zip_path: file:test_data_dir/gromacs_extra/ndx2resttop.zip

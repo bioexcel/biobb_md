@@ -11,15 +11,30 @@
     "properties": {
         "input_top_zip_path": {
             "type": "string",
-            "description": "Path the input topology TOP and ITP files zipball."
+            "description": "Path the input topology TOP and ITP files zipball",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.zip",
+            "enum": [
+                ".*\\.zip$"
+            ]
         },
         "input_itp_path": {
             "type": "string",
-            "description": "Path to the ligand ITP file to be inserted in the topology."
+            "description": "Path to the ligand ITP file to be inserted in the topology",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/pep_ligand.itp",
+            "enum": [
+                ".*\\.itp$"
+            ]
         },
         "output_top_zip_path": {
             "type": "string",
-            "description": "Path/Name the output topology TOP and ITP files zipball."
+            "description": "Path/Name the output topology TOP and ITP files zipball",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs_extra/ref_appendligand.zip",
+            "enum": [
+                ".*\\.zip$"
+            ]
         },
         "properties": {
             "type": "object",

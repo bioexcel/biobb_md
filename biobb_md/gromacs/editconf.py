@@ -12,11 +12,11 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Editconf:
-    """Wrapper class for the GROMACS editconf (http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html) module.
+    """Wrapper class for the `GROMACS editconf <http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html>`_ module.
 
     Args:
-        input_gro_path (str): Path to the input GRO file.
-        output_gro_path (str): Path to the output GRO file.
+        input_gro_path (str): Path to the input GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/editconf.gro>`_. Accepted formats: gro.
+        output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_editconf.gro>`_. Accepted formats: gro.
         properties (dic):
             * **distance_to_molecule** (*float*) - (1.0) Distance of the box from the outermost atom in nm. ie 1.0nm = 10 Angstroms.
             * **box_type** (*str*) - ("cubic") Geometrical shape of the solvent box. Available box types: (http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html) -bt option.

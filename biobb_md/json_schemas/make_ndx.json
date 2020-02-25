@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/make_ndx",
-    "title": "Wrapper of the GROMACS make_ndx (http://manual.gromacs.org/current/onlinehelp/gmx-make_ndx.html) module.",
+    "title": "Wrapper of the `GROMACS make_ndx <http://manual.gromacs.org/current/onlinehelp/gmx-make_ndx.html>`_ module.",
     "type": "object",
     "required": [
         "input_structure_path",
@@ -10,15 +10,32 @@
     "properties": {
         "input_structure_path": {
             "type": "string",
-            "description": "Path to the input GRO/PDB/TPR file."
+            "description": "Path to the input GRO/PDB/TPR file",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/make_ndx.tpr",
+            "enum": [
+                ".*\\.gro$",
+                ".*\\.pdb$",
+                ".*\\.tpr$"
+            ]
         },
         "output_ndx_path": {
             "type": "string",
-            "description": "Path to the output index NDX file."
+            "description": "Path to the output index NDX file",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_make_ndx.ndx",
+            "enum": [
+                ".*\\.ndx$"
+            ]
         },
         "input_ndx_path": {
             "type": "string",
-            "description": "Path to the input index NDX file."
+            "description": "Path to the input index NDX file",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.ndx$"
+            ]
         },
         "properties": {
             "type": "object",

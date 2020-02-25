@@ -11,15 +11,30 @@
     "properties": {
         "input_ndx_path": {
             "type": "string",
-            "description": "Path to the input NDX index file."
+            "description": "Path to the input NDX index file",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.ndx",
+            "enum": [
+                ".*\\.ndx$"
+            ]
         },
         "input_top_zip_path": {
             "type": "string",
-            "description": "Path the input TOP topology in zip format."
+            "description": "Path the input TOP topology in zip format",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.zip",
+            "enum": [
+                ".*\\.zip$"
+            ]
         },
         "output_top_zip_path": {
             "type": "string",
-            "description": "Path the output TOP topology in zip format."
+            "description": "Path the output TOP topology in zip format",
+            "filetype": "output",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs_extra/ref_ndx2resttop.zip",
+            "enum": [
+                ".*\\.zip$"
+            ]
         },
         "properties": {
             "type": "object",
