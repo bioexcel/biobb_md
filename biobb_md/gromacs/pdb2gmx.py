@@ -111,8 +111,8 @@ class Pdb2gmx:
 
         container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
-        output_top_path = fu.create_name(step=self.step, name=self.output_top_path)
-        output_itp_path = fu.create_name(step=self.step, name=self.output_itp_path)
+        output_top_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_top_path)
+        output_itp_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_itp_path)
 
         cmd = [self.gmx_path, "pdb2gmx",
                "-f", container_io_dict["in"]["input_pdb_path"],
