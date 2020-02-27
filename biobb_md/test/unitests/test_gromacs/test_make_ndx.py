@@ -6,7 +6,6 @@ class TestMakeNdx():
         fx.test_setup(self,'make_ndx')
 
     def tearDown(self):
-        #pass
         fx.test_teardown(self)
 
     def test_make_ndx(self):

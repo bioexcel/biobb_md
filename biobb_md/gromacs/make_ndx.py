@@ -100,11 +100,12 @@ class MakeNdx:
 
         container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
-        cmd = ['echo','-e', '\'' + self.selection + '\\nq' + '\'', '|',
+        cmd = ['echo','-e', '\"' + self.selection + '\\nq' + '\"', '|',
                self.gmx_path, 'make_ndx',
                '-f', container_io_dict["in"]["input_structure_path"],
                '-o', container_io_dict["out"]["output_ndx_path"]
                ]
+
 
         if container_io_dict["in"].get("input_ndx_path") and pl.Path(
                 container_io_dict["in"].get("input_ndx_path")).exists():

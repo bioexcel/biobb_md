@@ -30,7 +30,7 @@ class AppendLigand():
         self.input_top_zip_path = input_top_zip_path
         self.input_itp_path = input_itp_path
         self.output_top_zip_path = output_top_zip_path
-        #Optional files
+        # Optional files
         self.input_posres_itp_path = input_posres_itp_path
 
         # Properties specific for BB
@@ -53,12 +53,11 @@ class AppendLigand():
         """Launches the execution of the GROMACS editconf module."""
         tmp_files = []
 
-        
         # Get local loggers from launchlogger decorator
         out_log = getattr(self, 'out_log', None)
         err_log = getattr(self, 'err_log', None)
 
-        #Restart if needed
+        # Restart if needed
         if self.restart:
             output_file_list = [self.output_top_zip_path]
             if fu.check_complete_files(output_file_list):
@@ -118,12 +117,13 @@ class AppendLigand():
         else:
             top_lines.append(molecule_string)
 
-        #new_top = fu.create_name(path=top_dir, prefix=self.prefix, step=self.step, name='ligand.top')
-        new_top_name = 'ligand.top'
-        if self.step:
-            name = self.step+'_'+new_top_name
-        new_top = fu.create_name(path=top_dir, name=new_top_name)
-        #fu.create_name(step=self.step, name=self.output_top_path)
+        new_top = fu.create_name(path=top_dir, prefix=self.prefix, step=self.step, name='ligand.top')
+        # new_top_name = 'ligand.top'
+        # if self.step:
+        #     name = self.step+'_'+new_top_name
+        #
+        # new_top = fu.create_name(path=top_dir, name=new_top_name)
+
         with open(new_top, 'w') as new_top_f:
             new_top_f.write("".join(top_lines))
 
@@ -140,13 +140,12 @@ class AppendLigand():
 
         return 0
 
+
 def main():
     parser = argparse.ArgumentParser(description="Wrapper of the GROMACS editconf module.", formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
-    parser.add_argument('--system', required=False, help="Common name for workflow properties set")
-    parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/configuration.html")
 
-    #Specific args of each building block
+    # Specific args of each building block
     required_args = parser.add_argument_group('required arguments')
     required_args.add_argument('--input_top_zip_path', required=True)
     required_args.add_argument('--input_itp_path', required=True)
@@ -154,11 +153,9 @@ def main():
 
     args = parser.parse_args()
     config = args.config if args.config else None
-    properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()
-    if args.step:
-        properties = properties[args.step]
-
-    #Specific call of each building block
+    properties = settings.ConfReader(config=config).get_prop_dic()
+    
+    # Specific call of each building block
     AppendLigand(input_top_zip_path=args.input_top_zip_path, input_itp_path=args.input_itp_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
 
 if __name__ == '__main__':
