@@ -1,0 +1,4 @@
+properties:
+  container_image: gromacs/gromacs:latest
+  container_path: docker
+  container_volume_path: /inout

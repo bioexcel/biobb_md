@@ -1,0 +1,11 @@
+{
+  "properties": {
+    "mdp": {
+      "ld-seed": "1"
+    },
+    "container_path": "docker",
+    "container_image": "gromacs/gromacs:latest",
+    "container_volume_path": "/inout",
+    "container_working_dir": "/inout"
+  }
+}

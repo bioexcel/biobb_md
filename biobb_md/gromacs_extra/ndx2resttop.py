@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 """Module containing the Ndx2resttop class and the command line interface."""
-import os
 import fnmatch
 import argparse
-from biobb_common.configuration import  settings
+from pathlib import Path
+from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
 
-class Ndx2resttop():
+
+class Ndx2resttop:
     """Generate a restrained topology from an index NDX file.
 
     Args:
@@ -16,18 +17,19 @@ class Ndx2resttop():
         input_top_zip_path (str): Path the input TOP topology in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.zip>`_. Accepted formats: zip.
         output_top_zip_path (str): Path the output TOP topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs_extra/ref_ndx2resttop.zip>`_. Accepted formats: zip.
         properties (dic):
-            | - **force_constants** (*float[3]*) - ("500 500 500") Array of three floats defining the force constants.
-            | - **ref_rest_chain_triplet_list** (*str*) - (None) Triplet list composed by (reference group, restrain group, chain) list.
+            * **force_constants** (*str*) - ("500 500 500") Array of three floats defining the force constants.
+            * **ref_rest_chain_triplet_list** (*str*) - (None) Triplet list composed by (reference group, restrain group, chain) list.
     """
 
-    def __init__(self, input_ndx_path, input_top_zip_path,
-                 output_top_zip_path, properties, **kwargs):
+    def __init__(self, input_ndx_path: str, input_top_zip_path: str, output_top_zip_path: str,
+                 properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
-        self.input_ndx_path = input_ndx_path
-        self.input_top_zip_path = input_top_zip_path
-        self.output_top_zip_path = output_top_zip_path
+        self.io_dict = {
+            "in": {"input_ndx_path": input_ndx_path, "input_top_zip_path": input_top_zip_path},
+            "out": {"output_top_zip_path": output_top_zip_path}
+        }
 
         # Properties specific for BB
         self.force_constants = properties.get('force_constants', '500 500 500')
@@ -39,20 +41,33 @@ class Ndx2resttop():
         self.prefix = properties.get('prefix', None)
         self.step = properties.get('step', None)
         self.path = properties.get('path', '')
+        self.remove_tmp = properties.get('remove_tmp', True)
+        self.restart = properties.get('restart', False)
 
         # Check the properties
         fu.check_properties(self, properties)
 
     @launchlogger
-    def launch(self):
+    def launch(self) -> int:
         """Launch the topology generation."""
-        out_log, _ = fu.get_logs(path=self.path, prefix=self.prefix, step=self.step, can_write_console=self.can_write_console_log)
+        tmp_files = []
 
-        top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
+        # Get local loggers from launchlogger decorator
+        out_log = getattr(self, 'out_log', None)
+        err_log = getattr(self, 'err_log', None)
+
+        # Restart if needed
+        if self.restart:
+            output_file_list = [self.io_dict['out'].get("output_top_zip_path")]
+            if fu.check_complete_files(output_file_list):
+                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
+                return 0
+
+        top_file = fu.unzip_top(zip_file=self.io_dict['in'].get("input_top_zip_path"), out_log=out_log)
 
         # Create index list of index file :)
-        index_dic={}
-        lines = open(self.input_ndx_path,'r').read().splitlines()
+        index_dic = {}
+        lines = open(self.io_dict['in'].get("input_ndx_path")).read().splitlines()
         for index, line in enumerate(lines):
             if line.startswith('['):
                 index_dic[line] = index,
@@ -63,21 +78,21 @@ class Ndx2resttop():
         fu.log('Index_dic: '+str(index_dic), out_log, self.global_log)
 
         self.ref_rest_chain_triplet_list = [tuple(elem.strip(' ()').replace(' ', '').split(',')) for elem in self.ref_rest_chain_triplet_list.split('),')]
+        fu.log('ref_rest_chain_triplet_list: ' + str(self.ref_rest_chain_triplet_list), out_log, self.global_log)
         for reference_group, restrain_group, chain in self.ref_rest_chain_triplet_list:
             fu.log('Reference group: '+reference_group, out_log, self.global_log)
             fu.log('Restrain group: '+restrain_group, out_log, self.global_log)
             fu.log('Chain: '+chain, out_log, self.global_log)
-            self.output_itp_path = fu.create_name(path=os.path.dirname(top_file), prefix=self.prefix, step=self.step, name=restrain_group+'.itp')
+            self.io_dict['out']["output_itp_path"] = fu.create_name(path=str(Path(top_file).parent), prefix=self.prefix, step=self.step, name=restrain_group+'.itp')
 
             # Mapping atoms from absolute enumeration to Chain relative enumeration
             fu.log('reference_group_index: start_closed:'+str(index_dic['[ '+reference_group+' ]'][0]+1)+' stop_open: '+str(index_dic['[ '+reference_group+' ]'][1]), out_log, self.global_log)
-            reference_group_list = [ int(elem) for line in lines[index_dic['[ '+reference_group+' ]'][0]+1: index_dic['[ '+reference_group+' ]'][1]] for elem in line.split() ]
+            reference_group_list = [int(elem) for line in lines[index_dic['[ '+reference_group+' ]'][0]+1: index_dic['[ '+reference_group+' ]'][1]] for elem in line.split()]
             fu.log('restrain_group_index: start_closed:'+str(index_dic['[ '+restrain_group+' ]'][0]+1)+' stop_open: '+str(index_dic['[ '+restrain_group+' ]'][1]), out_log, self.global_log)
-            restrain_group_list = [ int(elem) for line in lines[index_dic['[ '+restrain_group+' ]'][0]+1: index_dic['[ '+restrain_group+' ]'][1]] for elem in line.split() ]
+            restrain_group_list = [int(elem) for line in lines[index_dic['[ '+restrain_group+' ]'][0]+1: index_dic['[ '+restrain_group+' ]'][1]] for elem in line.split()]
             selected_list = [reference_group_list.index(atom)+1 for atom in restrain_group_list]
-
             # Creating new ITP with restrictions
-            with open(self.output_itp_path, 'w') as f:
+            with open(self.io_dict['out'].get("output_itp_path"), 'w') as f:
                 fu.log('Creating: '+str(f)+' and adding the selected atoms force constants', out_log, self.global_log)
                 f.write('[ position_restraints ]\n')
                 f.write('; atom  type      fx      fy      fz\n')
@@ -85,28 +100,32 @@ class Ndx2resttop():
                     f.write(str(atom)+'     1  '+self.force_constants+'\n')
 
             # Including new ITP in the corresponding ITP-chain file
-            for file_name in os.listdir(os.path.dirname(top_file)):
-                if not file_name.startswith("posre") and not file_name.endswith("_pr.itp"):
-                    if fnmatch.fnmatch(file_name, "*_chain_"+chain+".itp"):
-                        with open(file_name, 'a') as f:
+            for file_dir in Path(top_file).parent.iterdir():
+                if not file_dir.name.startswith("posre") and not file_dir.name.endswith("_pr.itp"):
+                    if fnmatch.fnmatch(str(file_dir), "*_chain_"+chain+".itp"):
+                        with open(str(file_dir), 'a') as f:
                             fu.log('Opening: '+str(f)+' and adding the ifdef include statement', out_log, self.global_log)
                             f.write('\n')
                             f.write('; Include Position restraint file\n')
                             f.write('#ifdef CUSTOM_POSRES\n')
-                            f.write('#include "'+self.output_itp_path+'"\n')
+                            f.write('#include "'+str(Path(self.io_dict['out'].get("output_itp_path")).name)+'"\n')
                             f.write('#endif\n')
 
         # zip topology
-        fu.zip_top(zip_file=self.output_top_zip_path, top_file=top_file, out_log=out_log)
+        fu.zip_top(zip_file=self.io_dict['out'].get("output_top_zip_path"), top_file=top_file, out_log=out_log)
+
+        if self.remove_tmp:
+            fu.rm_file_list(tmp_files, out_log=out_log)
+
         return 0
 
-def main():
-    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS extra ndx2resttop module.", formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
-    parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
-    parser.add_argument('--system', required=False, help="Common name for workflow properties set")
-    parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/configuration.html")
 
-    #Specific args of each building block
+def main():
+    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS extra ndx2resttop module.",
+                                     formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
+    parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
+
+    # Specific args of each building block
     required_args = parser.add_argument_group('required arguments')
     required_args.add_argument('--input_ndx_path', required=True)
     required_args.add_argument('--input_top_zip_path', required=True)
@@ -114,12 +133,12 @@ def main():
 
     args = parser.parse_args()
     config = args.config if args.config else None
-    properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()
-    if args.step:
-        properties = properties[args.step]
+    properties = settings.ConfReader(config=config).get_prop_dic()
 
-    #Specific call of each building block
-    Ndx2resttop(input_ndx_path=args.input_ndx_path, input_top_zip_path=args.input_top_zip_path, output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
+    # Specific call of each building block
+    Ndx2resttop(input_ndx_path=args.input_ndx_path, input_top_zip_path=args.input_top_zip_path,
+                output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
+
 
 if __name__ == '__main__':
     main()

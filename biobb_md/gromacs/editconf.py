@@ -24,15 +24,15 @@ class Editconf:
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
-            * **container_path** (*string*) - (None)  Path to the binary executable of your container.
-            * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
-            * **container_volume_path** (*string*) - ("/data") Path to an internal directory in the container.
-            * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
-            * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
-            * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
+            * **container_path** (*str*) - (None)  Path to the binary executable of your container.
+            * **container_image** (*str*) - ("gromacs/gromacs:latest") Container Image identifier.
+            * **container_volume_path** (*str*) - ("/data") Path to an internal directory in the container.
+            * **container_working_dir** (*str*) - (None) Path to the internal CWD in the container.
+            * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
+            * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
     """
 
-    def __init__(self, input_gro_path, output_gro_path, properties=None, **kwargs):
+    def __init__(self, input_gro_path: str, output_gro_path: str, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
@@ -79,7 +79,7 @@ class Editconf:
         fu.check_properties(self, properties)
 
     @launchlogger
-    def launch(self):
+    def launch(self) -> int:
         """Launches the execution of the GROMACS editconf module."""
         tmp_files = []
 
@@ -139,11 +139,9 @@ class Editconf:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Wrapper of the GROMACS editconf module.",
+    parser = argparse.ArgumentParser(description="Wrapper of the GROMACS gmx editconf module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
-    parser.add_argument('--system', required=False, help="Common name for workflow properties set")
-    parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/configuration.html")
 
     # Specific args of each building block
     required_args = parser.add_argument_group('required arguments')
@@ -152,13 +150,12 @@ def main():
 
     args = parser.parse_args()
     config = args.config if args.config else None
-    properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()
-    if args.step:
-        properties = properties[args.step]
+    properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
     Editconf(input_gro_path=args.input_gro_path, output_gro_path=args.output_gro_path,
              properties=properties).launch()
+
 
 if __name__ == '__main__':
     main()

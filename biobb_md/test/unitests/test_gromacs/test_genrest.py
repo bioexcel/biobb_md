@@ -4,7 +4,7 @@ from biobb_md.gromacs.genrestr import Genrestr
 
 class TestGenrestr():
     def setUp(self):
-        fx.test_setup(self,'genrestr')
+        fx.test_setup(self, 'genrestr')
 
     def tearDown(self):
         #pass

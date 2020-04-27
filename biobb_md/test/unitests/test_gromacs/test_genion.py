@@ -3,7 +3,7 @@ from biobb_md.gromacs.genion import Genion
 
 class TestGenion():
     def setUp(self):
-        fx.test_setup(self,'genion')
+        fx.test_setup(self, 'genion')
 
     def tearDown(self):
         #pass

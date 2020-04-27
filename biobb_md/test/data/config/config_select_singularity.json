@@ -1,0 +1,8 @@
+{
+  "properties": {
+    "selection": "\"Mynewgroup\" group \"Protein-H\" and not same residue as within 0.4 of resname ARG",
+    "container_path": "singularity",
+    "container_image": "gromacs.simg",
+    "container_volume_path": "/inout"
+  }
+}

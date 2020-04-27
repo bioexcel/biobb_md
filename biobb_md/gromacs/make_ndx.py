@@ -2,9 +2,8 @@
 
 """Module containing the MakeNdx class and the command line interface."""
 import os
-import shutil
 import argparse
-import pathlib as pl
+from pathlib import Path
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
@@ -25,15 +24,16 @@ class MakeNdx:
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
-            * **container_path** (*string*) - (None)  Path to the binary executable of your container.
-            * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
-            * **container_volume_path** (*string*) - ("/data") Path to an internal directory in the container.
-            * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
-            * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
-            * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
+            * **container_path** (*str*) - (None)  Path to the binary executable of your container.
+            * **container_image** (*str*) - ("gromacs/gromacs:latest") Container Image identifier.
+            * **container_volume_path** (*str*) - ("/data") Path to an internal directory in the container.
+            * **container_working_dir** (*str*) - (None) Path to the internal CWD in the container.
+            * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
+            * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
     """
 
-    def __init__(self, input_structure_path, output_ndx_path, input_ndx_path=None, properties=None, **kwargs):
+    def __init__(self, input_structure_path: str, output_ndx_path: str, input_ndx_path: str = None,
+                 properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
@@ -78,7 +78,7 @@ class MakeNdx:
         fu.check_properties(self, properties)
 
     @launchlogger
-    def launch(self):
+    def launch(self) -> int:
         """Launches the execution of the GROMACS make_ndx module."""
         tmp_files = []
 
@@ -100,15 +100,14 @@ class MakeNdx:
 
         container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
-        cmd = ['echo','-e', '\"' + self.selection + '\\nq' + '\"', '|',
+        cmd = ['echo', '-e', '\'' + self.selection + '\\nq' + '\'', '|',
                self.gmx_path, 'make_ndx',
                '-f', container_io_dict["in"]["input_structure_path"],
                '-o', container_io_dict["out"]["output_ndx_path"]
                ]
 
-
-        if container_io_dict["in"].get("input_ndx_path") and pl.Path(
-                container_io_dict["in"].get("input_ndx_path")).exists():
+        if container_io_dict["in"].get("input_ndx_path")\
+                and Path(container_io_dict["in"].get("input_ndx_path")).exists():
             cmd.append('-n')
             cmd.append(container_io_dict["in"].get("input_ndx_path"))
 
@@ -139,8 +138,6 @@ def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS make_ndx module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
-    parser.add_argument('--system', required=False, help="Common name for workflow properties set")
-    parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/configuration.html")
 
     # Specific args of each building block
     required_args = parser.add_argument_group('required arguments')
@@ -150,9 +147,7 @@ def main():
 
     args = parser.parse_args()
     config = args.config if args.config else None
-    properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()
-    if args.step:
-        properties = properties[args.step]
+    properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
     MakeNdx(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path,

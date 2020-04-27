@@ -45,8 +45,8 @@ class Grompp:
             * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
     """
 
-    def __init__(self, input_gro_path, input_top_zip_path, output_tpr_path,
-                 input_cpt_path=None, input_ndx_path=None, properties=None, **kwargs):
+    def __init__(self, input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
+                 input_cpt_path: str = None, input_ndx_path: str = None, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
@@ -100,7 +100,7 @@ class Grompp:
         # Check the properties
         fu.check_properties(self, properties)
 
-    def create_mdp(self, path=None):
+    def create_mdp(self, path: str = None) -> str:
         """Creates an MDP file using the properties file settings"""
         mdp_list = []
 
@@ -253,7 +253,7 @@ class Grompp:
         return self.output_mdp_path
 
     @launchlogger
-    def launch(self):
+    def launch(self) -> int:
         """Launches the execution of the GROMACS grompp module."""
         tmp_files = []
         mdout = 'mdout.mdp'
@@ -277,7 +277,7 @@ class Grompp:
 
         # Unzip topology to topology_out
         top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
-        top_dir = os.path.dirname(top_file)
+        top_dir = str(Path(top_file).parent)
         tmp_files.append(top_dir)
 
         container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
@@ -287,7 +287,7 @@ class Grompp:
         else:
             mdp_dir = fu.create_unique_dir()
             tmp_files.append(mdp_dir)
-            self.output_mdp_path = self.create_mdp(path=os.path.join(mdp_dir, self.output_mdp_path))
+            self.output_mdp_path = self.create_mdp(path=str(Path(mdp_dir).joinpath(self.output_mdp_path)))
 
         md = self.mdp.get('type', 'minimization')
         if md not in ('index', 'free'):
@@ -301,10 +301,10 @@ class Grompp:
             fu.log('Container execution enabled', out_log)
 
             shutil.copy2(self.output_mdp_path, container_io_dict.get("unique_dir"))
-            self.output_mdp_path = os.path.join(self.container_volume_path, os.path.basename(self.output_mdp_path))
+            self.output_mdp_path = str(Path(self.container_volume_path).joinpath(Path(self.output_mdp_path).name))
 
-            shutil.copytree(top_dir, os.path.join(container_io_dict.get("unique_dir"), os.path.basename(top_dir)))
-            top_file = os.path.join(self.container_volume_path, os.path.basename(top_dir), os.path.basename(top_file))
+            shutil.copytree(top_dir, str(Path(container_io_dict.get("unique_dir")).joinpath(Path(top_dir).name)))
+            top_file = str(Path(self.container_volume_path).joinpath(Path(top_dir).name, Path(top_file).name))
 
         cmd = [self.gmx_path, 'grompp',
                '-f', self.output_mdp_path,
@@ -319,14 +319,14 @@ class Grompp:
             cmd.append('-t')
             if self.container_path:
                 shutil.copy2(container_io_dict["in"]["input_cpt_path"], container_io_dict.get("unique_dir"))
-                cmd.append(os.path.join(self.container_volume_path, os.path.basename(container_io_dict["in"]["input_cpt_path"])))
+                cmd.append(str(Path(self.container_volume_path).joinpath(Path(container_io_dict["in"]["input_cpt_path"]).name)))
             else:
                 cmd.append(container_io_dict["in"]["input_cpt_path"])
         if container_io_dict["in"].get("input_ndx_path") and Path(container_io_dict["in"]["input_ndx_path"]).exists():
             cmd.append('-n')
             if self.container_path:
                 shutil.copy2(container_io_dict["in"]["input_ndx_path"], container_io_dict.get("unique_dir"))
-                cmd.append(os.path.join(self.container_volume_path, os.path.basename(container_io_dict["in"]["input_ndx_path"])))
+                cmd.append(Path(self.container_volume_path).joinpath(Path(container_io_dict["in"]["input_ndx_path"]).name))
             else:
                 cmd.append(container_io_dict["in"]["input_ndx_path"])
 
@@ -354,12 +354,11 @@ class Grompp:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.", formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
+    parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.",
+                                     formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
-    parser.add_argument('--system', required=False, help="Common name for workflow properties set")
-    parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/configuration.html")
 
-    #Specific args of each building block
+    # Specific args of each building block
     required_args = parser.add_argument_group('required arguments')
     required_args.add_argument('--input_gro_path', required=True)
     required_args.add_argument('--input_top_zip_path', required=True)
@@ -369,12 +368,13 @@ def main():
 
     args = parser.parse_args()
     config = args.config if args.config else None
-    properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()
-    if args.step:
-        properties = properties[args.step]
+    properties = settings.ConfReader(config=config).get_prop_dic()
 
-    #Specific call of each building block
-    Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path, output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path, input_ndx_path=args.input_ndx_path, properties=properties).launch()
+    # Specific call of each building block
+    Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path,
+           output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path,
+           input_ndx_path=args.input_ndx_path, properties=properties).launch()
+
 
 if __name__ == '__main__':
     main()

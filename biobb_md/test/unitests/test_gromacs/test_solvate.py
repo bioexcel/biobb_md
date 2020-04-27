@@ -3,7 +3,7 @@ from biobb_md.gromacs.solvate import Solvate
 
 class TestSolvate():
     def setUp(self):
-        fx.test_setup(self,'solvate')
+        fx.test_setup(self, 'solvate')
 
     def tearDown(self):
         #pass

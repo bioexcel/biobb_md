@@ -31,21 +31,17 @@ class Mdrun:
             * **mpi_hostlist** (*str*) - (None) Path to the MPI hostlist file.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
-            * **container_path** (*string*) - (None)  Path to the binary executable of your container.
-            * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
-            * **container_volume_path** (*string*) - ("/data") Path to an internal directory in the container.
-            * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
-            * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
-            * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
-
-
+            * **container_path** (*str*) - (None)  Path to the binary executable of your container.
+            * **container_image** (*str*) - ("gromacs/gromacs:latest") Container Image identifier.
+            * **container_volume_path** (*str*) - ("/data") Path to an internal directory in the container.
+            * **container_working_dir** (*str*) - (None) Path to the internal CWD in the container.
+            * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
+            * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
     """
 
-    def __init__(self, input_tpr_path, output_trr_path,
-                 output_gro_path, output_edr_path,
-                 output_log_path, output_xtc_path=None,
-                 output_cpt_path=None, output_dhdl_path=None,
-                 properties=None, **kwargs):
+    def __init__(self, input_tpr_path: str, output_trr_path: str, output_gro_path: str, output_edr_path: str,
+                 output_log_path: str, output_xtc_path: str = None, output_cpt_path: str = None,
+                 output_dhdl_path: str = None, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
@@ -70,6 +66,7 @@ class Mdrun:
         self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
 
         # Properties common in all GROMACS BB
+        self.gmxlib = properties.get('gmxlib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
         self.gmx_nobackup = properties.get('gmx_nobackup', True)
         self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
@@ -142,6 +139,11 @@ class Mdrun:
             cmd.append('-dhdl')
             cmd.append(container_io_dict["out"]["output_dhdl_path"])
 
+        new_env = None
+        if self.gmxlib:
+            new_env = os.environ.copy()
+            new_env['GMXLIB'] = self.gmxlib
+
         cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
                                  host_volume=container_io_dict.get("unique_dir"),
                                  container_volume=self.container_volume_path,
@@ -150,7 +152,7 @@ class Mdrun:
                                  container_shell_path=self.container_shell_path,
                                  container_image=self.container_image,
                                  out_log=out_log, global_log=self.global_log)
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log).launch()
+        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
         tmp_files.append(container_io_dict.get("unique_dir"))
@@ -165,8 +167,6 @@ def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS mdrun module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
-    parser.add_argument('--system', required=False, help="Common name for workflow properties set")
-    parser.add_argument('--step', required=False, help="Check 'https://biobb-common.readthedocs.io/en/latest/configuration.html")
 
     # Specific args of each building block
     required_args = parser.add_argument_group('required arguments')
@@ -181,9 +181,7 @@ def main():
 
     args = parser.parse_args()
     config = args.config if args.config else None
-    properties = settings.ConfReader(config=config, system=args.system).get_prop_dic()
-    if args.step:
-        properties = properties[args.step]
+    properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
     Mdrun(input_tpr_path=args.input_tpr_path, output_trr_path=args.output_trr_path,

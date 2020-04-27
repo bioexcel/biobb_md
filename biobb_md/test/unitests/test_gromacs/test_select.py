@@ -1,9 +1,9 @@
 from biobb_common.tools import test_fixtures as fx
-from biobb_md.gromacs.select import Select
+from biobb_md.gromacs.gmx_select import Select
 
 class TestSelect:
     def setUp(self):
-        fx.test_setup(self, 'select')
+        fx.test_setup(self, 'gmx_select')
 
     def tearDown(self):
         #pass

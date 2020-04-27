@@ -1,0 +1,11 @@
+{
+  "properties": {
+    "mdp": {
+      "ld-seed": "1"
+    },
+    "container_path": "singularity",
+    "container_image": "gromacs.simg",
+    "container_volume_path": "/inout",
+    "container_working_dir": "/inout"
+  }
+}

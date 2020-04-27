@@ -4,7 +4,7 @@ from biobb_md.gromacs.common import gmx_rms
 
 class TestMdrun():
     def setUp(self):
-        fx.test_setup(self,'mdrun')
+        fx.test_setup(self, 'mdrun')
 
     def tearDown(self):
         #pass

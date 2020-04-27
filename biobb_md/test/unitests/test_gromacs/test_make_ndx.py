@@ -3,7 +3,7 @@ from biobb_md.gromacs.make_ndx import MakeNdx
 
 class TestMakeNdx():
     def setUp(self):
-        fx.test_setup(self,'make_ndx')
+        fx.test_setup(self, 'make_ndx')
 
     def tearDown(self):
         fx.test_teardown(self)

@@ -3,7 +3,7 @@ from biobb_md.gromacs.pdb2gmx import Pdb2gmx
 
 class TestPdb2gmx():
     def setUp(self):
-        fx.test_setup(self,'pdb2gmx')
+        fx.test_setup(self, 'pdb2gmx')
 
     def tearDown(self):
         #pass

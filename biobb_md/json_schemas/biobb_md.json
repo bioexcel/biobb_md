@@ -6,7 +6,7 @@
     "conda": "https://anaconda.org/bioconda/biobb_md",
     "docker": "https://quay.io/repository/biocontainers/biobb_md",
     "singularity": "https://www.singularity-hub.org/collections/2735/usage",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "tools" : [
         {
             "block" : "Pdb2gmx",
@@ -54,7 +54,7 @@
             "block" : "Select",
             "tool" : "gmx select",
             "desc" : "Creates a GROMACS index file (NDX) from an input selection and an input GROMACS structure file.",
-            "exec" : "select"
+            "exec" : "gmx_select"
         },
         {
             "block" : "Solvate",
@@ -76,12 +76,12 @@
         }
     ],
     "dep_pypi" : [
-        "install_requires=['biobb_common==2.0.1']",
-        "python_requires='==3.6.*'"
+        "install_requires=['biobb_common==3.0.0']",
+        "python_requires='==3.7.*'"
     ],
     "dep_conda" : [
-        "python ==3.6.*",
-        "biobb_common ==2.0.1",
+        "python ==3.7.*",
+        "biobb_common ==3.0.0",
         "GROMACS ==2019.1"
     ],
     "keywords" : [

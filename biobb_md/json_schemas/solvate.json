@@ -49,7 +49,7 @@
         "properties": {
             "type": "object",
             "properties": {
-                "intput_solvent_gro_path": {
+                "input_solvent_gro_path": {
                     "type": "string",
                     "default": "spc216.gro",
                     "description": "Path to the GRO file contanining the structure of the solvent."

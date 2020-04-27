@@ -3,7 +3,7 @@ from biobb_md.gromacs.editconf import Editconf
 
 class TestEditconf():
     def setUp(self):
-        fx.test_setup(self,'editconf')
+        fx.test_setup(self, 'editconf')
 
     def tearDown(self):
         #pass

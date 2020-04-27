@@ -40,7 +40,7 @@
             "type": "object",
             "properties": {
                 "force_constants": {
-                    "type": "float[3]",
+                    "type": "string",
                     "default": "500 500 500",
                     "description": "Array of three floats defining the force constants."
                 },

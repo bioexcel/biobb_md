@@ -1,0 +1,7 @@
+{
+  "properties": {
+    "container_path": "singularity",
+    "container_image": "gromacs.simg",
+    "container_volume_path": "/tmp"
+  }
+}

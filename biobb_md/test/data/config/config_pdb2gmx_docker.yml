@@ -1,0 +1,5 @@
+properties:
+  container_image: pmx_image
+  container_path: docker
+  container_volume_path: /inout
+  his: 0 0 1 1 0 0 0

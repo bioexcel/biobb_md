@@ -1,0 +1,7 @@
+properties:
+  container_image: gromacs.simg
+  container_path: singularity
+  container_volume_path: /inout
+  container_working_dir: /inout
+  mdp:
+    ld-seed: '1'

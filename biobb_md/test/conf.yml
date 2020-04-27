@@ -14,7 +14,7 @@ pdb2gmx:
   properties:
     his: 0 0 1 1 0 0 0
 
-pdb2gmx_container:
+pdb2gmx_docker:
   paths:
     input_pdb_path: file:test_data_dir/gromacs/egfr.pdb
     output_gro_path: output_gro.gro
@@ -24,10 +24,20 @@ pdb2gmx_container:
   properties:
     his: 0 0 1 1 0 0 0
     container_path: docker
-    #container_path: singularity
     container_image: pmx_image
-    #container_image: gromacs/gromacs:latest
-    #container_image: gromacs.simg
+    container_volume_path: /inout
+
+pdb2gmx_singularity:
+  paths:
+    input_pdb_path: file:test_data_dir/gromacs/egfr.pdb
+    output_gro_path: output_gro.gro
+    output_top_zip_path: output_top_zip.zip
+    ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_pdb2gmx_container.zip
+    ref_output_gro_path: file:test_reference_dir/gromacs/ref_pdb2gmx.gro
+  properties:
+    his: 0 0 1 1 0 0 0
+    container_path: singularity
+    container_image: gromacs.simg
     container_volume_path: /inout
 
 editconf:
@@ -35,17 +45,28 @@ editconf:
     input_gro_path: file:test_data_dir/gromacs/editconf.gro
     output_gro_path: output_gro.gro
     ref_output_gro_path: file:test_reference_dir/gromacs/ref_editconf.gro
+  properties:
+    distance_to_molecule: 1.0
+    box_type: "cubic"
 
-editconf_container:
+editconf_docker:
   paths:
     input_gro_path: file:test_data_dir/gromacs/editconf.gro
     output_gro_path: output_gro.gro
     ref_output_gro_path: file:test_reference_dir/gromacs/ref_editconf.gro
   properties:
     container_path: docker
-    #container_path: singularity
     container_image: gromacs/gromacs:latest
-    #container_image: gromacs.simg
+    container_volume_path: /tmp
+
+editconf_singularity:
+  paths:
+    input_gro_path: file:test_data_dir/gromacs/editconf.gro
+    output_gro_path: output_gro.gro
+    ref_output_gro_path: file:test_reference_dir/gromacs/ref_editconf.gro
+  properties:
+    container_path: singularity
+    container_image: gromacs.simg
     container_volume_path: /tmp
 
 genion:
@@ -56,8 +77,11 @@ genion:
     input_top_zip_path: file:test_data_dir/gromacs/genion.zip
     output_top_zip_path: output_top_zip.zip
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_genion.zip
+  properties:
+    concentration: 0.05
+    replaced_group: "SOL"
 
-genion_container:
+genion_docker:
   paths:
     input_tpr_path: file:test_data_dir/gromacs/genion.tpr
     output_gro_path: output_gro.gro
@@ -67,10 +91,21 @@ genion_container:
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_genion.zip
   properties:
     container_path: docker
-    #container_path: singularity
     container_image: gromacs/gromacs:latest
-    #container_image: gromacs.simg
-    #container_image: pmx_image
+    container_volume_path: /data
+    container_working_dir: /data
+
+genion_singularity:
+  paths:
+    input_tpr_path: file:test_data_dir/gromacs/genion.tpr
+    output_gro_path: output_gro.gro
+    ref_output_gro_path: file:test_reference_dir/gromacs/ref_genion.gro
+    input_top_zip_path: file:test_data_dir/gromacs/genion.zip
+    output_top_zip_path: output_top_zip.zip
+    ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_genion.zip
+  properties:
+    container_path: singularity
+    container_image: gromacs.simg
     container_volume_path: /data
     container_working_dir: /data
 
@@ -81,8 +116,11 @@ genrestr:
     input_ndx_path: file:test_data_dir/gromacs/genrestr.ndx
     output_itp_path: output_itp.itp
     ref_output_itp_path: file:test_reference_dir/gromacs/ref_genrestr.itp
+  properties:
+    restrained_group: "system"
+    force_constants: "500 500 500"
 
-genrestr_container:
+genrestr_docker:
   paths:
     input_structure_path: file:test_data_dir/gromacs/genrestr.gro
     input_ndx_path: file:test_data_dir/gromacs/genrestr.ndx
@@ -90,10 +128,19 @@ genrestr_container:
     ref_output_itp_path: file:test_reference_dir/gromacs/ref_genrestr.itp
   properties:
     container_path: docker
-    #container_path: singularity
     container_image: gromacs/gromacs:latest
-    #container_image: gromacs.simg
-    #container_image: pmx_image
+    container_volume_path: /data
+    container_working_dir: /data
+
+genrestr_singularity:
+  paths:
+    input_structure_path: file:test_data_dir/gromacs/genrestr.gro
+    input_ndx_path: file:test_data_dir/gromacs/genrestr.ndx
+    output_itp_path: output_itp.itp
+    ref_output_itp_path: file:test_reference_dir/gromacs/ref_genrestr.itp
+  properties:
+    container_path: singularity
+    container_image: gromacs.simg
     container_volume_path: /data
     container_working_dir: /data
 
@@ -107,7 +154,7 @@ grompp:
     mdp:
       ld-seed: '1'
 
-grompp_container:
+grompp_docker:
   paths:
     input_gro_path: file:test_data_dir/gromacs/grompp.gro
     input_top_zip_path: file:test_data_dir/gromacs/grompp.zip
@@ -117,12 +164,24 @@ grompp_container:
     mdp:
       ld-seed: '1'
     container_path: docker
-    #container_path: singularity
-    #container_image: gromacs/gromacs:latest
-    #container_image: gromacs.simg
-    container_image: pmx_image
+    container_image: gromacs/gromacs:latest
     container_volume_path: /inout
     container_working_dir: /inout
+
+grompp_singularity:
+  paths:
+    input_gro_path: file:test_data_dir/gromacs/grompp.gro
+    input_top_zip_path: file:test_data_dir/gromacs/grompp.zip
+    output_tpr_path: output_tpr.tpr
+    ref_output_tpr_path: file:test_reference_dir/gromacs/ref_grompp.tpr
+  properties:
+    mdp:
+      ld-seed: '1'
+    container_path: singularity
+    container_image: gromacs.simg
+    container_volume_path: /inout
+    container_working_dir: /inout
+
 
 mdrun:
   paths:
@@ -132,8 +191,11 @@ mdrun:
     output_edr_path: output_edr_path.edr
     output_log_path: output_log_path.log
     ref_output_trr_path: file:test_reference_dir/gromacs/ref_mdrun.trr
+  properties:
+    num_threads: 0
+    gmx_path: "gmx"
 
-mdrun_container:
+mdrun_docker:
   paths:
     input_tpr_path: file:test_data_dir/gromacs/mdrun.tpr
     output_trr_path: output_trr_path.trr
@@ -143,9 +205,20 @@ mdrun_container:
     ref_output_trr_path: file:test_reference_dir/gromacs/ref_mdrun.trr
   properties:
     container_path: docker
-    #container_path: singularity
-    container_image: pmx_image
-    #container_image: gromacs.simg
+    container_image: gromacs/gromacs:latest
+    container_volume_path: /inout
+
+mdrun_singularity:
+  paths:
+    input_tpr_path: file:test_data_dir/gromacs/mdrun.tpr
+    output_trr_path: output_trr_path.trr
+    output_gro_path: output_gro_path.gro
+    output_edr_path: output_edr_path.edr
+    output_log_path: output_log_path.log
+    ref_output_trr_path: file:test_reference_dir/gromacs/ref_mdrun.trr
+  properties:
+    container_path: singularity
+    container_image: gromacs.simg
     container_volume_path: /inout
 
 make_ndx:
@@ -153,20 +226,31 @@ make_ndx:
     input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
     output_ndx_path: output_ndx.ndx
     ref_output_ndx_path: file:test_reference_dir/gromacs/ref_make_ndx.ndx
+  properties:
+    selection: "a CA C N O"
 
-make_ndx_container:
+
+make_ndx_docker:
   paths:
     input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
     output_ndx_path: output_ndx.ndx
     ref_output_ndx_path: file:test_reference_dir/gromacs/ref_make_ndx.ndx
   properties:
     container_path: docker
-    #container_path: singularity
     container_image: gromacs/gromacs:latest
-    #container_image: gromacs.simg
     container_volume_path: /tmp
 
-select:
+make_ndx_singularity:
+  paths:
+    input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
+    output_ndx_path: output_ndx.ndx
+    ref_output_ndx_path: file:test_reference_dir/gromacs/ref_make_ndx.ndx
+  properties:
+    container_path: singularity
+    container_image: gromacs.simg
+    container_volume_path: /tmp
+
+gmx_select:
   paths:
     input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
     output_ndx_path: output_ndx.ndx
@@ -174,7 +258,7 @@ select:
   properties:
     selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of resname ARG'
 
-select_container:
+select_docker:
   paths:
     input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
     output_ndx_path: output_ndx.ndx
@@ -182,9 +266,18 @@ select_container:
   properties:
     selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of resname ARG'
     container_path: docker
-    #container_path: singularity
-    container_image: pmx_image
-    #container_image: gromacs.simg
+    container_image: gromacs/gromacs:latest
+    container_volume_path: /inout
+
+select_singularity:
+  paths:
+    input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
+    output_ndx_path: output_ndx.ndx
+    ref_output_ndx_path: file:test_reference_dir/gromacs/ref_select.ndx
+  properties:
+    selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of resname ARG'
+    container_path: singularity
+    container_image: gromacs.simg
     container_volume_path: /inout
 
 solvate:
@@ -195,8 +288,11 @@ solvate:
     output_top_zip_path: output_top_zip.zip
     ref_output_gro_path: file:test_reference_dir/gromacs/ref_solvate.gro
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_solvate.zip
+  properties:
+    gmx_path: "gmx"
+    input_solvent_gro_path: "spc216.gro"
 
-solvate_container:
+solvate_docker:
   paths:
     input_solute_gro_path: file:test_data_dir/gromacs/solvate.gro
     output_gro_path: output_gro.gro
@@ -206,12 +302,21 @@ solvate_container:
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_solvate_docker.zip
   properties:
     container_path: docker
-    #container_path: singularity
-    container_image: pmx_image
-    #container_image: gromacs/gromacs:latest
-    #container_image: gromacs.simg
+    container_image: gromacs/gromacs:latest
     container_volume_path: /inout
-    #container_working_dir: /data
+
+solvate_singularity:
+  paths:
+    input_solute_gro_path: file:test_data_dir/gromacs/solvate.gro
+    output_gro_path: output_gro.gro
+    input_top_zip_path: file:test_data_dir/gromacs/solvate.zip
+    output_top_zip_path: output_top_zip.zip
+    ref_output_gro_path: file:test_reference_dir/gromacs/ref_solvate_docker.gro
+    ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_solvate_docker.zip
+  properties:
+    container_path: singularity
+    container_image: gromacs.simg
+    container_volume_path: /inout
 
 ndx2resttop:
   paths:
@@ -228,3 +333,5 @@ append_ligand:
     input_top_zip_path: file:test_data_dir/gromacs_extra/ndx2resttop.zip
     output_top_zip_path: output_top_zip.zip
     ref_output_top_zip_path: file:test_reference_dir/gromacs_extra/ref_appendligand.zip
+  properties:
+    posres_name: "POSRES_LIGAND"

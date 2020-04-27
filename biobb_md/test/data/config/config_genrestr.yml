@@ -1,0 +1,3 @@
+properties:
+  force_constants: 500 500 500
+  restrained_group: system
