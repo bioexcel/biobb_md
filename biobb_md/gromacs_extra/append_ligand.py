@@ -24,7 +24,7 @@ class AppendLigand:
     """
 
     def __init__(self, input_top_zip_path: str, input_itp_path: str, output_top_zip_path: str,
-                 input_posres_itp_path: str = None, properties: dict = None, **kwargs):
+                 input_posres_itp_path: str = None, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
@@ -50,7 +50,7 @@ class AppendLigand:
         fu.check_properties(self, properties)
 
     @launchlogger
-    def launch(self):
+    def launch(self) -> int:
         """Launches the execution of the GROMACS editconf module."""
         tmp_files = []
 

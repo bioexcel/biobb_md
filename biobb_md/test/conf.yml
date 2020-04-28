@@ -250,7 +250,7 @@ make_ndx_singularity:
     container_image: gromacs.simg
     container_volume_path: /tmp
 
-gmx_select:
+gmxselect:
   paths:
     input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
     output_ndx_path: output_ndx.ndx
@@ -258,7 +258,7 @@ gmx_select:
   properties:
     selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of resname ARG'
 
-select_docker:
+gmxselect_docker:
   paths:
     input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
     output_ndx_path: output_ndx.ndx
@@ -269,7 +269,7 @@ select_docker:
     container_image: gromacs/gromacs:latest
     container_volume_path: /inout
 
-select_singularity:
+gmxselect_singularity:
   paths:
     input_structure_path: file:test_data_dir/gromacs/make_ndx.tpr
     output_ndx_path: output_ndx.ndx

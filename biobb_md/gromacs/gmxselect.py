@@ -12,7 +12,7 @@ from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
 
-class Select:
+class Gmxselect:
     """Wrapper of the `GROMACS select <http://manual.gromacs.org/current/onlinehelp/gmx-select.html>`_ module.
 
     Args:
@@ -33,7 +33,7 @@ class Select:
     """
 
     def __init__(self, input_structure_path: str, output_ndx_path: str, input_ndx_path: str = None,
-                 properties: dict = None, **kwargs):
+                 properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
@@ -78,7 +78,7 @@ class Select:
         fu.check_properties(self, properties)
 
     @launchlogger
-    def launch(self):
+    def launch(self) -> int:
         """Launches the execution of the GROMACS select module."""
         tmp_files = []
 

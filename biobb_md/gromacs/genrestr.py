@@ -33,7 +33,7 @@ class Genrestr:
     """
 
     def __init__(self, input_structure_path: str, input_ndx_path: str, output_itp_path: str,
-                 properties: dict = None, **kwargs):
+                 properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files

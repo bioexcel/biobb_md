@@ -34,8 +34,8 @@ class Solvate:
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
     """
 
-    def __init__(self, input_solute_gro_path, output_gro_path, input_top_zip_path,
-                 output_top_zip_path, properties: dict = None, **kwargs):
+    def __init__(self, input_solute_gro_path: str, output_gro_path: str, input_top_zip_path: str,
+                 output_top_zip_path: str, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
@@ -82,7 +82,7 @@ class Solvate:
         fu.check_properties(self, properties)
 
     @launchlogger
-    def launch(self):
+    def launch(self) -> int:
         """Launches the execution of the GROMACS solvate module."""
         tmp_files = []
 
