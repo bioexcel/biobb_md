@@ -166,8 +166,8 @@ def main():
     properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
-    Select(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path,
-           input_ndx_path=args.input_ndx_path, properties=properties).launch()
+    Gmxselect(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path,
+              input_ndx_path=args.input_ndx_path, properties=properties).launch()
 
 
 if __name__ == '__main__':
