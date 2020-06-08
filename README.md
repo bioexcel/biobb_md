@@ -17,6 +17,59 @@ The latest documentation of this package can be found in our readthedocs site:
 ### Version
 v3.0.0 2020.2
 
+### Installation
+Using PIP:
+* Installation:
+
+
+        pip install "biobb_md>=3.0.0"
+
+
+* Usage: [Python API documentation](https://biobb-md.readthedocs.io/en/latest/modules.html)
+
+Using ANACONDA:
+
+* Installation:
+
+
+        conda install -c bioconda "biobb_md>=3.0.0"
+
+
+* Usage: With conda installation BioBBs can be used with the [Python API documentation](https://biobb-md.readthedocs.io/en/latest/modules.html) and the [Command Line documentation](https://biobb-md.readthedocs.io/en/latest/command_line.html)
+
+Using DOCKER:
+
+* Installation:
+
+
+        docker pull quay.io/biocontainers/biobb_md:3.0.0--py_0
+
+
+* Usage:
+
+
+        docker run quay.io/biocontainers/biobb_md:3.0.0--py_0 <command>
+
+
+Using SINGULARITY:
+
+**MacOS users**: it's strongly recommended to avoid Singularity and use **Docker** as containerization system.
+
+* Installation:
+
+
+        singularity pull --name biobb_md.sif shub://bioexcel/biobb_md
+
+
+* Usage:
+
+
+        singularity exec biobb_md.sif <command>
+
+
+The command list and specification can be found at the [Command Line documentation](https://biobb-model.readthedocs.io/en/latest/command_line.html).
+
+
 ### Copyright & Licensing
 This software has been developed in the [MMB group](http://mmb.irbbarcelona.org) at the [BSC](http://www.bsc.es/) & [IRB](https://www.irbbarcelona.org/) for the [European BioExcel](http://bioexcel.eu/), funded by the European Commission (EU H2020 [823830](http://cordis.europa.eu/projects/823830), EU H2020 [675728](http://cordis.europa.eu/projects/675728)).
 
