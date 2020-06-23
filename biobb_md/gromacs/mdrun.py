@@ -25,6 +25,7 @@ class Mdrun:
         output_dhdl_path (str) (Optional): Path to the output dhdl.xvg file only used when free energy calculation is turned on. File type: output. Accepted formats: xvg.
         properties (dic):
             * **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
+            * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
             * **mpi_np** (*str*) - (None) Number of MPI processes. Usually an integer bigger than 1.

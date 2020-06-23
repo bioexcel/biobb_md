@@ -22,6 +22,7 @@ class Gmxselect:
         properties (dic):
             * **selection** (*str*) - ("a CA C N O") Heavy atoms. Atom selection string.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
+            * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
             * **container_path** (*str*) - (None)  Path to the binary executable of your container.

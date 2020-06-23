@@ -45,6 +45,14 @@ gromacs.make_ndx module
     :undoc-members:
     :show-inheritance:
 
+gromacs.gmxselect module
+------------------------------
+
+.. automodule:: gromacs.gmxselect
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gromacs.mdrun module
 ----------------------
 

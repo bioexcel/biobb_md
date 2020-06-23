@@ -34,6 +34,7 @@ class Grompp:
             * **output_mdp_path** (*str*) - ("grompp.mdp") Path of the output MDP file.
             * **output_top_path** (*str*) - ("grompp.top") Path the output topology TOP file.
             * **maxwarn** (*int*) - (10) Maximum number of allowed warnings.
+            * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.

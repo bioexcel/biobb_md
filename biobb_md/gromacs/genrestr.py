@@ -21,6 +21,7 @@ class Genrestr:
         properties (dic):
             * **restrained_group** (*str*) - ("system") Index group that will be restrained.
             * **force_constants** (*str*) - ("500 500 500") Array of three floats defining the force constants
+            * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.

@@ -27,6 +27,7 @@ class Genion:
             * **neutral** (*bool*) - (False) Neutralize the charge of the system.
             * **concentration** (*float*) - (0.05) Concentration of the ions in (mol/liter).
             * **seed** (*int*) - (1993) Seed for random number generator.
+            * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.

@@ -21,6 +21,7 @@ class MakeNdx:
         input_ndx_path (str) (Optional): Path to the input index NDX file. File type: input. Accepted formats: ndx.
         properties (dic):
             * **selection** (*str*) - ("a CA C N O") Heavy atoms. Atom selection string.
+            * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
