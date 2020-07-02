@@ -12,67 +12,78 @@
             "block" : "Pdb2gmx",
             "tool" : "gmx pdb2gmx",
             "desc" : "Creates a compressed (ZIP) GROMACS topology (TOP and ITP files) from a given PDB file.",
-            "exec" : "pdb2gmx"
+            "exec" : "pdb2gmx",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.pdb2gmx"
         },
         {
             "block" : "Editconf",
             "tool" : "gmx editconf",
             "desc" : "Creates a GROMACS structure file (GRO) adding the information of the solvent box to the input structure file.",
-            "exec" : "editconf"
+            "exec" : "editconf",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.editconf"
         },
         {
             "block" : "Genion",
             "tool" : "gmx genion",
             "desc" : "Creates a new compressed GROMACS topology adding ions until reaching the desired concentration to the input compressed GROMACS topology. ",
-            "exec" : "genion"
+            "exec" : "genion",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.genion"
         },
         {
             "block" : "Genrestr",
             "tool" : "gmx genrestr",
             "desc" : "Creates a new GROMACS compressed topology applying the indicated force restrains to the given input compressed topology.",
-            "exec" : "genrestr"
+            "exec" : "genrestr",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.genrestr"
         },
         {
             "block" : "Grompp",
             "tool" : "gmx grompp",
             "desc" : "Creates a GROMACS portable binary run input file (TPR) applying the desired properties from the input compressed GROMACS topology.",
-            "exec" : "grompp"
+            "exec" : "grompp",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.grompp"
         },
         {
             "block" : "Mdrun",
             "tool" : "gmx mdrun",
             "desc" : "Performs molecular dynamics simulations from an input GROMACS TPR file.",
-            "exec" : "mdrun"
+            "exec" : "mdrun",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.mdrun"
         },
         {
             "block" : "MakeNdx",
             "tool" : "gmx make_ndx",
             "desc" : "Creates a GROMACS index file (NDX) from an input selection and an input GROMACS structure file.",
-            "exec" : "make_ndx"
+            "exec" : "make_ndx",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.make_ndx"
         },
         {
-            "block" : "Select",
+            "block" : "Gmxselect",
             "tool" : "gmx select",
             "desc" : "Creates a GROMACS index file (NDX) from an input selection and an input GROMACS structure file.",
-            "exec" : "gmx_select"
+            "exec" : "gmx_select",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.gmxselect"
         },
         {
             "block" : "Solvate",
             "tool" : "gmx solvate",
             "desc" : "Creates a new compressed GROMACS topology file adding solvent molecules to a given input compressed GROMACS topology file.",
-            "exec" : "solvate"
+            "exec" : "solvate",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.solvate"
         },
         {
             "block" : "Ndx2resttop",
             "tool" : "in house",
             "desc" : "Creates a new GROMACS compressed topology applying the force restrains to the input groups in the input index file to the given input compressed topology.",
-            "exec" : "ndx2resttop"
+            "exec" : "ndx2resttop",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs_extra.html#gromacs-extra-ndx2resttop-module"
         },
         {
             "block" : "AppendLigand",
             "tool" : "in house",
             "desc" : "Takes a ligand ITP file and inserts it in a topology.",
-            "exec" : "append_ligand"
+            "exec" : "append_ligand",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs_extra.html#gromacs-extra-append-ligand-module"
         }
     ],
     "dep_pypi" : [
