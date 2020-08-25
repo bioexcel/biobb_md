@@ -131,7 +131,7 @@ class Genion:
         if self.neutral:
             cmd.append('-neutral')
 
-        if self.concentration and not self.neutral:
+        if self.concentration:
             cmd.append('-conc')
             cmd.append(str(self.concentration))
             fu.log('To reach up %g mol/litre concentration' % self.concentration, out_log, self.global_log)
