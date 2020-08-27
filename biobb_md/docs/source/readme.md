@@ -12,7 +12,7 @@ Biobb (BioExcel building blocks) packages are Python building blocks that
 create new layer of compatibility and interoperability over popular
 bioinformatics tools.
 The latest documentation of this package can be found in our readthedocs site:
-[latest API documentation](http://biobb_md.readthedocs.io/en/latest/).
+[latest API documentation](http://biobb-md.readthedocs.io/en/latest/).
 
 ### Version
 v3.0.0 2020.2
@@ -70,7 +70,7 @@ Using SINGULARITY:
         singularity exec biobb_md.sif <command>
 
 
-The command list and specification can be found at the [Command Line documentation](https://biobb-model.readthedocs.io/en/latest/command_line.html).
+The command list and specification can be found at the [Command Line documentation](https://biobb-md.readthedocs.io/en/latest/command_line.html).
 
 
 ### Copyright & Licensing

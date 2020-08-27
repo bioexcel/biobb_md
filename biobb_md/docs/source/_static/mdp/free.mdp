@@ -1,0 +1,67 @@
+;This mdp file has been created by the pymdsetup.gromacs_wrapper.grompp.create_mdp()
+;Type of MDP: free
+
+;Run parameters
+nsteps = 5000
+integrator = md
+dt = 0.002
+
+;Output control
+nstcomm = 100
+nstxout = 5000
+nstvout = 5000
+nstenergy = 5000
+nstlog = 5000
+nstcalcenergy = 100
+nstxout-compressed = 1000
+compressed-x-grps = System
+compressed-x-precision = 1000
+
+;Bond parameters
+constraint-algorithm = lincs
+constraints = h-bonds
+lincs-iter = 1
+lincs-order = 4
+continuation = yes
+
+;Neighbour searching
+cutoff-scheme = Verlet
+ns-type = grid
+rcoulomb = 1.0
+vdwtype = cut-off
+rvdw = 1.0
+nstlist = 10
+rlist = 1
+
+;Eletrostatics
+coulombtype = PME
+pme-order = 4
+fourierspacing = 0.12
+fourier-nx = 0
+fourier-ny = 0
+fourier-nz = 0
+ewald-rtol = 1e-5
+
+;Temperature coupling
+tcoupl = V-rescale
+tc-grps = Protein Non-Protein
+tau-t = 0.1	  0.1
+ref-t = 300 	  300
+
+;Pressure coupling
+pcoupl = Parrinello-Rahman
+pcoupltype = isotropic
+tau-p = 1.0
+ref-p = 1.0
+compressibility = 4.5e-5
+refcoord-scaling = com
+
+;Dispersion correction
+DispCorr = EnerPres
+
+;Velocity generation
+gen-vel = no
+
+;Periodic boundary conditions
+pbc = xyz
+ld-seed = 1
