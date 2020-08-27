@@ -30,6 +30,7 @@ class Grompp:
         properties (dic):
             * **input_mdp_path** (*str*) - (None) Path of the input MDP file.
             * **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
+
               * **type** (*str*) - ("minimization") Default options for the mdp file. Each one of the listed values creates a different mdp file: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_, `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_, `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_, `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_, index (creates an empty mdp file).
             * **output_mdp_path** (*str*) - ("grompp.mdp") Path of the output MDP file.
             * **output_top_path** (*str*) - ("grompp.top") Path the output topology TOP file.
