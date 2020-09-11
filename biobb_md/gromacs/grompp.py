@@ -15,7 +15,7 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 class Grompp:
     """Wrapper of the GROMACS grompp module.
-    The GROMACS preprocessor module needs to be feeded with the input system
+    The GROMACS preprocessor module needs to be fed with the input system
     and the dynamics parameters to create a portable binary run input file TPR.
     The dynamics parameters are specified in the mdp section of the
     configuration YAML file. The parameter names and defaults are the same as
@@ -23,7 +23,7 @@ class Grompp:
 
     Args:
         input_gro_path (str): Path to the input GROMACS structure GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro>`_. Accepted formats: gro.
-        input_top_zip_path (str): Path the input GROMACS topology TOP and ITP files in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.zip>`_. Accepted formats: zip.
+        input_top_zip_path (str): Path to the input GROMACS topology TOP and ITP files in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.zip>`_. Accepted formats: zip.
         output_tpr_path (str): Path to the output portable binary run file TPR. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_grompp.tpr>`_. Accepted formats: tpr.
         input_cpt_path (str) (Optional): Path to the input GROMACS checkpoint file CPT. File type: input. Accepted formats: cpt.
         input_ndx_path (str) (Optional): Path to the input GROMACS index files NDX. File type: input. Accepted formats: ndx.
@@ -33,7 +33,7 @@ class Grompp:
 
               * **type** (*str*) - ("minimization") Default options for the mdp file. Each one of the listed values creates a different mdp file: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_, `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_, `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_, `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_, index (creates an empty mdp file).
             * **output_mdp_path** (*str*) - ("grompp.mdp") Path of the output MDP file.
-            * **output_top_path** (*str*) - ("grompp.top") Path the output topology TOP file.
+            * **output_top_path** (*str*) - ("grompp.top") Path to the output topology TOP file.
             * **maxwarn** (*int*) - (10) Maximum number of allowed warnings.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
