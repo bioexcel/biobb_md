@@ -46,13 +46,6 @@ class Grompp:
             * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
 
-    Examples:
-        This is a use example of how to use the Grommpp module from Python
-        >>> from biobb_md.gromacs.grompp import Grompp
-        >>> output_gppmin_tpr = 'gppmin.tpr'
-        >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
-        >>> Grompp(input_gro_path=output_genion_gro, input_top_zip_path=output_genion_top_zip, output_tpr_path=output_gppmin_tpr, properties=prop).launch()
-
     """
 
     def __init__(self, input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
@@ -264,7 +257,17 @@ class Grompp:
 
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the GROMACS grompp module."""
+        """Launches the execution of the GROMACS grompp module.
+
+        Examples:
+            This is a use example of how to use the Grommpp module from Python
+
+            >>> from biobb_md.gromacs.grompp import Grompp
+            >>> output_gppmin_tpr = 'gppmin.tpr'
+            >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
+            >>> Grompp(input_gro_path=output_genion_gro, input_top_zip_path=output_genion_top_zip, output_tpr_path=output_gppmin_tpr, properties=prop).launch()
+
+        """
         tmp_files = []
         mdout = 'mdout.mdp'
         tmp_files.append(mdout)
