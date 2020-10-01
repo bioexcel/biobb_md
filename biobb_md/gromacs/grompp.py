@@ -263,9 +263,8 @@ class Grompp:
             This is a use example of how to use the Grommpp module from Python
 
             >>> from biobb_md.gromacs.grompp import Grompp
-            >>> output_gppmin_tpr = 'gppmin.tpr'
             >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
-            >>> Grompp(input_gro_path=output_genion_gro, input_top_zip_path=output_genion_top_zip, output_tpr_path=output_gppmin_tpr, properties=prop).launch()
+            >>> Grompp(input_gro_path='/home/user/myStructure.gro', input_top_zip_path='/home/user/myTopology.zip', output_tpr_path='/home/user/NewCompiledBin.tpr', properties=prop).launch()
 
         """
         tmp_files = []
