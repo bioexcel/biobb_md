@@ -30,3 +30,13 @@ dl.docutils dt {
     font-size: 100%!important;
     color: #404340!important;
 }
+
+@media not all and (min-resolution:.001dpcm)
+{ @supports (-webkit-appearance:none) {
+
+    dl.first.docutils { 
+
+        margin-top:-27px; 
+
+    }
+}}
