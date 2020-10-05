@@ -1,3 +1,4 @@
 $(document).ready(function(){
-	$('.icon.icon-home').html('<img src="_static/logo.png" class="logo" alt="Logo">');
+	var rel_path = $('.icon.icon-home').attr('href').input.split('index.html')[0];
+	$('.icon.icon-home').html('<img src="' + rel_path + '_static/logo.png" class="logo" alt="Logo">');
 });
