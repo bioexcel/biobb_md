@@ -31,6 +31,10 @@ dl.docutils dt {
     color: #404340!important;
 }
 
+.line-block .line:first-child {
+	font-weight: bold;
+    text-transform: uppercase;
+}
 
 @media not all and (min-resolution:.001dpcm)
 { @supports (-webkit-appearance:none) {
