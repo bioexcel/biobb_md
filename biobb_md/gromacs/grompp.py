@@ -14,8 +14,8 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Grompp:
-    """biobb_md Grompp
-    Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module.
+    """biobb_md Grompp|br|
+    Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module.|br|
     The GROMACS preprocessor module needs to be fed with the input system
     and the dynamics parameters to create a portable binary run input file TPR.
     The dynamics parameters are specified in the mdp section of the
