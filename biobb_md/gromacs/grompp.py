@@ -15,13 +15,9 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 class Grompp:
     """
-    | biobb_md Grompp
+    | **biobb_md Grompp**
     | Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module.
-    | The GROMACS preprocessor module needs to be fed with the input system
-    and the dynamics parameters to create a portable binary run input file TPR.
-    The dynamics parameters are specified in the mdp section of the
-    configuration YAML file. The parameter names and defaults are the same as
-    the ones in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
+    | The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The dynamics parameters are specified in the mdp section of the configuration YAML file. The parameter names and defaults are the same as the ones in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
 
     Args:
         input_gro_path (str): Path to the input GROMACS structure GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro>`_. Accepted formats: gro (edam:format_2330).
