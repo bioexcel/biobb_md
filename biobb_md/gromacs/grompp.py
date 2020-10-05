@@ -30,6 +30,7 @@ class Grompp:
         input_ndx_path (str) (Optional): Path to the input GROMACS index files NDX. File type: input. Accepted formats: ndx (edam:format_2330).
         input_mdp_path (str) (Optional): Path of the input GROMACS `MDP file <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_. File type: input. Accepted formats: mdp (edam:format_2330).
         properties (dict): Python dictionary object containing the tool parameters (not input/output files).
+
             * **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
                 * **type** (*str*) - ("minimization") Default options for the mdp file. Each creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Creates a minimization), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (Creates a nvt), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (Creates a npt), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (Creates a free MD), index (Creates an empty mdp file).
             * **maxwarn** (*int*) - (10) [0-1000|1] Maximum number of allowed warnings.
@@ -45,10 +46,12 @@ class Grompp:
             * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
 
     Info:
+
         * wrapped_software:
             * name: GROMACS Grompp
             * version: >5.1
             * license: LGPL 2.1
+
         * ontology:
             * name: EDAM
             * schema: http://edamontology.org/EDAM.owl
