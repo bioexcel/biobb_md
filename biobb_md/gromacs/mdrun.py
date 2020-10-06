@@ -25,6 +25,7 @@ class Mdrun:
         output_dhdl_path (str) (Optional): Path to the output dhdl.xvg file only used when free energy calculation is turned on. File type: output. Accepted formats: xvg.
         properties (dic):
             * **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
+            * **use_gpu** (*bool*) - (False) Use settings appropriate for GPU
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
@@ -57,6 +58,7 @@ class Mdrun:
         self.mpi_bin = properties.get('mpi_bin')
         self.mpi_np = properties.get('mpi_np')
         self.mpi_hostlist = properties.get('mpi_hostlist')
+        self.use_gpu = properties.get('use_gpu', False)
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -120,6 +122,9 @@ class Mdrun:
                '-e', container_io_dict["out"]["output_edr_path"],
                '-g', container_io_dict["out"]["output_log_path"],
                '-nt', self.num_threads]
+        
+        if self.use_gpu: 
+            cmd += ["-nb","gpu","-pme","gpu"]
 
         if self.mpi_bin:
             mpi_cmd = [self.mpi_bin]
