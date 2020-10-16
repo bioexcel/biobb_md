@@ -124,6 +124,7 @@ class Mdrun:
                '-nt', self.num_threads]
         
         if self.use_gpu: 
+            fu.log('Adding GPU specific settings')
             cmd += ["-nb","gpu","-pme","gpu"]
 
         if self.mpi_bin:
