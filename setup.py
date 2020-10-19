@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="biobb_md",
-    version="3.0.0",
+    version="3.0.1",
     author="Biobb developers",
     author_email="pau.andrio@bsc.es",
     description="Biobb_md is the Biobb module collection to perform molecular dynamics simulations.",
@@ -18,7 +18,7 @@ setuptools.setup(
         "Bioexcel": "https://bioexcel.eu/"
     },
     packages=setuptools.find_packages(exclude=['docs', 'test']),
-    install_requires=['biobb_common==3.0.0'],
+    install_requires=['biobb_common==3.0.1'],
     python_requires='==3.7.*',
     classifiers=(
         "Development Status :: 3 - Alpha",
