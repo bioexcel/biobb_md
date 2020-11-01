@@ -55,7 +55,7 @@ class Gmxselect:
         self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
 
         # Properties common in all GROMACS BB
-        self.gmxlib = properties.get('gmxlib', None)
+        self.gmx_lib = properties.get('gmx_lib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
         self.gmx_nobackup = properties.get('gmx_nobackup', True)
         self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
@@ -115,9 +115,9 @@ class Gmxselect:
         cmd.append("\'"+self.selection+"\'")
 
         new_env = None
-        if self.gmxlib:
+        if self.gmx_lib:
             new_env = os.environ.copy()
-            new_env['GMXLIB'] = self.gmxlib
+            new_env['GMXLIB'] = self.gmx_lib
 
         if self.container_path:
             if self.container_path.endswith('singularity'):

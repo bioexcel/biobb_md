@@ -25,7 +25,7 @@ class Mdrun:
         output_dhdl_path (str) (Optional): Path to the output dhdl.xvg file only used when free energy calculation is turned on. File type: output. Accepted formats: xvg.
         properties (dic):
             * **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
-            * **use_gpu** (*bool*) - (False) Use settings appropriate for GPU
+            * **use_gpu** (*bool*) - (False) Use settings appropriate for GPU. Adds: -nb gpu -pme gpu
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
@@ -70,7 +70,7 @@ class Mdrun:
         self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
 
         # Properties common in all GROMACS BB
-        self.gmxlib = properties.get('gmxlib', None)
+        self.gmx_lib = properties.get('gmx_lib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
         self.gmx_nobackup = properties.get('gmx_nobackup', True)
         self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
@@ -129,7 +129,7 @@ class Mdrun:
             cmd += [self.dev]
         
         if self.use_gpu: 
-            fu.log('Adding GPU specific settings')
+            fu.log('Adding GPU specific settings adds: -nb gpu -pme gpu')
             cmd += ["-nb","gpu","-pme","gpu"]
 
         if self.mpi_bin:
@@ -152,9 +152,9 @@ class Mdrun:
             cmd.append(container_io_dict["out"]["output_dhdl_path"])
 
         new_env = None
-        if self.gmxlib:
+        if self.gmx_lib:
             new_env = os.environ.copy()
-            new_env['GMXLIB'] = self.gmxlib
+            new_env['GMXLIB'] = self.gmx_lib
 
         cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
                                  host_volume=container_io_dict.get("unique_dir"),
