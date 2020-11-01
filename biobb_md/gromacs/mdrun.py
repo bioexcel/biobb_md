@@ -135,7 +135,7 @@ class Mdrun:
         if self.mpi_bin:
             mpi_cmd = [self.mpi_bin]
             if self.mpi_np:
-                mpi_cmd.append('-np')
+                mpi_cmd.append('-n')
                 mpi_cmd.append(str(self.mpi_np))
             if self.mpi_hostlist:
                 mpi_cmd.append('-hostfile')
