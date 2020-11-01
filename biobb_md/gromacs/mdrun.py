@@ -59,6 +59,7 @@ class Mdrun:
         self.mpi_np = properties.get('mpi_np')
         self.mpi_hostlist = properties.get('mpi_hostlist')
         self.use_gpu = properties.get('use_gpu', False)
+        self.dev = properties.get('dev')  # Not documented and not listed option, only for devs
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -122,6 +123,10 @@ class Mdrun:
                '-e', container_io_dict["out"]["output_edr_path"],
                '-g', container_io_dict["out"]["output_log_path"],
                '-nt', self.num_threads]
+
+        if self.dev:
+            fu.log(f'Adding development options: {self.dev}')
+            cmd += [self.dev]
         
         if self.use_gpu: 
             fu.log('Adding GPU specific settings')
