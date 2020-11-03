@@ -19,8 +19,6 @@ class Pdb2gmx:
         output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.gro>`_. Accepted formats: gro.
         output_top_zip_path (str): Path the output TOP topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.zip>`_. Accepted formats: zip.
         properties (dic):
-            * **output_top_path** (*str*) - ("p2g.top") Path of the output TOP file.
-            * **output_itp_path** (*str*) - ("p2g.itp") Path of the output itp file.
             * **water_type** (*str*) - ("spce") Water molecule type. Valid values: spc, spce, tip3p, tip4p, tip5p, tips3p.
             * **force_field** (*str*) - ("amber99sb-ildn") Force field to be used during the conversion. Valid values: gromos45a3, charmm27, gromos53a6, amber96, amber99, gromos43a2, gromos54a7, gromos43a1, amberGS, gromos53a5, amber99sb, amber03, amber99sb-ildn, oplsaa, amber94.
             * **ignh** (*bool*) - (False) Should pdb2gmx ignore the hidrogens in the original structure.
@@ -50,8 +48,8 @@ class Pdb2gmx:
         }
 
         # Properties specific for BB
-        self.output_top_path = properties.get('output_top_path', 'p2g.top')
-        self.output_itp_path = properties.get('output_itp_path', 'posre.itp')
+        self.internal_top_name = properties.get('internal_top_name', 'p2g.top') # Excluded from documentation for simplicity
+        self.internal_itp_name = properties.get('internal_itp_name', 'posre.itp') # Excluded from documentation for simplicity
         self.water_type = properties.get('water_type', 'spce')
         self.force_field = properties.get('force_field', 'amber99sb-ildn')
         self.ignh = properties.get('ignh', False)
@@ -113,16 +111,16 @@ class Pdb2gmx:
 
         container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
-        output_top_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_top_path)
-        output_itp_path = fu.create_name(prefix=self.prefix, step=self.step, name=self.output_itp_path)
+        internal_top_name = fu.create_name(prefix=self.prefix, step=self.step, name=self.internal_top_name)
+        internal_itp_name = fu.create_name(prefix=self.prefix, step=self.step, name=self.internal_itp_name)
 
         cmd = [self.gmx_path, "pdb2gmx",
                "-f", container_io_dict["in"]["input_pdb_path"],
                "-o", container_io_dict["out"]["output_gro_path"],
-               "-p", output_top_path,
+               "-p", internal_top_name,
                "-water", self.water_type,
                "-ff", self.force_field,
-               "-i", output_itp_path]
+               "-i", internal_itp_name]
 
         if self.his:
             cmd.append("-his")
@@ -150,15 +148,15 @@ class Pdb2gmx:
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
 
         if self.container_path:
-            output_top_path = os.path.join(container_io_dict.get("unique_dir"), output_top_path)
+            internal_top_name = os.path.join(container_io_dict.get("unique_dir"), internal_top_name)
 
         # zip topology
         fu.log('Compressing topology to: %s' % container_io_dict["out"]["output_top_zip_path"], out_log,
                self.global_log)
-        fu.zip_top(zip_file=self.io_dict["out"]["output_top_zip_path"], top_file=output_top_path, out_log=out_log)
+        fu.zip_top(zip_file=self.io_dict["out"]["output_top_zip_path"], top_file=internal_top_name, out_log=out_log)
 
-        tmp_files.append(self.output_top_path)
-        tmp_files.append(self.output_itp_path)
+        tmp_files.append(self.internal_top_name)
+        tmp_files.append(self.internal_itp_name)
         tmp_files.append(container_io_dict.get("unique_dir"))
         if self.remove_tmp:
             fu.rm_file_list(tmp_files, out_log=out_log)
