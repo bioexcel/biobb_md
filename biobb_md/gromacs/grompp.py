@@ -54,19 +54,21 @@ class Grompp:
     """
 
     def __init__(self, input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
-                 input_cpt_path: str = None, input_ndx_path: str = None, properties: dict = None, **kwargs) -> None:
+                 input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
+                 properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
         self.io_dict = {
-            "in": {"input_gro_path": input_gro_path, "input_cpt_path": input_cpt_path, "input_ndx_path": input_ndx_path},
+            "in": {"input_gro_path": input_gro_path, "input_cpt_path": input_cpt_path,
+                   "input_ndx_path": input_ndx_path, "input_mdp_path": input_mdp_path},
             "out": {"output_tpr_path": output_tpr_path}
         }
         # Should not be copied inside container
         self.input_top_zip_path = input_top_zip_path
 
         # Properties specific for BB
-        self.input_mdp_path = properties.get('input_mdp_path', None)
+
         self.output_mdp_path = properties.get('output_mdp_path', 'grompp.mdp')
         self.output_top_path = properties.get('output_top_path', 'grompp.top')
         #TODO REVIEW: When select is implemented.
@@ -299,8 +301,8 @@ class Grompp:
 
         container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
-        if self.input_mdp_path:
-            self.output_mdp_path = self.input_mdp_path
+        if self.io_dict["in"]["input_mdp_path"]:
+            self.output_mdp_path = self.io_dict["in"]["input_mdp_path"]
         else:
             mdp_dir = fu.create_unique_dir()
             tmp_files.append(mdp_dir)
