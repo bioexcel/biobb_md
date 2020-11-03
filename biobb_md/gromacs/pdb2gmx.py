@@ -25,6 +25,7 @@ class Pdb2gmx:
             * **force_field** (*str*) - ("amber99sb-ildn") Force field to be used during the conversion. Valid values: gromos45a3, charmm27, gromos53a6, amber96, amber99, gromos43a2, gromos54a7, gromos43a1, amberGS, gromos53a5, amber99sb, amber03, amber99sb-ildn, oplsaa, amber94.
             * **ignh** (*bool*) - (False) Should pdb2gmx ignore the hidrogens in the original structure.
             * **his** (*str*) - (None) Histidine protonation array.
+            * **merge** (*bool*) - (False) Merge all chains into a single molecule.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
@@ -55,6 +56,7 @@ class Pdb2gmx:
         self.force_field = properties.get('force_field', 'amber99sb-ildn')
         self.ignh = properties.get('ignh', False)
         self.his = properties.get('his', None)
+        self.merge = properties.get('merge', False)
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -127,6 +129,9 @@ class Pdb2gmx:
             cmd = ['echo', self.his, '|'] + cmd
         if self.ignh:
             cmd.append("-ignh")
+        if self.merge:
+            cmd.append("-merge")
+            cmd.append("all")
 
         new_env = None
         if self.gmx_lib:
