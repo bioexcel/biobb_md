@@ -24,13 +24,18 @@ class Mdrun:
         output_cpt_path (str) (Optional): Path to the output GROMACS checkpoint file CPT. File type: output. Accepted formats: cpt.
         output_dhdl_path (str) (Optional): Path to the output dhdl.xvg file only used when free energy calculation is turned on. File type: output. Accepted formats: xvg.
         properties (dic):
-            * **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
-            * **use_gpu** (*bool*) - (False) Use settings appropriate for GPU. Adds: -nb gpu -pme gpu
-            * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
-            * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
             * **mpi_np** (*str*) - (None) Number of MPI processes. Usually an integer bigger than 1.
             * **mpi_hostlist** (*str*) - (None) Path to the MPI hostlist file.
+            * **num_threads** (*int*) - (0) Let GROMACS guess. The number of threads that are going to be used.
+            * **num_threads_mpi** (*int*) - (0) Let GROMACS guess. The number of GROMACS MPI threads that are going to be used.
+            * **num_threads_omp** (*int*) - (0) Let GROMACS guess. The number of GROMACS OPENMP threads that are going to be used.
+            * **num_threads_omp_pme** (*int*) - (0) Let GROMACS guess. The number of GROMACS OPENMP_PME threads that are going to be used.
+            * **use_gpu** (*bool*) - (False) Use settings appropriate for GPU. Adds: -nb gpu -pme gpu
+            * **gpu_id** (*str*) - (None) List of unique GPU device IDs available to use.
+            * **gpu_tasks** (*str*) - (None) List of GPU device IDs, mapping each PP task on each node to a device.
+            * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
+            * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
             * **container_path** (*str*) - (None)  Path to the binary executable of your container.
@@ -54,12 +59,22 @@ class Mdrun:
         }
 
         # Properties specific for BB
-        self.num_threads = str(properties.get('num_threads', 0))
+        # general mpi properties
         self.mpi_bin = properties.get('mpi_bin')
         self.mpi_np = properties.get('mpi_np')
         self.mpi_hostlist = properties.get('mpi_hostlist')
-        self.use_gpu = properties.get('use_gpu', False)
-        self.dev = properties.get('dev')  # Not documented and not listed option, only for devs
+        # gromacs cpu mpi/openmp properties
+        self.num_threads = str(properties.get('num_threads', ''))
+        self.num_threads_mpi = str(properties.get('num_threads_mpi', ''))
+        self.num_threads_omp = str(properties.get('num_threads_omp', ''))
+        self.num_threads_omp_pme = str(properties.get('num_threads_omp_pme', ''))
+        # gromacs gpus
+        self.use_gpu = properties.get('use_gpu', False)  # Adds: -nb gpu -pme gpu
+        self.gpu_id = str(properties.get('gpu_id', ''))
+        self.gpu_tasks = str(properties.get('gpu_tasks', ''))
+        # Not documented and not listed option, only for devs
+        self.dev = properties.get('dev')
+
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -121,26 +136,7 @@ class Mdrun:
                '-o', container_io_dict["out"]["output_trr_path"],
                '-c', container_io_dict["out"]["output_gro_path"],
                '-e', container_io_dict["out"]["output_edr_path"],
-               '-g', container_io_dict["out"]["output_log_path"],
-               '-nt', self.num_threads]
-
-        if self.dev:
-            fu.log(f'Adding development options: {self.dev}')
-            cmd += [self.dev]
-        
-        if self.use_gpu: 
-            fu.log('Adding GPU specific settings adds: -nb gpu -pme gpu')
-            cmd += ["-nb","gpu","-pme","gpu"]
-
-        if self.mpi_bin:
-            mpi_cmd = [self.mpi_bin]
-            if self.mpi_np:
-                mpi_cmd.append('-n')
-                mpi_cmd.append(str(self.mpi_np))
-            if self.mpi_hostlist:
-                mpi_cmd.append('-hostfile')
-                mpi_cmd.append(self.mpi_hostlist)
-            cmd = mpi_cmd + cmd
+               '-g', container_io_dict["out"]["output_log_path"]]
         if container_io_dict["out"].get("output_xtc_path"):
             cmd.append('-x')
             cmd.append(container_io_dict["out"]["output_xtc_path"])
@@ -150,6 +146,52 @@ class Mdrun:
         if container_io_dict["out"].get("output_dhdl_path"):
             cmd.append('-dhdl')
             cmd.append(container_io_dict["out"]["output_dhdl_path"])
+
+        # general mpi properties
+        if self.mpi_bin:
+            mpi_cmd = [self.mpi_bin]
+            if self.mpi_np:
+                mpi_cmd.append('-n')
+                mpi_cmd.append(str(self.mpi_np))
+            if self.mpi_hostlist:
+                mpi_cmd.append('-hostfile')
+                mpi_cmd.append(self.mpi_hostlist)
+            cmd = mpi_cmd + cmd
+
+        # gromacs cpu mpi/openmp properties
+        if self.num_threads:
+            fu.log(f'User added number of gmx threads: {self.num_threads}')
+            cmd.append('-nt')
+            cmd.append(self.num_threads)
+        if self.num_threads_mpi:
+            fu.log(f'User added number of gmx mpi threads: {self.num_threads_mpi}')
+            cmd.append('-ntmpi')
+            cmd.append(self.num_threads_mpi)
+        if self.num_threads_omp:
+            fu.log(f'User added number of gmx omp threads: {self.num_threads_omp}')
+            cmd.append('-ntomp')
+            cmd.append(self.num_threads_omp)
+        if self.num_threads_omp_pme:
+            fu.log(f'User added number of gmx omp_pme threads: {self.num_threads_omp_pme}')
+            cmd.append('-ntomp_pme')
+            cmd.append(self.num_threads_omp_pme)
+        # GMX gpu properties
+        if self.use_gpu: 
+            fu.log('Adding GPU specific settings adds: -nb gpu -pme gpu')
+            cmd += ["-nb","gpu","-pme","gpu"]
+        if self.gpu_id:
+            fu.log(f'User added a list of unique GPU device IDs available to use: {self.gpu_id}')
+            cmd.append('-gpu_id')
+            cmd.append(self.gpu_id)
+        if self.gpu_tasks:
+            fu.log(f'User added a list of GPU device IDs, mapping each PP task on each node to a device: {self.gpu_tasks}')
+            cmd.append('-gputasks')
+            cmd.append(self.gpu_tasks)
+        # Not documented and not listed option, only for devs
+        if self.dev:
+            fu.log(f'Adding development options: {self.dev}')
+            cmd += [self.dev.split()]
+
 
         new_env = None
         if self.gmx_lib:
