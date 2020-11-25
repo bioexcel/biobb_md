@@ -75,6 +75,7 @@ class Grompp:
         #TODO REVIEW:  this two attributes
         self.nsteps = ''
         self.dt = ''
+        self.properties = properties
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -385,6 +386,7 @@ def main():
     required_args.add_argument('--input_top_zip_path', required=True)
     required_args.add_argument('--output_tpr_path', required=True)
     parser.add_argument('--input_cpt_path', required=False)
+    parser.add_argument('--input_mdp_path', required=False)
     parser.add_argument('--input_ndx_path', required=False)
 
     args = parser.parse_args()
@@ -394,7 +396,7 @@ def main():
     # Specific call of each building block
     Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path,
            output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path,
-           input_ndx_path=args.input_ndx_path, properties=properties).launch()
+           input_ndx_path=args.input_ndx_path, input_mdp_path=args.input_mdp_path, properties=properties).launch()
 
 
 if __name__ == '__main__':
