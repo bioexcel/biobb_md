@@ -28,7 +28,7 @@ class Grompp:
         input_mdp_path (str) (Optional): Path to the input GROMACS `MDP file <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_. File type: input. Accepted formats: mdp (edam:format_2330).
         properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
-                * **type** (*str*) - ("minimization") Default options for the mdp file. Each creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Energy minimization using steepest descent algorithm is used), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (substance N, Volume V and Temperature T are conserved), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (substance N, pressure P and Temperature T are conserved), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (No dessing constraints applied, Free MD), index (Creates an empty mdp file).
+            * **simulation_type** (*str*) - ("minimization") Default options for the mdp file. Each creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Energy minimization using steepest descent algorithm is used), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (substance N, Volume V and Temperature T are conserved), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (substance N, pressure P and Temperature T are conserved), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (No dessing constraints applied, Free MD), index (Creates an empty mdp file).
             * **maxwarn** (*int*) - (10) [0-1000|1] Maximum number of allowed warnings.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
@@ -114,7 +114,11 @@ class Grompp:
 
         self.output_mdp_path = path
 
-        sim_type = self.mdp.get('type', 'minimization')
+        sim_type = self.properties.get('simulation_type', None)
+        if not sim_type:
+            sim_type = self.mdp.get('type', None)
+            if not sim_type:
+                sim_type = 'minimization'
         minimization = (sim_type == 'minimization')
         nvt = (sim_type == 'nvt')
         npt = (sim_type == 'npt')
