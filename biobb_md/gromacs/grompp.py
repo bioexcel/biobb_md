@@ -66,9 +66,9 @@ class Grompp:
         self.input_top_zip_path = input_top_zip_path
 
         # Properties specific for BB
-
         self.output_mdp_path = properties.get('output_mdp_path', 'grompp.mdp')
         self.output_top_path = properties.get('output_top_path', 'grompp.top')
+        self.sim_type = properties.get('simulation_type', None)
         #TODO REVIEW: When select is implemented.
         self.maxwarn = str(properties.get('maxwarn', 10))
         self.mdp = {k: str(v) for k, v in properties.get('mdp', dict()).items()}
@@ -114,18 +114,17 @@ class Grompp:
 
         self.output_mdp_path = path
 
-        sim_type = self.properties.get('simulation_type', None)
-        if not sim_type:
-            sim_type = self.mdp.get('type', None)
-            if not sim_type:
-                sim_type = 'minimization'
-        minimization = (sim_type == 'minimization')
-        nvt = (sim_type == 'nvt')
-        npt = (sim_type == 'npt')
-        free = (sim_type == 'free')
-        index = (sim_type == 'index')
+        if not self.sim_type:
+            self.sim_type = self.mdp.get('type', None)
+            if not self.sim_type:
+                self.sim_type = 'minimization'
+        minimization = (self.sim_type == 'minimization')
+        nvt = (self.sim_type == 'nvt')
+        npt = (self.sim_type == 'npt')
+        free = (self.sim_type == 'free')
+        index = (self.sim_type == 'index')
         md = (nvt or npt or free)
-        mdp_list.append(";Type of MDP: " + sim_type)
+        mdp_list.append(";Type of MDP: " + self.sim_type)
 
         # Position restrain
         if not free:
@@ -243,7 +242,7 @@ class Grompp:
         mdp_list.append("pbc = " + self.mdp.pop('pbc', 'xyz'))
 
         if index:
-            mdp_list =[";This mdp file has been created by the pymdsetup.gromacs_wrapper.grompp.create_mdp()"]
+            mdp_list = [";This mdp file has been created by the pymdsetup.gromacs_wrapper.grompp.create_mdp()"]
 
         mdp_list.insert(0, ";This mdp file has been created by the pymdsetup.gromacs_wrapper.grompp.create_mdp()")
 
@@ -386,6 +385,7 @@ def main():
     required_args.add_argument('--output_tpr_path', required=True)
     parser.add_argument('--input_cpt_path', required=False)
     parser.add_argument('--input_ndx_path', required=False)
+    parser.add_argument('--input_mdp_path', required=False)
 
     args = parser.parse_args()
     config = args.config if args.config else None
@@ -394,7 +394,7 @@ def main():
     # Specific call of each building block
     Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path,
            output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path,
-           input_ndx_path=args.input_ndx_path, properties=properties).launch()
+           input_ndx_path=args.input_ndx_path, input_mdp_path=args.input_mdp_path, properties=properties).launch()
 
 
 if __name__ == '__main__':
