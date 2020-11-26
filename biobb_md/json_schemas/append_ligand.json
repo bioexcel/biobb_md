@@ -1,8 +1,11 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/append_ligand",
-    "title": "This class takes a ligand ITP file and inserts it in a topology.",
+    "name": null,
+    "title": null,
+    "description": null,
     "type": "object",
+    "info": [],
     "required": [
         "input_top_zip_path",
         "input_itp_path",
@@ -16,6 +19,12 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.zip",
             "enum": [
                 ".*\\.zip$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.zip$",
+                    "description": "Path the input topology TOP and ITP files zipball"
+                }
             ]
         },
         "input_itp_path": {
@@ -25,6 +34,12 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/pep_ligand.itp",
             "enum": [
                 ".*\\.itp$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.itp$",
+                    "description": "Path to the ligand ITP file to be inserted in the topology"
+                }
             ]
         },
         "output_top_zip_path": {
@@ -34,6 +49,12 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs_extra/ref_appendligand.zip",
             "enum": [
                 ".*\\.zip$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.zip$",
+                    "description": "Path/Name the output topology TOP and ITP files zipball"
+                }
             ]
         },
         "properties": {
@@ -42,17 +63,20 @@
                 "posres_name": {
                     "type": "string",
                     "default": "POSRES_LIGAND",
+                    "wf_prop": false,
                     "description": "String to be included in the ifdef clause."
                 },
                 "remove_tmp": {
                     "type": "boolean",
                     "default": true,
-                    "description": "[WF property] Remove temporal files."
+                    "wf_prop": true,
+                    "description": "Remove temporal files."
                 },
                 "restart": {
                     "type": "boolean",
                     "default": false,
-                    "description": "[WF property] Do not execute if output files exist."
+                    "wf_prop": true,
+                    "description": "Do not execute if output files exist."
                 }
             }
         }

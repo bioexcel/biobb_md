@@ -1,8 +1,21 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/mdrun",
-    "title": "Wrapper of the `GROMACS mdrun <http://manual.gromacs.org/current/onlinehelp/gmx-mdrun.html>`_ module.",
+    "name": "biobb_md.gromacs.mdrun Mdrun",
+    "title": "Wrapper of the GROMACS mdrun module.",
+    "description": "MDRun is the main computational chemistry engine within GROMACS. It performs Molecular Dynamics simulations, but it can also perform Stochastic Dynamics, Energy Minimization, test particle insertion or (re)calculation of energies.",
     "type": "object",
+    "info": {
+        "wrapped_software": {
+            "name": "GROMACS MDRun",
+            "version": ">5.1",
+            "license": "LGPL 2.1"
+        },
+        "ontology": {
+            "name": "EDAM",
+            "schema": "http://edamontology.org/EDAM.owl"
+        }
+    },
     "required": [
         "input_tpr_path",
         "output_trr_path",
@@ -18,6 +31,13 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/mdrun.tpr",
             "enum": [
                 ".*\\.tpr$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.tpr$",
+                    "description": "Path to the portable binary run input file TPR",
+                    "edam": "format_2333"
+                }
             ]
         },
         "output_trr_path": {
@@ -27,6 +47,13 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.trr",
             "enum": [
                 ".*\\.trr$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.trr$",
+                    "description": "Path to the GROMACS uncompressed raw trajectory file TRR",
+                    "edam": "format_3910"
+                }
             ]
         },
         "output_gro_path": {
@@ -36,6 +63,13 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.gro",
             "enum": [
                 ".*\\.gro$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.gro$",
+                    "description": "Path to the output GROMACS structure GRO file",
+                    "edam": "format_2033"
+                }
             ]
         },
         "output_edr_path": {
@@ -45,6 +79,13 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.edr",
             "enum": [
                 ".*\\.edr$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.edr$",
+                    "description": "Path to the output GROMACS portable energy file EDR",
+                    "edam": "format_2330"
+                }
             ]
         },
         "output_log_path": {
@@ -54,6 +95,13 @@
             "sample": null,
             "enum": [
                 ".*\\.log$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.log$",
+                    "description": "Path to the output GROMACS trajectory log file LOG",
+                    "edam": "format_2330"
+                }
             ]
         },
         "output_xtc_path": {
@@ -63,6 +111,13 @@
             "sample": null,
             "enum": [
                 ".*\\.xtc$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.xtc$",
+                    "description": "Path to the GROMACS compressed trajectory file XTC",
+                    "edam": "format_3875"
+                }
             ]
         },
         "output_cpt_path": {
@@ -72,83 +127,152 @@
             "sample": null,
             "enum": [
                 ".*\\.cpt$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.cpt$",
+                    "description": "Path to the output GROMACS checkpoint file CPT",
+                    "edam": "format_2333"
+                }
             ]
         },
         "output_dhdl_path": {
             "type": "string",
-            "description": "Path to the output dhdl",
+            "description": "Path to the output dhdl.xvg file only used when free energy calculation is turned on",
             "filetype": "output",
             "sample": null,
             "enum": [
                 ".*\\.xvg$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.xvg$",
+                    "description": "Path to the output dhdl.xvg file only used when free energy calculation is turned on",
+                    "edam": "format_2033"
+                }
             ]
         },
         "properties": {
             "type": "object",
             "properties": {
-                "num_threads": {
-                    "type": "number",
-                    "default": 0,
-                    "description": "Let GROMACS guess. The number of threads that are going to be used."
-                },
-                "gmx_path": {
-                    "type": "string",
-                    "default": "gmx",
-                    "description": "Path to the GROMACS executable binary."
-                },
                 "mpi_bin": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "Path to the MPI runner. Usually \"mpirun\" or \"srun\"."
                 },
                 "mpi_np": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "Number of MPI processes. Usually an integer bigger than 1."
                 },
                 "mpi_hostlist": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "Path to the MPI hostlist file."
+                },
+                "num_threads": {
+                    "type": "integer",
+                    "default": 0,
+                    "wf_prop": true,
+                    "description": "Let GROMACS guess. The number of threads that are going to be used."
+                },
+                "num_threads_mpi": {
+                    "type": "integer",
+                    "default": 0,
+                    "wf_prop": true,
+                    "description": "Let GROMACS guess. The number of GROMACS MPI threads that are going to be used."
+                },
+                "num_threads_omp": {
+                    "type": "integer",
+                    "default": 0,
+                    "wf_prop": true,
+                    "description": "Let GROMACS guess. The number of GROMACS OPENMP threads that are going to be used."
+                },
+                "num_threads_omp_pme": {
+                    "type": "integer",
+                    "default": 0,
+                    "wf_prop": true,
+                    "description": "Let GROMACS guess. The number of GROMACS OPENMP_PME threads that are going to be used."
+                },
+                "use_gpu": {
+                    "type": "boolean",
+                    "default": false,
+                    "wf_prop": false,
+                    "description": "Use settings appropriate for GPU. Adds: -nb gpu -pme gpu"
+                },
+                "gpu_id": {
+                    "type": "string",
+                    "default": null,
+                    "wf_prop": false,
+                    "description": "List of unique GPU device IDs available to use."
+                },
+                "gpu_tasks": {
+                    "type": "string",
+                    "default": null,
+                    "wf_prop": false,
+                    "description": "List of GPU device IDs, mapping each PP task on each node to a device."
+                },
+                "gmx_lib": {
+                    "type": "string",
+                    "default": null,
+                    "wf_prop": false,
+                    "description": "Path set GROMACS GMXLIB environment variable."
+                },
+                "gmx_path": {
+                    "type": "string",
+                    "default": "gmx",
+                    "wf_prop": false,
+                    "description": "Path to the GROMACS executable binary."
                 },
                 "remove_tmp": {
                     "type": "boolean",
                     "default": true,
-                    "description": "[WF property] Remove temporal files."
+                    "wf_prop": true,
+                    "description": "Remove temporal files."
                 },
                 "restart": {
                     "type": "boolean",
                     "default": false,
-                    "description": "[WF property] Do not execute if output files exist."
+                    "wf_prop": true,
+                    "description": "Do not execute if output files exist."
                 },
                 "container_path": {
                     "type": "string",
                     "default": null,
-                    "description": " Path to the binary executable of your container."
+                    "wf_prop": false,
+                    "description": "Path to the binary executable of your container."
                 },
                 "container_image": {
                     "type": "string",
                     "default": "gromacs/gromacs:latest",
+                    "wf_prop": false,
                     "description": "Container Image identifier."
                 },
                 "container_volume_path": {
                     "type": "string",
                     "default": "/data",
+                    "wf_prop": false,
                     "description": "Path to an internal directory in the container."
                 },
                 "container_working_dir": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "Path to the internal CWD in the container."
                 },
                 "container_user_id": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "User number id to be mapped inside the container."
                 },
                 "container_shell_path": {
                     "type": "string",
                     "default": "/bin/bash",
+                    "wf_prop": false,
                     "description": "Path to the binary executable of the container shell."
                 }
             }

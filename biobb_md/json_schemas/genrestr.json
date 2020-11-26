@@ -1,8 +1,11 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/genrestr",
-    "title": "Wrapper class for the `GROMACS genrestr <http://manual.gromacs.org/current/onlinehelp/gmx-genrestr.html>`_ module.",
+    "name": null,
+    "title": null,
+    "description": null,
     "type": "object",
+    "info": [],
     "required": [
         "input_structure_path",
         "input_ndx_path",
@@ -18,6 +21,20 @@
                 ".*\\.pdb$",
                 ".*\\.gro$",
                 ".*\\.tpr$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.pdb$",
+                    "description": "Path to the input structure PDB, GRO or TPR format"
+                },
+                {
+                    "extension": ".*\\.gro$",
+                    "description": "Path to the input structure PDB, GRO or TPR format"
+                },
+                {
+                    "extension": ".*\\.tpr$",
+                    "description": "Path to the input structure PDB, GRO or TPR format"
+                }
             ]
         },
         "input_ndx_path": {
@@ -27,6 +44,12 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.ndx",
             "enum": [
                 ".*\\.ndx$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.ndx$",
+                    "description": "Path to the input GROMACS index file, NDX format"
+                }
             ]
         },
         "output_itp_path": {
@@ -36,6 +59,12 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genrestr.itp",
             "enum": [
                 ".*\\.itp$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.itp$",
+                    "description": "Path the output ITP topology file with restrains"
+                }
             ]
         },
         "properties": {
@@ -44,56 +73,73 @@
                 "restrained_group": {
                     "type": "string",
                     "default": "system",
+                    "wf_prop": false,
                     "description": "Index group that will be restrained."
                 },
                 "force_constants": {
                     "type": "string",
                     "default": "500 500 500",
+                    "wf_prop": false,
                     "description": "Array of three floats defining the force constants"
+                },
+                "gmx_lib": {
+                    "type": "string",
+                    "default": null,
+                    "wf_prop": false,
+                    "description": "Path set GROMACS GMXLIB environment variable."
                 },
                 "gmx_path": {
                     "type": "string",
                     "default": "gmx",
+                    "wf_prop": false,
                     "description": "Path to the GROMACS executable binary."
                 },
                 "remove_tmp": {
                     "type": "boolean",
                     "default": true,
-                    "description": "[WF property] Remove temporal files."
+                    "wf_prop": true,
+                    "description": "Remove temporal files."
                 },
                 "restart": {
                     "type": "boolean",
                     "default": false,
-                    "description": "[WF property] Do not execute if output files exist."
+                    "wf_prop": true,
+                    "description": "Do not execute if output files exist."
                 },
                 "container_path": {
                     "type": "string",
                     "default": null,
-                    "description": " Path to the binary executable of your container."
+                    "wf_prop": false,
+                    "description": "Path to the binary executable of your container."
                 },
                 "container_image": {
                     "type": "string",
                     "default": "gromacs/gromacs:latest",
+                    "wf_prop": false,
                     "description": "Container Image identifier."
                 },
                 "container_volume_path": {
                     "type": "string",
                     "default": "/data",
+                    "wf_prop": false,
                     "description": "Path to an internal directory in the container."
                 },
                 "container_working_dir": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "Path to the internal CWD in the container."
                 },
                 "container_user_id": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "User number id to be mapped inside the container."
                 },
                 "container_shell_path": {
                     "type": "string",
                     "default": "/bin/bash",
+                    "wf_prop": false,
                     "description": "Path to the binary executable of the container shell."
                 }
             }

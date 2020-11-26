@@ -1,8 +1,11 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/editconf",
-    "title": "Wrapper class for the `GROMACS editconf <http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html>`_ module.",
+    "name": null,
+    "title": null,
+    "description": null,
     "type": "object",
+    "info": [],
     "required": [
         "input_gro_path",
         "output_gro_path"
@@ -15,6 +18,12 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/editconf.gro",
             "enum": [
                 ".*\\.gro$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.gro$",
+                    "description": "Path to the input GRO file"
+                }
             ]
         },
         "output_gro_path": {
@@ -24,69 +33,93 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_editconf.gro",
             "enum": [
                 ".*\\.gro$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.gro$",
+                    "description": "Path to the output GRO file"
+                }
             ]
         },
         "properties": {
             "type": "object",
             "properties": {
                 "distance_to_molecule": {
-                    "type": "float",
+                    "type": "number",
                     "default": 1.0,
+                    "wf_prop": false,
                     "description": "Distance of the box from the outermost atom in nm. ie 1.0nm = 10 Angstroms."
                 },
                 "box_type": {
                     "type": "string",
                     "default": "cubic",
-                    "description": "-bt option."
+                    "wf_prop": false,
+                    "description": "Geometrical shape of the solvent box. Available box types: (http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html) -bt option."
                 },
                 "center_molecule": {
                     "type": "boolean",
                     "default": true,
+                    "wf_prop": false,
                     "description": "Center molecule in the box."
+                },
+                "gmx_lib": {
+                    "type": "string",
+                    "default": null,
+                    "wf_prop": false,
+                    "description": "Path set GROMACS GMXLIB environment variable."
                 },
                 "gmx_path": {
                     "type": "string",
                     "default": "gmx",
+                    "wf_prop": false,
                     "description": "Path to the GROMACS executable binary."
                 },
                 "remove_tmp": {
                     "type": "boolean",
                     "default": true,
-                    "description": "[WF property] Remove temporal files."
+                    "wf_prop": true,
+                    "description": "Remove temporal files."
                 },
                 "restart": {
                     "type": "boolean",
                     "default": false,
-                    "description": "[WF property] Do not execute if output files exist."
+                    "wf_prop": true,
+                    "description": "Do not execute if output files exist."
                 },
                 "container_path": {
                     "type": "string",
                     "default": null,
-                    "description": " Path to the binary executable of your container."
+                    "wf_prop": false,
+                    "description": "Path to the binary executable of your container."
                 },
                 "container_image": {
                     "type": "string",
                     "default": "gromacs/gromacs:latest",
+                    "wf_prop": false,
                     "description": "Container Image identifier."
                 },
                 "container_volume_path": {
                     "type": "string",
                     "default": "/data",
+                    "wf_prop": false,
                     "description": "Path to an internal directory in the container."
                 },
                 "container_working_dir": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "Path to the internal CWD in the container."
                 },
                 "container_user_id": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "User number id to be mapped inside the container."
                 },
                 "container_shell_path": {
                     "type": "string",
                     "default": "/bin/bash",
+                    "wf_prop": false,
                     "description": "Path to the binary executable of the container shell."
                 }
             }
