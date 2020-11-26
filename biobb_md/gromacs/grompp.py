@@ -75,7 +75,6 @@ class Grompp:
         #TODO REVIEW:  this two attributes
         self.nsteps = ''
         self.dt = ''
-        self.properties = properties
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -385,7 +384,6 @@ def main():
     required_args.add_argument('--input_top_zip_path', required=True)
     required_args.add_argument('--output_tpr_path', required=True)
     parser.add_argument('--input_cpt_path', required=False)
-    parser.add_argument('--input_mdp_path', required=False)
     parser.add_argument('--input_ndx_path', required=False)
     parser.add_argument('--input_mdp_path', required=False)
 
