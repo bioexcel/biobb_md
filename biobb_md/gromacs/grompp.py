@@ -15,7 +15,7 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 class Grompp:
     """
-    | biobb_md.gromacs.grompp Grompp
+    | biobb_md Grompp
     | Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module.
     | The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The dynamics parameters are specified in the mdp section of the configuration YAML file. The parameter names and defaults are the same as the ones in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
 
@@ -27,19 +27,19 @@ class Grompp:
         input_ndx_path (str) (Optional): Path to the input GROMACS index files NDX. File type: input. Accepted formats: ndx (edam:format_2330).
         input_mdp_path (str) (Optional): Path to the input GROMACS `MDP file <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_. File type: input. Accepted formats: mdp (edam:format_2330).
         properties (dict - Python dictionary object containing the tool parameters, not input/output files):
-            * **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
-            * **simulation_type** (*str*) - ("minimization") Default options for the mdp file. Each creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Energy minimization using steepest descent algorithm is used), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (substance N, Volume V and Temperature T are conserved), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (substance N, pressure P and Temperature T are conserved), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (No dessing constraints applied, Free MD), index (Creates an empty mdp file).
+            * **mdp** (*dict*) - ({}) MDP options specification. (Used if *input_mdp_path* is None)
+            * **simulation_type** (*str*) - ("minimization") Default options for the mdp file. Each creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Energy minimization using steepest descent algorithm is used), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (substance N; Volume V and Temperature T are conserved), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (substance N pressure P and Temperature T are conserved), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (No dessign constraints applied, Free MD), index (Creates an empty mdp file).
             * **maxwarn** (*int*) - (10) [0-1000|1] Maximum number of allowed warnings.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
-            * **container_path** (*string*) - (None)  Path to the binary executable of your container.
-            * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
-            * **container_volume_path** (*string*) - ("/data") Path to an internal directory in the container.
-            * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
-            * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
-            * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
+            * **container_path** (*str*) - (None)  Path to the binary executable of your container.
+            * **container_image** (*str*) - ("gromacs/gromacs:latest") Container Image identifier.
+            * **container_volume_path** (*str*) - ("/data") Path to an internal directory in the container.
+            * **container_working_dir** (*str*) - (None) Path to the internal CWD in the container.
+            * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
+            * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
 
     Info:
         * wrapped_software:
@@ -268,7 +268,7 @@ class Grompp:
         """Launches the execution of the GROMACS grompp module.
 
         Examples:
-            This is a use example of how to use the Grommpp module from Python
+            This is a use example of how to use the Grompp module from Python
 
             >>> from biobb_md.gromacs.grompp import Grompp
             >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
@@ -373,6 +373,16 @@ class Grompp:
         return returncode
 
 
+def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
+           input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
+           properties: dict = None, **kwargs) -> None:
+
+    return Grompp(input_gro_path=input_gro_path, input_top_zip_path=input_top_zip_path,
+                  output_tpr_path=output_tpr_path, input_cpt_path=input_cpt_path,
+                  input_ndx_path=input_ndx_path, input_mdp_path=input_mdp_path,
+                  properties=properties).launch()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
@@ -392,9 +402,10 @@ def main():
     properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
-    Grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path,
+    grompp(input_gro_path=args.input_gro_path, input_top_zip_path=args.input_top_zip_path,
            output_tpr_path=args.output_tpr_path, input_cpt_path=args.input_cpt_path,
-           input_ndx_path=args.input_ndx_path, input_mdp_path=args.input_mdp_path, properties=properties).launch()
+           input_ndx_path=args.input_ndx_path, input_mdp_path=args.input_mdp_path,
+           properties=properties)
 
 
 if __name__ == '__main__':
