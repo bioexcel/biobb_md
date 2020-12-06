@@ -1,8 +1,11 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/ndx2resttop",
-    "title": "Generate a restrained topology from an index NDX file.",
+    "name": null,
+    "title": null,
+    "description": null,
     "type": "object",
+    "info": [],
     "required": [
         "input_ndx_path",
         "input_top_zip_path",
@@ -16,6 +19,12 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.ndx",
             "enum": [
                 ".*\\.ndx$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.ndx$",
+                    "description": "Path to the input NDX index file"
+                }
             ]
         },
         "input_top_zip_path": {
@@ -25,6 +34,12 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.zip",
             "enum": [
                 ".*\\.zip$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.zip$",
+                    "description": "Path the input TOP topology in zip format"
+                }
             ]
         },
         "output_top_zip_path": {
@@ -34,6 +49,12 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs_extra/ref_ndx2resttop.zip",
             "enum": [
                 ".*\\.zip$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.zip$",
+                    "description": "Path the output TOP topology in zip format"
+                }
             ]
         },
         "properties": {
@@ -42,12 +63,14 @@
                 "force_constants": {
                     "type": "string",
                     "default": "500 500 500",
+                    "wf_prop": false,
                     "description": "Array of three floats defining the force constants."
                 },
                 "ref_rest_chain_triplet_list": {
                     "type": "string",
                     "default": null,
-                    "description": "list."
+                    "wf_prop": false,
+                    "description": "Triplet list composed by (reference group, restrain group, chain) list."
                 }
             }
         }
