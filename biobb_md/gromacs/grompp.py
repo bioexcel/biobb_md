@@ -265,10 +265,10 @@ class Grompp:
 
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the GROMACS grompp module.
+        """Launches the execution of the grompp building block.
 
         Examples:
-            This is a use example of how to use the Grompp module from Python
+            This is a use example of how to use the building block from Python
 
             >>> from biobb_md.gromacs.grompp import Grompp
             >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
@@ -376,6 +376,16 @@ class Grompp:
 def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
            input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
            properties: dict = None, **kwargs) -> None:
+    """Please check the usage documentation of :meth:`grompp.Grompp.launch` method of :class:`grompp.Grompp`.
+
+            Examples:
+                This is a use example of how to use the building block from Python
+
+                >>> from biobb_md.gromacs.grompp import Grompp
+                >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
+                >>> grompp(input_gro_path='/path/to/myStructure.gro', input_top_zip_path='/path/to/myTopology.zip', output_tpr_path='/path/to/NewCompiledBin.tpr', properties=prop)
+
+            """
 
     return Grompp(input_gro_path=input_gro_path, input_top_zip_path=input_top_zip_path,
                   output_tpr_path=output_tpr_path, input_cpt_path=input_cpt_path,
