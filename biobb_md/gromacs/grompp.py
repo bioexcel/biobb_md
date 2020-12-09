@@ -376,12 +376,12 @@ class Grompp:
 def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
            input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
            properties: dict = None, **kwargs) -> None:
-    """Please check the usage documentation of :meth:`grompp.Grompp.launch` method of :class:`grompp.Grompp`.
+    """Please check the usage & arguments documentation of :meth:`launch() <gromacs.grompp.Grompp.launch>` method in the :class:`Grompp <gromacs.grompp.Grompp>` class.
 
             Examples:
                 This is a use example of how to use the building block from Python
 
-                >>> from biobb_md.gromacs.grompp import Grompp
+                >>> from biobb_md.gromacs.grompp import grompp
                 >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
                 >>> grompp(input_gro_path='/path/to/myStructure.gro', input_top_zip_path='/path/to/myTopology.zip', output_tpr_path='/path/to/NewCompiledBin.tpr', properties=prop)
 
