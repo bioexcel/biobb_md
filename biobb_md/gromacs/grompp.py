@@ -369,6 +369,24 @@ class Grompp:
 
         return returncode
 
+def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
+           input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
+           properties: dict = None, **kwargs) -> None:
+    """Please check the usage documentation of :meth:`grompp.Grompp.launch` method of :class:`grompp.Grompp`.
+
+            Examples:
+                This is a use example of how to use the building block from Python
+
+                >>> from biobb_md.gromacs.grompp import Grompp
+                >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
+                >>> grompp(input_gro_path='/path/to/myStructure.gro', input_top_zip_path='/path/to/myTopology.zip', output_tpr_path='/path/to/NewCompiledBin.tpr', properties=prop)
+
+            """
+
+    return Grompp(input_gro_path=input_gro_path, input_top_zip_path=input_top_zip_path,
+                  output_tpr_path=output_tpr_path, input_cpt_path=input_cpt_path,
+                  input_ndx_path=input_ndx_path, input_mdp_path=input_mdp_path,
+                  properties=properties).launch()
 
 def main():
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.",
