@@ -30,6 +30,7 @@ class Mdrun:
             * **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
             * **mpi_np** (*str*) - (None) Number of MPI processes. Usually an integer bigger than 1.
             * **mpi_hostlist** (*str*) - (None) Path to the MPI hostlist file.
+            * **checkpoint_time** (*int*) - (15) Checkpoint writing interval in minutes. Only enabled if an output_cpt_path is provided.
             * **num_threads** (*int*) - (0) [0-1000|1] Let GROMACS guess. The number of threads that are going to be used.
             * **num_threads_mpi** (*int*) - (0) [0-1000|1] Let GROMACS guess. The number of GROMACS MPI threads that are going to be used.
             * **num_threads_omp** (*int*) - (0) [0-1000|1] Let GROMACS guess. The number of GROMACS OPENMP threads that are going to be used.
@@ -84,6 +85,8 @@ class Mdrun:
         self.use_gpu = properties.get('use_gpu', False)  # Adds: -nb gpu -pme gpu
         self.gpu_id = str(properties.get('gpu_id', ''))
         self.gpu_tasks = str(properties.get('gpu_tasks', ''))
+        # gromacs
+        self.checkpoint_time = properties.get('checkpoint_time')
         # Not documented and not listed option, only for devs
         self.dev = properties.get('dev')
 
@@ -154,6 +157,9 @@ class Mdrun:
         if container_io_dict["out"].get("output_cpt_path"):
             cmd.append('-cpo')
             cmd.append(container_io_dict["out"]["output_cpt_path"])
+            if self.checkpoint_time:
+                cmd.append('-cpt')
+                cmd.append(str(self.checkpoint_time))
         if container_io_dict["out"].get("output_dhdl_path"):
             cmd.append('-dhdl')
             cmd.append(container_io_dict["out"]["output_dhdl_path"])
@@ -191,11 +197,11 @@ class Mdrun:
             fu.log('Adding GPU specific settings adds: -nb gpu -pme gpu')
             cmd += ["-nb","gpu","-pme","gpu"]
         if self.gpu_id:
-            fu.log(f'User added a list of unique GPU device IDs available to use: {self.gpu_id}')
+            fu.log(f'List of unique GPU device IDs available to use: {self.gpu_id}')
             cmd.append('-gpu_id')
             cmd.append(self.gpu_id)
         if self.gpu_tasks:
-            fu.log(f'User added a list of GPU device IDs, mapping each PP task on each node to a device: {self.gpu_tasks}')
+            fu.log(f'List of GPU device IDs, mapping each PP task on each node to a device: {self.gpu_tasks}')
             cmd.append('-gputasks')
             cmd.append(self.gpu_tasks)
         # Not documented and not listed option, only for devs
