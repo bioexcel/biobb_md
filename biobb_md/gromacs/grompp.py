@@ -42,8 +42,7 @@ class Grompp:
             * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
 
     Example:
-        This is a use example of how to use the building block from Python
-        block:: python
+        This is a use example of how to use the building block from Python::
 
             from biobb_md.gromacs.grompp import grompp
             prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
