@@ -19,28 +19,6 @@ class Grompp:
     | Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module.
     | The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The dynamics parameters are specified in the mdp section of the configuration YAML file. The parameter names and defaults are the same as the ones in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
 
-    Args:
-        input_gro_path (str): Path to the input GROMACS structure GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro>`_. Accepted formats: gro (edam:format_2330).
-        input_top_zip_path (str): Path to the input GROMACS topology TOP and ITP files in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.zip>`_. Accepted formats: zip (edam:format_3987).
-        output_tpr_path (str): Path to the output portable binary run file TPR. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_grompp.tpr>`_. Accepted formats: tpr (edam:format_2333).
-        input_cpt_path (str) (Optional): Path to the input GROMACS checkpoint file CPT. File type: input. Accepted formats: cpt (edam:format_2333).
-        input_ndx_path (str) (Optional): Path to the input GROMACS index files NDX. File type: input. Accepted formats: ndx (edam:format_2330).
-        input_mdp_path (str) (Optional): Path of the input GROMACS `MDP file <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_. File type: input. Accepted formats: mdp (edam:format_2330).
-        properties (dict - Python dictionary object containing the tool parameters, not input/output files):
-            * **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
-                * **type** (*str*) - ("minimization") Default options for the mdp file. Each creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Creates a minimization), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (Creates a nvt), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (Creates a npt), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (Creates a free MD), index (Creates an empty mdp file).
-            * **maxwarn** (*int*) - (10) [0-1000|1] Maximum number of allowed warnings.
-            * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
-            * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
-            * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
-            * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
-            * **container_path** (*string*) - (None)  Path to the binary executable of your container.
-            * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
-            * **container_volume_path** (*string*) - ("/data") Path to an internal directory in the container.
-            * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
-            * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
-            * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
-
     Info:
         * wrapped_software:
             * name: GROMACS Grompp
@@ -364,14 +342,39 @@ class Grompp:
 def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
            input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
            properties: dict = None, **kwargs) -> None:
-    """Please check the usage & arguments documentation in the :class:`Grompp <gromacs.grompp.Grompp>` class.
+    """Launches the execution of the :class:`gromacs.grompp.Grompp <gromacs.grompp.Grompp>` class.
+
+            Args:
+                input_gro_path (str): Path to the input GROMACS structure GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro>`_. Accepted formats: gro (edam:format_2330).
+                input_top_zip_path (str): Path to the input GROMACS topology TOP and ITP files in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.zip>`_. Accepted formats: zip (edam:format_3987).
+                output_tpr_path (str): Path to the output portable binary run file TPR. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_grompp.tpr>`_. Accepted formats: tpr (edam:format_2333).
+                input_cpt_path (str) (Optional): Path to the input GROMACS checkpoint file CPT. File type: input. Accepted formats: cpt (edam:format_2333).
+                input_ndx_path (str) (Optional): Path to the input GROMACS index files NDX. File type: input. Accepted formats: ndx (edam:format_2330).
+                input_mdp_path (str) (Optional): Path of the input GROMACS `MDP file <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_. File type: input. Accepted formats: mdp (edam:format_2330).
+                properties (dict - Python dictionary object containing the tool parameters, not input/output files):
+                    * **mdp** (*dict*) - (defaults dict) MDP options specification. (Used if *input_mdp_path* is None)
+                        * **type** (*str*) - ("minimization") Default options for the mdp file. Each creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Creates a minimization), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (Creates a nvt), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (Creates a npt), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (Creates a free MD), index (Creates an empty mdp file).
+                    * **maxwarn** (*int*) - (10) [0-1000|1] Maximum number of allowed warnings.
+                    * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
+                    * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
+                    * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
+                    * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+                    * **container_path** (*string*) - (None)  Path to the binary executable of your container.
+                    * **container_image** (*string*) - ("gromacs/gromacs:latest") Container Image identifier.
+                    * **container_volume_path** (*string*) - ("/data") Path to an internal directory in the container.
+                    * **container_working_dir** (*string*) - (None) Path to the internal CWD in the container.
+                    * **container_user_id** (*string*) - (None) User number id to be mapped inside the container.
+                    * **container_shell_path** (*string*) - ("/bin/bash") Path to the binary executable of the container shell.
 
             Examples:
                 This is a use example of how to use the building block from Python
 
                     from biobb_md.gromacs.grompp import grompp
                     prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
-                    grompp(input_gro_path='/path/to/myStructure.gro', input_top_zip_path='/path/to/myTopology.zip', output_tpr_path='/path/to/NewCompiledBin.tpr', properties=prop)
+                    grompp(input_gro_path='/path/to/myStructure.gro',
+                           input_top_zip_path='/path/to/myTopology.zip',
+                           output_tpr_path='/path/to/NewCompiledBin.tpr',
+                           properties=prop)
 
             """
 
