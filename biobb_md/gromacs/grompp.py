@@ -11,6 +11,8 @@ from biobb_common.tools.file_utils import launchlogger
 from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
+from biobb_md.gromacs.common import create_mdp
+from biobb_md.gromacs.common import mdp_preset
 
 
 class Grompp:
@@ -41,6 +43,16 @@ class Grompp:
             * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
 
+    Examples:
+        This is a use example of how to use the building block from Python::
+
+            from biobb_md.gromacs.grompp import grompp
+            prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
+            grompp(input_gro_path='/path/to/myStructure.gro',
+                   input_top_zip_path='/path/to/myTopology.zip',
+                   output_tpr_path='/path/to/NewCompiledBin.tpr',
+                   properties=prop)
+
     Info:
         * wrapped_software:
             * name: GROMACS Grompp
@@ -53,7 +65,7 @@ class Grompp:
 
     def __init__(self, input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
                  input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
-                 properties: dict = None, **kwargs) -> None:
+                 properties: dict = None) -> None:
         properties = properties or {}
 
         # Input/Output files
@@ -69,12 +81,8 @@ class Grompp:
         self.output_mdp_path = properties.get('output_mdp_path', 'grompp.mdp')
         self.output_top_path = properties.get('output_top_path', 'grompp.top')
         self.sim_type = properties.get('simulation_type', None)
-        #TODO REVIEW: When select is implemented.
         self.maxwarn = str(properties.get('maxwarn', 10))
         self.mdp = {k: str(v) for k, v in properties.get('mdp', dict()).items()}
-        #TODO REVIEW:  this two attributes
-        self.nsteps = ''
-        self.dt = ''
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -108,173 +116,10 @@ class Grompp:
         # Check the properties
         fu.check_properties(self, properties)
 
-    def create_mdp(self, path: str = None) -> str:
-        """Creates an MDP file using the properties file settings"""
-        mdp_list = []
-
-        self.output_mdp_path = path
-
-        if not self.sim_type:
-            self.sim_type = self.mdp.get('type', None)
-            if not self.sim_type:
-                self.sim_type = 'minimization'
-        minimization = (self.sim_type == 'minimization')
-        nvt = (self.sim_type == 'nvt')
-        npt = (self.sim_type == 'npt')
-        free = (self.sim_type == 'free')
-        index = (self.sim_type == 'index')
-        md = (nvt or npt or free)
-        mdp_list.append(";Type of MDP: " + self.sim_type)
-
-        # Position restrain
-        if not free:
-            mdp_list.append("\n;Position restrain")
-            mdp_list.append("Define = " + self.mdp.pop('define', '-DPOSRES'))
-
-        # Run parameters
-        mdp_list.append("\n;Run parameters")
-        self.nsteps = self.mdp.pop('nsteps', '5000')
-        mdp_list.append("nsteps = " + self.nsteps)
-        if minimization:
-            mdp_list.append("integrator = " + self.mdp.pop('integrator', 'steep'))
-            mdp_list.append("emtol = " + self.mdp.pop('emtol', '1000.0'))
-            mdp_list.append("emstep = " + self.mdp.pop('emstep', '0.01'))
-        if md:
-            mdp_list.append("integrator = " + self.mdp.pop('integrator', 'md'))
-            self.dt = self.mdp.pop('dt', '0.002')
-            mdp_list.append("dt = " + self.dt)
-
-        # Output control
-        if md:
-            mdp_list.append("\n;Output control")
-            if nvt or npt:
-                mdp_list.append("nstxout = " + self.mdp.pop('nstxout', '500'))
-                mdp_list.append("nstvout = " + self.mdp.pop('nstvout', '500'))
-                mdp_list.append("nstenergy = " + self.mdp.pop('nstenergy', '500'))
-                mdp_list.append("nstlog = " + self.mdp.pop('nstlog', '500'))
-                mdp_list.append("nstcalcenergy = " + self.mdp.pop('nstcalcenergy', '100'))
-                mdp_list.append("nstcomm = " + self.mdp.pop('nstcomm', '100'))
-                mdp_list.append("nstxout-compressed = " + self.mdp.pop('nstxout-compressed', '1000'))
-                mdp_list.append("compressed-x-precision = " + self.mdp.pop('compressed-x-precision', '1000'))
-                mdp_list.append("compressed-x-grps = " + self.mdp.pop('compressed-x-grps', 'System'))
-            if free:
-                mdp_list.append("nstcomm = " + self.mdp.pop('nstcomm', '100'))
-                mdp_list.append("nstxout = " + self.mdp.pop('nstxout', '5000'))
-                mdp_list.append("nstvout = " + self.mdp.pop('nstvout', '5000'))
-                mdp_list.append("nstenergy = " + self.mdp.pop('nstenergy', '5000'))
-                mdp_list.append("nstlog = " + self.mdp.pop('nstlog', '5000'))
-                mdp_list.append("nstcalcenergy = " + self.mdp.pop('nstcalcenergy', '100'))
-                mdp_list.append("nstxout-compressed = " + self.mdp.pop('nstxout-compressed', '1000'))
-                mdp_list.append("compressed-x-grps = " + self.mdp.pop('compressed-x-grps', 'System'))
-                mdp_list.append("compressed-x-precision = " + self.mdp.pop('compressed-x-precision', '1000'))
-
-        # Bond parameters
-        if md:
-            mdp_list.append("\n;Bond parameters")
-            mdp_list.append("constraint-algorithm = " + self.mdp.pop('constraint-algorithm', 'lincs'))
-            mdp_list.append("constraints = " + self.mdp.pop('constraints', 'h-bonds'))
-            mdp_list.append("lincs-iter = " + self.mdp.pop('lincs-iter', '1'))
-            mdp_list.append("lincs-order = " + self.mdp.pop('lincs-order', '4'))
-            if nvt:
-                mdp_list.append("continuation = " + self.mdp.pop('continuation', 'no'))
-            if npt or free:
-                mdp_list.append("continuation = " + self.mdp.pop('continuation', 'yes'))
-
-        # Neighbour searching
-        mdp_list.append("\n;Neighbour searching")
-        mdp_list.append("cutoff-scheme = " + self.mdp.pop('cutoff-scheme', 'Verlet'))
-        mdp_list.append("ns-type = " + self.mdp.pop('ns-type', 'grid'))
-        mdp_list.append("rcoulomb = " + self.mdp.pop('rcoulomb', '1.0'))
-        mdp_list.append("vdwtype = " + self.mdp.pop('vdwtype', 'cut-off'))
-        mdp_list.append("rvdw = " + self.mdp.pop('rvdw', '1.0'))
-        mdp_list.append("nstlist = " + self.mdp.pop('nstlist', '10'))
-        mdp_list.append("rlist = " + self.mdp.pop('rlist', '1'))
-
-        # Eletrostatics
-        mdp_list.append("\n;Eletrostatics")
-        mdp_list.append("coulombtype = " + self.mdp.pop('coulombtype', 'PME'))
-        if md:
-            mdp_list.append("pme-order = " + self.mdp.pop('pme-order', '4'))
-            mdp_list.append("fourierspacing = " + self.mdp.pop('fourierspacing', '0.12'))
-            mdp_list.append("fourier-nx = " + self.mdp.pop('fourier-nx', '0'))
-            mdp_list.append("fourier-ny = " + self.mdp.pop('fourier-ny', '0'))
-            mdp_list.append("fourier-nz = " + self.mdp.pop('fourier-nz', '0'))
-            mdp_list.append("ewald-rtol = " + self.mdp.pop('ewald-rtol', '1e-5'))
-
-        # Temperature coupling
-        if md:
-            mdp_list.append("\n;Temperature coupling")
-            mdp_list.append("tcoupl = " + self.mdp.pop('tcoupl', 'V-rescale'))
-            mdp_list.append("tc-grps = " + self.mdp.pop('tc-grps', 'Protein Non-Protein'))
-            mdp_list.append("tau-t = " + self.mdp.pop('tau-t', '0.1	  0.1'))
-            mdp_list.append("ref-t = " + self.mdp.pop('ref-t', '300 	  300'))
-
-        # Pressure coupling
-        if md:
-            mdp_list.append("\n;Pressure coupling")
-            if nvt:
-                mdp_list.append("pcoupl = " + self.mdp.pop('pcoupl', 'no'))
-            if npt or free:
-                mdp_list.append("pcoupl = " + self.mdp.pop('pcoupl', 'Parrinello-Rahman'))
-                mdp_list.append("pcoupltype = " + self.mdp.pop('pcoupltype', 'isotropic'))
-                mdp_list.append("tau-p = " + self.mdp.pop('tau-p', '1.0'))
-                mdp_list.append("ref-p = " + self.mdp.pop('ref-p', '1.0'))
-                mdp_list.append("compressibility = " + self.mdp.pop('compressibility', '4.5e-5'))
-                mdp_list.append("refcoord-scaling = " + self.mdp.pop('refcoord-scaling', 'com'))
-
-        # Dispersion correction
-        if md:
-            mdp_list.append("\n;Dispersion correction")
-            mdp_list.append("DispCorr = " + self.mdp.pop('DispCorr', 'EnerPres'))
-
-        # Velocity generation
-        if md:
-            mdp_list.append("\n;Velocity generation")
-            if nvt:
-                mdp_list.append("gen-vel = " + self.mdp.pop('gen-vel', 'yes'))
-                mdp_list.append("gen-temp = " + self.mdp.pop('gen-temp', '300'))
-                mdp_list.append("gen-seed = " + self.mdp.pop('gen-seed', '-1'))
-            if npt or free:
-                mdp_list.append("gen-vel = " + self.mdp.pop('gen-vel', 'no'))
-
-        # Periodic boundary conditions
-        mdp_list.append("\n;Periodic boundary conditions")
-        mdp_list.append("pbc = " + self.mdp.pop('pbc', 'xyz'))
-
-        if index:
-            mdp_list = [";This mdp file has been created by the pymdsetup.gromacs_wrapper.grompp.create_mdp()"]
-
-        mdp_list.insert(0, ";This mdp file has been created by the pymdsetup.gromacs_wrapper.grompp.create_mdp()")
-
-        # Adding the rest of parameters in the config file to the MDP file
-        # if the parameter has already been added replace the value
-        parameter_keys = [parameter.split('=')[0].strip().replace('_','-') for parameter in mdp_list]
-        for k, v in self.mdp.items():
-            config_parameter_key = str(k).strip().replace('_','-')
-            if config_parameter_key != 'type':
-                if config_parameter_key in parameter_keys:
-                    mdp_list[parameter_keys.index(config_parameter_key)] = config_parameter_key + ' = '+str(v)
-                else:
-                    mdp_list.append(config_parameter_key + ' = '+str(v))
-
-        with open(self.output_mdp_path, 'w') as mdp:
-            for line in mdp_list:
-                mdp.write(line + '\n')
-
-        return self.output_mdp_path
-
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the grompp building block.
+        """Execute the :class:`Grompp <gromacs.grompp.Grompp>`gromacs.grompp.Grompp object"""
 
-        Examples:
-            This is a use example of how to use the building block from Python
-
-            >>> from biobb_md.gromacs.grompp import Grompp
-            >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
-            >>> Grompp(input_gro_path='/path/to/myStructure.gro', input_top_zip_path='/path/to/myTopology.zip', output_tpr_path='/path/to/NewCompiledBin.tpr', properties=prop).launch()
-
-        """
         tmp_files = []
         mdout = 'mdout.mdp'
         tmp_files.append(mdout)
@@ -302,20 +147,12 @@ class Grompp:
 
         container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
 
-        if self.io_dict["in"]["input_mdp_path"]:
-            self.output_mdp_path = self.io_dict["in"]["input_mdp_path"]
-        else:
-            mdp_dir = fu.create_unique_dir()
-            tmp_files.append(mdp_dir)
-            self.output_mdp_path = self.create_mdp(path=str(Path(mdp_dir).joinpath(self.output_mdp_path)))
-
-        md = self.mdp.get('type', 'minimization')
-        if md not in ('index', 'free'):
-            fu.log('Will run a %s md of %s steps' % (md, self.nsteps), out_log, self.global_log)
-        elif md == 'index':
-            fu.log('Will create a TPR to be used as structure file')
-        else:
-            fu.log('Will run a %s md of %s' % (md, fu.human_readable_time(int(self.nsteps)*float(self.dt))), out_log, self.global_log)
+        mdp_dir = fu.create_unique_dir()
+        tmp_files.append(mdp_dir)
+        self.output_mdp_path = create_mdp(output_mdp_path=str(Path(mdp_dir).joinpath(self.output_mdp_path)),
+                                          input_mdp_path=self.io_dict["in"]["input_mdp_path"],
+                                          preset_dict=mdp_preset(self.sim_type),
+                                          mdp_properties_dict=self.mdp)
 
         if self.container_path:
             fu.log('Container execution enabled', out_log)
@@ -375,17 +212,9 @@ class Grompp:
 
 def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
            input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
-           properties: dict = None, **kwargs) -> None:
-    """Please check the usage & arguments documentation of :meth:`launch() <gromacs.grompp.Grompp.launch>` method in the :class:`Grompp <gromacs.grompp.Grompp>` class.
-
-            Examples:
-                This is a use example of how to use the building block from Python
-
-                >>> from biobb_md.gromacs.grompp import grompp
-                >>> prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
-                >>> grompp(input_gro_path='/path/to/myStructure.gro', input_top_zip_path='/path/to/myTopology.zip', output_tpr_path='/path/to/NewCompiledBin.tpr', properties=prop)
-
-            """
+           properties: dict = None) -> int:
+    """Create :class:`Grompp <gromacs.grompp.Grompp>`gromacs.grompp.Grompp class and
+    execute :meth:`launch() <gromacs.grompp.Grompp.launch>` method"""
 
     return Grompp(input_gro_path=input_gro_path, input_top_zip_path=input_top_zip_path,
                   output_tpr_path=output_tpr_path, input_cpt_path=input_cpt_path,
