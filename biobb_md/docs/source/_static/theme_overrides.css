@@ -32,8 +32,11 @@ dl.docutils dt {
 }
 
 .line-block .line:first-child {
-	font-weight: bold;
-    text-transform: uppercase;
+	display: none;
+}
+
+p.rubric:after {
+    content: ":";
 }
 
 @media not all and (min-resolution:.001dpcm)
