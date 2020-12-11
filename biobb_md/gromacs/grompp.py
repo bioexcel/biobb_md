@@ -17,7 +17,7 @@ class Grompp:
     """
     | biobb_md Grompp
     | Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module.
-    | The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The dynamics parameters are specified by three methods: First the simulation_type presets this presets are overwritten by second method the configuration YAML file; finally the third method, the mdp section in the yaml file overwrites them both.  There are three methods  an input mdp file and the simulation_type presets. The simulation The parameter names and defaults are the same as the ones in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
+    | The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The dynamics parameters are specified by two methods:  1.The simulation_type presets or  2.The input_mdp_path file.  These two methods are mutually exclusive and can be modified adding parameters to the mdp section in the yaml configuration file. The simulation parameter names and default values can be consulted in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
 
     Args:
         input_gro_path (str): Path to the input GROMACS structure GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro>`_. Accepted formats: gro (edam:format_2033).
