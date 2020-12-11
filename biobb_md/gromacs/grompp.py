@@ -17,7 +17,7 @@ class Grompp:
     """
     | biobb_md Grompp
     | Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module.
-    | The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The dynamics parameters are specified in the mdp section of the configuration YAML file, an input mdp file and the simulation_type pressets. The parameter names and defaults are the same as the ones in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
+    | The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The dynamics parameters are specified by three methods: First the simulation_type presets this presets are overwritten by second method the configuration YAML file; finally the third method, the mdp section in the yaml file overwrites them both.  There are three methods  an input mdp file and the simulation_type presets. The simulation The parameter names and defaults are the same as the ones in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
 
     Args:
         input_gro_path (str): Path to the input GROMACS structure GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro>`_. Accepted formats: gro (edam:format_2033).
@@ -270,7 +270,7 @@ class Grompp:
 
     @launchlogger
     def launch(self) -> int:
-        """Execute the :class:`Grompp <gromacs.grompp.Grompp>` gromacs.grompp.Grompp object"""
+        """Execute the :class:`Grompp <gromacs.grompp.Grompp>` gromacs.grompp.Grompp object."""
         tmp_files = []
         mdout = 'mdout.mdp'
         tmp_files.append(mdout)
@@ -373,7 +373,7 @@ def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
            input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
            properties: dict = None, **kwargs) -> None:
     """Create :class:`Grompp <gromacs.grompp.Grompp>` class and
-    execute the :meth:`launch() <gromacs.grompp.Grompp.launch>` method"""
+    execute the :meth:`launch() <gromacs.grompp.Grompp.launch>` method."""
 
     return Grompp(input_gro_path=input_gro_path, input_top_zip_path=input_top_zip_path,
                   output_tpr_path=output_tpr_path, input_cpt_path=input_cpt_path,
@@ -382,7 +382,7 @@ def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
 
 
 def main():
-    """Command line execution of this building block please check the command line documentation"""
+    """Command line execution of this building block. Please check the command line documentation."""
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
