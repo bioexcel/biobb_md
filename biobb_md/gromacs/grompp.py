@@ -270,7 +270,7 @@ class Grompp:
 
     @launchlogger
     def launch(self) -> int:
-        """Execute the :class:`Grompp <gromacs.grompp.Grompp>`gromacs.grompp.Grompp object"""
+        """Execute the :class:`Grompp <gromacs.grompp.Grompp>` gromacs.grompp.Grompp object"""
         tmp_files = []
         mdout = 'mdout.mdp'
         tmp_files.append(mdout)
@@ -372,8 +372,8 @@ class Grompp:
 def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
            input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
            properties: dict = None, **kwargs) -> None:
-    """Create :class:`Grompp <gromacs.grompp.Grompp>`gromacs.grompp.Grompp class and
-    execute :meth:`launch() <gromacs.grompp.Grompp.launch>` method"""
+    """Create :class:`Grompp <gromacs.grompp.Grompp>` class and
+    execute the :meth:`launch() <gromacs.grompp.Grompp.launch>` method"""
 
     return Grompp(input_gro_path=input_gro_path, input_top_zip_path=input_top_zip_path,
                   output_tpr_path=output_tpr_path, input_cpt_path=input_cpt_path,
