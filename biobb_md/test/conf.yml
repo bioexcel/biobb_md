@@ -116,6 +116,7 @@ genrestr:
     input_ndx_path: file:test_data_dir/gromacs/genrestr.ndx
     output_itp_path: output_itp.itp
     ref_output_itp_path: file:test_reference_dir/gromacs/ref_genrestr.itp
+    ref_output_itp_noNDX_path: file:test_reference_dir/gromacs/ref_genrestr_noNDX.itp
   properties:
     restrained_group: "system"
     force_constants: "500 500 500"

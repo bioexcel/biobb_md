@@ -3,6 +3,8 @@
 """Module containing the Genrestr class and the command line interface."""
 import os
 import argparse
+import shutil
+from pathlib import Path
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
@@ -16,8 +18,8 @@ class Genrestr:
 
     Args:
         input_structure_path (str): Path to the input structure PDB, GRO or TPR format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.gro>`_. Accepted formats: pdb, gro, tpr.
-        input_ndx_path (str): Path to the input GROMACS index file, NDX format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.ndx>`_. Accepted formats: ndx.
         output_itp_path (str): Path the output ITP topology file with restrains. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genrestr.itp>`_. Accepted formats: itp.
+        input_ndx_path (str) (Optional): Path to the input GROMACS index file, NDX format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.ndx>`_. Accepted formats: ndx.
         properties (dic):
             * **restrained_group** (*str*) - ("system") Index group that will be restrained.
             * **force_constants** (*str*) - ("500 500 500") Array of three floats defining the force constants
@@ -33,7 +35,7 @@ class Genrestr:
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
     """
 
-    def __init__(self, input_structure_path: str, input_ndx_path: str, output_itp_path: str,
+    def __init__(self, input_structure_path: str, output_itp_path: str, input_ndx_path: str = None,
                  properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
@@ -105,9 +107,16 @@ class Genrestr:
         cmd = ['echo', '\"'+self.restrained_group+'\"', '|',
                self.gmx_path, "genrestr",
                "-f", container_io_dict["in"]["input_structure_path"],
-               "-n", container_io_dict["in"]["input_ndx_path"],
                "-o", container_io_dict["out"]["output_itp_path"],
                "-fc", self.force_constants]
+
+        if container_io_dict["in"].get("input_ndx_path") and Path(container_io_dict["in"]["input_ndx_path"]).exists():
+            cmd.append('-n')
+            if self.container_path:
+                shutil.copy2(container_io_dict["in"]["input_ndx_path"], container_io_dict.get("unique_dir"))
+                cmd.append(Path(self.container_volume_path).joinpath(Path(container_io_dict["in"]["input_ndx_path"]).name))
+            else:
+                cmd.append(container_io_dict["in"]["input_ndx_path"])
 
         new_env = None
         if self.gmx_lib:
@@ -140,8 +149,8 @@ def main():
     # Specific args of each building block
     required_args = parser.add_argument_group('required arguments')
     required_args.add_argument('--input_structure_path', required=True)
-    required_args.add_argument('--input_ndx_path', required=True)
     required_args.add_argument('--output_itp_path', required=True)
+    parser.add_argument('--input_ndx_path', required=False)
     ####
 
     args = parser.parse_args()
