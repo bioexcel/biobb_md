@@ -12,14 +12,17 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Editconf:
-    """Wrapper class for the `GROMACS editconf <http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html>`_ module.
+    """
+    | biobb_md Editconf
+    | Wrapper class for the `GROMACS editconf <http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html>`_ module.
+    | The GROMACS solvate module generates a box around the selected structure.
 
     Args:
-        input_gro_path (str): Path to the input GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/editconf.gro>`_. Accepted formats: gro.
-        output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_editconf.gro>`_. Accepted formats: gro.
-        properties (dic):
-            * **distance_to_molecule** (*float*) - (1.0) Distance of the box from the outermost atom in nm. ie 1.0nm = 10 Angstroms.
-            * **box_type** (*str*) - ("cubic") Geometrical shape of the solvent box. Available box types: (http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html) -bt option.
+        input_gro_path (str): Path to the input GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/editconf.gro>`_. Accepted formats: gro (edam:format_2033).
+        output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_editconf.gro>`_. Accepted formats: gro (edam:format_2033).
+        properties (dict - Python dictionary object containing the tool parameters, not input/output files):
+            * **distance_to_molecule** (*float*) - (1.0) [0~100|0.1] Distance of the box from the outermost atom in nm. ie 1.0nm = 10 Angstroms.
+            * **box_type** (*str*) - ("cubic") Geometrical shape of the solvent box. Values: cubic (rectangular box with all sides equal), triclinic (triclinic box), dodecahedron (rhombic dodecahedron), octahedron (truncated octahedron).
             * **center_molecule** (*bool*) - (True) Center molecule in the box.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
@@ -31,6 +34,15 @@ class Editconf:
             * **container_working_dir** (*str*) - (None) Path to the internal CWD in the container.
             * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
+
+    Info:
+        * wrapped_software:
+            * name: GROMACS Solvate
+            * version: >5.1
+            * license: LGPL 2.1
+        * ontology:
+            * name: EDAM
+            * schema: http://edamontology.org/EDAM.owl
     """
 
     def __init__(self, input_gro_path: str, output_gro_path: str, properties: dict = None, **kwargs) -> None:
@@ -81,7 +93,7 @@ class Editconf:
 
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the GROMACS editconf module."""
+        """Execute the :class:`Editconf <gromacs.editconf.Editconf>` object."""
         tmp_files = []
 
         # Get local loggers from launchlogger decorator
@@ -139,6 +151,14 @@ class Editconf:
         return returncode
 
 
+def editconf(input_gro_path: str, output_gro_path: str, properties: dict = None, **kwargs) -> int:
+    """Create :class:`Editconf <gromacs.editconf.Editconf>` class and
+    execute the :meth:`launch() <gromacs.editconf.Editconf.launch>` method."""
+
+    return Editconf(input_gro_path=input_gro_path, output_gro_path=output_gro_path,
+                    properties=properties, **kwargs).launch()
+
+
 def main():
     parser = argparse.ArgumentParser(description="Wrapper of the GROMACS gmx editconf module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
@@ -154,8 +174,8 @@ def main():
     properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
-    Editconf(input_gro_path=args.input_gro_path, output_gro_path=args.output_gro_path,
-             properties=properties).launch()
+    editconf(input_gro_path=args.input_gro_path, output_gro_path=args.output_gro_path,
+             properties=properties)
 
 
 if __name__ == '__main__':
