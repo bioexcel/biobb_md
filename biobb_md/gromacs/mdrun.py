@@ -55,11 +55,11 @@ class Mdrun:
             from biobb_md.gromacs.mdrun import mdrun
             prop = { 'num_threads': 0,
                      'gmx_path': 'gmx' }
-            mdrun(input_tpr_path: /path/to/myPortableBinaryRunInputFile.tpr,
-                  output_trr_path: /path/to/newTrajectory.trr,
-                  output_gro_path: /path/to/newStructure.gro,
-                  output_edr_path: /path/to/newEnergy.edr,
-                  output_log_path: /path/to/newSimulationLog.log,
+            mdrun(input_tpr_path='/path/to/myPortableBinaryRunInputFile.tpr',
+                  output_trr_path='/path/to/newTrajectory.trr',
+                  output_gro_path='/path/to/newStructure.gro',
+                  output_edr_path='/path/to/newEnergy.edr',
+                  output_log_path='/path/to/newSimulationLog.log',
                   properties=prop)
 
     Info:
