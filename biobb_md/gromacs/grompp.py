@@ -48,7 +48,7 @@ class Grompp:
 
             from biobb_md.gromacs.grompp import grompp
             prop = { 'mdp':
-                        { 'type': 'minimization',
+                        { 'simulation_type': 'minimization',
                           'emtol':'500',
                           'nsteps':'5000'}}
             grompp(input_gro_path='/path/to/myStructure.gro',
@@ -83,7 +83,7 @@ class Grompp:
         # Properties specific for BB
         self.output_mdp_path = properties.get('output_mdp_path', 'grompp.mdp')
         self.output_top_path = properties.get('output_top_path', 'grompp.top')
-        self.sim_type = properties.get('simulation_type', None)
+        self.simulation_type = properties.get('simulation_type', None)
         self.maxwarn = str(properties.get('maxwarn', 10))
         self.mdp = {k: str(v) for k, v in properties.get('mdp', dict()).items()}
 
@@ -153,7 +153,7 @@ class Grompp:
         tmp_files.append(mdp_dir)
         self.output_mdp_path = create_mdp(output_mdp_path=str(Path(mdp_dir).joinpath(self.output_mdp_path)),
                                           input_mdp_path=self.io_dict["in"]["input_mdp_path"],
-                                          preset_dict=mdp_preset(self.sim_type),
+                                          preset_dict=mdp_preset(self.simulation_type),
                                           mdp_properties_dict=self.mdp)
 
         if self.container_path:

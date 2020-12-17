@@ -117,11 +117,11 @@ def mdp_preset(sim_type: str) -> Dict[str, str]:
     if not sim_type: 
         return mdp_dict
     
-    minimization = (self.sim_type == 'minimization')
-    nvt = (self.sim_type == 'nvt')
-    npt = (self.sim_type == 'npt')
-    free = (self.sim_type == 'free')
-    index = (self.sim_type == 'index')
+    minimization = (sim_type == 'minimization')
+    nvt = (sim_type == 'nvt')
+    npt = (sim_type == 'npt')
+    free = (sim_type == 'free')
+    index = (sim_type == 'index')
     md = (nvt or npt or free)
 
     # Position restrain
@@ -246,7 +246,8 @@ def write_mdp(output_mdp_path: str, mdp_dict: Mapping[str, str]):
     return output_mdp_path
             
             
-def create_mdp(output_mdp_path: str, input_mdp_path: str = None, preset_dict: Mapping[str, str] = None,
+def create_mdp(output_mdp_path: str, input_mdp_path: str = None,
+               preset_dict: Mapping[str, str] = None,
                mdp_properties_dict: Mapping[str, str] = None) -> str:
     """Creates an MDP file using the following hierarchy  mdp_properties_dict > input_mdp_path > preset_dict"""
     mdp_dict = {}
