@@ -13,7 +13,7 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 class Mdrun:
     """
-    | biobb_md.gromacs.mdrun Mdrun
+    | biobb_md Mdrun
     | Wrapper of the `GROMACS mdrun <http://manual.gromacs.org/current/onlinehelp/gmx-mdrun.html>`_ module.
     | MDRun is the main computational chemistry engine within GROMACS. It performs Molecular Dynamics simulations, but it can also perform Stochastic Dynamics, Energy Minimization, test particle insertion or (re)calculation of energies.
 
@@ -28,13 +28,13 @@ class Mdrun:
         output_dhdl_path (str) (Optional): Path to the output dhdl.xvg file only used when free energy calculation is turned on. File type: output. Accepted formats: xvg (edam:format_2033).
         properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
-            * **mpi_np** (*str*) - (None) Number of MPI processes. Usually an integer bigger than 1.
+            * **mpi_np** (*int*) - (0) [0~1000|1] Number of MPI processes. Usually an integer bigger than 1.
             * **mpi_hostlist** (*str*) - (None) Path to the MPI hostlist file.
-            * **checkpoint_time** (*int*) - (15) Checkpoint writing interval in minutes. Only enabled if an output_cpt_path is provided.
-            * **num_threads** (*int*) - (0) [0-1000|1] Let GROMACS guess. The number of threads that are going to be used.
-            * **num_threads_mpi** (*int*) - (0) [0-1000|1] Let GROMACS guess. The number of GROMACS MPI threads that are going to be used.
-            * **num_threads_omp** (*int*) - (0) [0-1000|1] Let GROMACS guess. The number of GROMACS OPENMP threads that are going to be used.
-            * **num_threads_omp_pme** (*int*) - (0) [0-1000|1] Let GROMACS guess. The number of GROMACS OPENMP_PME threads that are going to be used.
+            * **checkpoint_time** (*int*) - (15) [0~1000|1] Checkpoint writing interval in minutes. Only enabled if an output_cpt_path is provided.
+            * **num_threads** (*int*) - (0) [0~1000|1] Let GROMACS guess. The number of threads that are going to be used.
+            * **num_threads_mpi** (*int*) - (0) [0~1000|1] Let GROMACS guess. The number of GROMACS MPI threads that are going to be used.
+            * **num_threads_omp** (*int*) - (0) [0~1000|1] Let GROMACS guess. The number of GROMACS OPENMP threads that are going to be used.
+            * **num_threads_omp_pme** (*int*) - (0) [0~1000|1] Let GROMACS guess. The number of GROMACS OPENMP_PME threads that are going to be used.
             * **use_gpu** (*bool*) - (False) Use settings appropriate for GPU. Adds: -nb gpu -pme gpu
             * **gpu_id** (*str*) - (None) List of unique GPU device IDs available to use.
             * **gpu_tasks** (*str*) - (None) List of GPU device IDs, mapping each PP task on each node to a device.
@@ -49,9 +49,22 @@ class Mdrun:
             * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
 
+    Examples:
+        This is a use example of how to use the building block from Python::
+
+            from biobb_md.gromacs.mdrun import mdrun
+            prop = { 'num_threads': 0,
+                     'gmx_path': 'gmx' }
+            mdrun(input_tpr_path: /path/to/myPortableBinaryRunInputFile.tpr,
+                  output_trr_path: /path/to/newTrajectory.trr,
+                  output_gro_path: /path/to/newStructure.gro,
+                  output_edr_path: /path/to/newEnergy.edr,
+                  output_log_path: /path/to/newSimulationLog.log,
+                  properties=prop)
+
     Info:
         * wrapped_software:
-            * name: GROMACS MDRun
+            * name: GROMACS Mdrun
             * version: >5.1
             * license: LGPL 2.1
         * ontology:
@@ -67,8 +80,10 @@ class Mdrun:
         # Input/Output files
         self.io_dict = {
             "in": {"input_tpr_path": input_tpr_path},
-            "out": {"output_trr_path": output_trr_path, "output_gro_path": output_gro_path, "output_edr_path": output_edr_path, "output_log_path": output_log_path,
-                    "output_xtc_path": output_xtc_path, "output_cpt_path": output_cpt_path, "output_dhdl_path": output_dhdl_path}
+            "out": {"output_trr_path": output_trr_path, "output_gro_path": output_gro_path,
+                    "output_edr_path": output_edr_path, "output_log_path": output_log_path,
+                    "output_xtc_path": output_xtc_path, "output_cpt_path": output_cpt_path,
+                    "output_dhdl_path": output_dhdl_path}
         }
 
         # Properties specific for BB
@@ -124,7 +139,7 @@ class Mdrun:
 
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the GROMACS mdrun module."""
+        """Execute the :class:`Mdrun <gromacs.mdrun.Mdrun>` object."""
         tmp_files = []
 
         # Get local loggers from launchlogger decorator
@@ -209,7 +224,6 @@ class Mdrun:
             fu.log(f'Adding development options: {self.dev}')
             cmd += [self.dev.split()]
 
-
         new_env = None
         if self.gmx_lib:
             new_env = os.environ.copy()
@@ -234,7 +248,21 @@ class Mdrun:
         return returncode
 
 
+def mdrun(input_tpr_path: str, output_trr_path: str, output_gro_path: str, output_edr_path: str,
+          output_log_path: str, output_xtc_path: str = None, output_cpt_path: str = None,
+          output_dhdl_path: str = None, properties: dict = None, **kwargs) -> int:
+    """Create :class:`Mdrun <gromacs.mdrun.Mdrun>` class and
+    execute the :meth:`launch() <gromacs.mdrun.Mdrun.launch>` method."""
+
+    return Mdrun(input_tpr_path=input_tpr_path, output_trr_path=output_trr_path,
+                 output_gro_path=output_gro_path, output_edr_path=output_edr_path,
+                 output_log_path=output_log_path, output_xtc_path=output_xtc_path,
+                 output_cpt_path=output_cpt_path, output_dhdl_path=output_dhdl_path,
+                 properties=properties, **kwargs).launch()
+
+
 def main():
+    """Command line execution of this building block. Please check the command line documentation."""
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS mdrun module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
@@ -255,11 +283,11 @@ def main():
     properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
-    Mdrun(input_tpr_path=args.input_tpr_path, output_trr_path=args.output_trr_path,
+    mdrun(input_tpr_path=args.input_tpr_path, output_trr_path=args.output_trr_path,
           output_gro_path=args.output_gro_path, output_edr_path=args.output_edr_path,
           output_log_path=args.output_log_path, output_xtc_path=args.output_xtc_path,
           output_cpt_path=args.output_cpt_path, output_dhdl_path=args.output_dhdl_path,
-          properties=properties).launch()
+          properties=properties)
 
 
 if __name__ == '__main__':
