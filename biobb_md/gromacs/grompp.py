@@ -19,7 +19,7 @@ class Grompp:
     """
     | biobb_md Grompp
     | Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module.
-    | The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The dynamics parameters are specified in the mdp section of the configuration YAML file. The parameter names and defaults are the same as the ones in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
+    | The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The simulation parameters can be specified by two methods:  1.The predefined mdp settings defined at simulation_type property or  2.A custom mdp file defined at the input_mdp_path argument.  These two methods are mutually exclusive. In both cases can be further modified by adding parameters to the mdp section in the yaml configuration file. The simulation parameter names and default values can be consulted in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_.
 
     Args:
         input_gro_path (str): Path to the input GROMACS structure GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro>`_. Accepted formats: gro (edam:format_2033).
@@ -29,8 +29,8 @@ class Grompp:
         input_ndx_path (str) (Optional): Path to the input GROMACS index files NDX. File type: input. Accepted formats: ndx (edam:format_2330).
         input_mdp_path (str) (Optional): Path to the input GROMACS `MDP file <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_. File type: input. Accepted formats: mdp (edam:format_2330).
         properties (dict - Python dictionary object containing the tool parameters, not input/output files):
-            * **mdp** (*dict*) - ({}) MDP options specification. (Used if *input_mdp_path* is None)
-            * **simulation_type** (*str*) - ("minimization") Default options for the mdp file. Each creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Energy minimization using steepest descent algorithm is used), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (substance N, Volume V and Temperature T are conserved), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (substance N, pressure P and Temperature T are conserved), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (No design constraints applied, Free MD), index (Creates an empty mdp file).
+            * **mdp** (*dict*) - ({}) MDP options specification.
+            * **simulation_type** (*str*) - ("minimization") Default options for the mdp file. Each creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Energy minimization using steepest descent algorithm is used), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (substance N Volume V and Temperature T are conserved), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (substance N pressure P and Temperature T are conserved), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (No design constraints applied; Free MD), index (Creates an empty mdp file).
             * **maxwarn** (*int*) - (10) [0~1000|1] Maximum number of allowed warnings.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
@@ -47,10 +47,13 @@ class Grompp:
         This is a use example of how to use the building block from Python::
 
             from biobb_md.gromacs.grompp import grompp
-            prop = { 'mdp':{ 'type': 'minimization', 'emtol':'500', 'nsteps':'5000'}}
+            prop = { 'mdp':
+                        { 'type': 'minimization',
+                          'emtol':'500',
+                          'nsteps':'5000'}}
             grompp(input_gro_path='/path/to/myStructure.gro',
                    input_top_zip_path='/path/to/myTopology.zip',
-                   output_tpr_path='/path/to/NewCompiledBin.tpr',
+                   output_tpr_path='/path/to/newCompiledBin.tpr',
                    properties=prop)
 
     Info:
@@ -65,7 +68,7 @@ class Grompp:
 
     def __init__(self, input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
                  input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
-                 properties: dict = None) -> None:
+                 properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
@@ -118,8 +121,7 @@ class Grompp:
 
     @launchlogger
     def launch(self) -> int:
-        """Execute the :class:`Grompp <gromacs.grompp.Grompp>`gromacs.grompp.Grompp object"""
-
+        """Execute the :class:`Grompp <gromacs.grompp.Grompp>` object."""
         tmp_files = []
         mdout = 'mdout.mdp'
         tmp_files.append(mdout)
@@ -212,17 +214,18 @@ class Grompp:
 
 def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,
            input_cpt_path: str = None, input_ndx_path: str = None, input_mdp_path: str = None,
-           properties: dict = None) -> int:
-    """Create :class:`Grompp <gromacs.grompp.Grompp>`gromacs.grompp.Grompp class and
-    execute :meth:`launch() <gromacs.grompp.Grompp.launch>` method"""
+           properties: dict = None, **kwargs) -> int:
+    """Create :class:`Grompp <gromacs.grompp.Grompp>` class and
+    execute the :meth:`launch() <gromacs.grompp.Grompp.launch>` method."""
 
     return Grompp(input_gro_path=input_gro_path, input_top_zip_path=input_top_zip_path,
                   output_tpr_path=output_tpr_path, input_cpt_path=input_cpt_path,
                   input_ndx_path=input_ndx_path, input_mdp_path=input_mdp_path,
-                  properties=properties).launch()
+                  properties=properties, **kwargs).launch()
 
 
 def main():
+    """Command line execution of this building block. Please check the command line documentation."""
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS grompp module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")

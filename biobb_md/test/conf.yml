@@ -160,7 +160,7 @@ grompp_docker:
     input_gro_path: file:test_data_dir/gromacs/grompp.gro
     input_top_zip_path: file:test_data_dir/gromacs/grompp.zip
     output_tpr_path: output_tpr.tpr
-    ref_output_tpr_path: file:test_reference_dir/gromacs/ref_grompp.tpr
+    ref_output_tpr_path: file:test_reference_dir/gromacs/ref_grompp_docker.tpr
   properties:
     mdp:
       ld-seed: '1'
@@ -174,7 +174,7 @@ grompp_singularity:
     input_gro_path: file:test_data_dir/gromacs/grompp.gro
     input_top_zip_path: file:test_data_dir/gromacs/grompp.zip
     output_tpr_path: output_tpr.tpr
-    ref_output_tpr_path: file:test_reference_dir/gromacs/ref_grompp.tpr
+    ref_output_tpr_path: file:test_reference_dir/gromacs/ref_grompp_docker.tpr
   properties:
     mdp:
       ld-seed: '1'
