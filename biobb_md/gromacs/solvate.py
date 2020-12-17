@@ -110,7 +110,7 @@ class Solvate:
 
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the GROMACS solvate module."""
+        """Execute the :class:`Solvate <gromacs.solvate.Solvate>` object."""
         tmp_files = []
 
         # Get local loggers from launchlogger decorator
