@@ -56,7 +56,7 @@ editconf_docker:
     ref_output_gro_path: file:test_reference_dir/gromacs/ref_editconf.gro
   properties:
     container_path: docker
-    container_image: gromacs/gromacs:latest
+    container_image: longr/gromacs-docker:latest
     container_volume_path: /tmp
 
 editconf_singularity:
@@ -91,7 +91,7 @@ genion_docker:
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_genion.zip
   properties:
     container_path: docker
-    container_image: gromacs/gromacs:latest
+    container_image: longr/gromacs-docker:latest
     container_volume_path: /data
     container_working_dir: /data
 
@@ -129,7 +129,7 @@ genrestr_docker:
     ref_output_itp_path: file:test_reference_dir/gromacs/ref_genrestr.itp
   properties:
     container_path: docker
-    container_image: gromacs/gromacs:latest
+    container_image: longr/gromacs-docker:latest
     container_volume_path: /data
     container_working_dir: /data
 
@@ -165,7 +165,7 @@ grompp_docker:
     mdp:
       ld-seed: '1'
     container_path: docker
-    container_image: gromacs/gromacs:latest
+    container_image: longr/gromacs-docker:latest
     container_volume_path: /inout
     container_working_dir: /inout
 
@@ -206,7 +206,7 @@ mdrun_docker:
     ref_output_trr_path: file:test_reference_dir/gromacs/ref_mdrun.trr
   properties:
     container_path: docker
-    container_image: gromacs/gromacs:latest
+    container_image: longr/gromacs-docker:latest
     container_volume_path: /inout
 
 mdrun_singularity:
@@ -238,7 +238,7 @@ make_ndx_docker:
     ref_output_ndx_path: file:test_reference_dir/gromacs/ref_make_ndx.ndx
   properties:
     container_path: docker
-    container_image: gromacs/gromacs:latest
+    container_image: longr/gromacs-docker:latest
     container_volume_path: /tmp
 
 make_ndx_singularity:
@@ -267,7 +267,7 @@ gmxselect_docker:
   properties:
     selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of resname ARG'
     container_path: docker
-    container_image: gromacs/gromacs:latest
+    container_image: longr/gromacs-docker:latest
     container_volume_path: /inout
 
 gmxselect_singularity:
@@ -291,7 +291,7 @@ solvate:
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_solvate.zip
   properties:
     gmx_path: "gmx"
-    input_solvent_gro_path: "spc216.gro"
+    restart: "False"
 
 solvate_docker:
   paths:
@@ -303,7 +303,7 @@ solvate_docker:
     ref_output_top_zip_path: file:test_reference_dir/gromacs/ref_solvate_docker.zip
   properties:
     container_path: docker
-    container_image: gromacs/gromacs:latest
+    container_image: longr/gromacs-docker:latest
     container_volume_path: /inout
 
 solvate_singularity:

@@ -5,7 +5,7 @@ import os
 import shutil
 import argparse
 from pathlib import Path
-from biobb_common.configuration import  settings
+from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
 from biobb_common.command_wrapper import cmd_wrapper
@@ -14,15 +14,19 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Solvate:
-    """Wrapper of the `GROMACS solvate <http://manual.gromacs.org/current/onlinehelp/gmx-editconf.html>`_ module.
+    """
+    | biobb_md Solvate
+    | Wrapper of the `GROMACS solvate <http://manual.gromacs.org/current/onlinehelp/gmx-solvate.html>`_ module.
+    | The GROMACS solvate module, generates a box of solvent around the selected structure.
 
     Args:
-        input_solute_gro_path (str): Path to the input GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/solvate.gro>`_. Accepted formats: gro.
-        output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_solvate.gro>`_. Accepted formats: gro.
-        input_top_zip_path (str): Path the input TOP topology in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/solvate.zip>`_. Accepted formats: zip.
-        output_top_zip_path (str): Path the output topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_solvate.zip>`_. Accepted formats: zip.
-        properties (dic):
-            * **input_solvent_gro_path** (*str*) - ("spc216.gro") Path to the GRO file contanining the structure of the solvent.
+        input_solute_gro_path (str): Path to the input GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/solvate.gro>`_. Accepted formats: gro (edam:format_2033).
+        output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_solvate.gro>`_. Accepted formats: gro (edam:format_2033).
+        input_top_zip_path (str): Path the input TOP topology in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/solvate.zip>`_. Accepted formats: zip (edam:format_3987).
+        output_top_zip_path (str): Path the output topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_solvate.zip>`_. Accepted formats: zip (edam:format_3987).
+        input_solvent_gro_path (str) (Optional): (spc216.gro) Path to the GRO file containing the structure of the solvent. File type: input. Accepted formats: gro (edam:format_2033).
+        properties (dict - Python dictionary object containing the tool parameters, not input/output files):
+            * **shell** (*float*) - (0.0) [0~100|0.1] Thickness in nanometers of optional water layer around solute.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
@@ -33,22 +37,44 @@ class Solvate:
             * **container_working_dir** (*str*) - (None) Path to the internal CWD in the container.
             * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
-    """
 
+    Examples:
+        This is a use example of how to use the building block from Python::
+
+            from biobb_md.gromacs.solvate import Solvate
+            prop = { 'shell': 1.0 }
+            solvate(input_solute_gro_path='/path/to/myStructure.gro',
+                    output_gro_path='/path/to/newStructure.gro',
+                    input_top_zip_path='/path/to/myTopology.zip',
+                    output_top_zip_path='/path/to/newTopology.zip',
+                    properties=prop)
+
+
+    Info:
+        * wrapped_software:
+            * name: GROMACS Solvate
+            * version: >5.1
+            * license: LGPL 2.1
+        * ontology:
+            * name: EDAM
+            * schema: http://edamontology.org/EDAM.owl
+    """
     def __init__(self, input_solute_gro_path: str, output_gro_path: str, input_top_zip_path: str,
-                 output_top_zip_path: str, properties: dict = None, **kwargs) -> None:
+                 output_top_zip_path: str, input_solvent_gro_path: str = None, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
         self.io_dict = {
-            "in": {"input_solute_gro_path": input_solute_gro_path},
+            "in": {"input_solute_gro_path": input_solute_gro_path, "input_solvent_gro_path": input_solvent_gro_path},
             "out": {"output_gro_path": output_gro_path, "output_top_zip_path": output_top_zip_path}
         }
         # Should not be copied inside container
         self.input_top_zip_path = input_top_zip_path
 
         # Properties specific for BB
-        self.input_solvent_gro_path = properties.get('input_solvent_gro_path', 'spc216.gro')
+        self.shell = properties.get('shell')
+        if not self.io_dict["in"].get('input_solvent_gro_path'):
+            self.io_dict["in"]['input_solvent_gro_path'] = 'spc216.gro'
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -116,9 +142,13 @@ class Solvate:
 
         cmd = [self.gmx_path, 'solvate',
                '-cp', container_io_dict["in"]["input_solute_gro_path"],
-               '-cs', self.input_solvent_gro_path,
+               '-cs', container_io_dict["in"]["input_solvent_gro_path"],
                '-o', container_io_dict["out"]["output_gro_path"],
                '-p', top_file]
+
+        if self.shell:
+            cmd.append("-shell")
+            cmd.append(str(self.shell))
 
         new_env = None
         if self.gmx_lib:
@@ -151,7 +181,18 @@ class Solvate:
         return returncode
 
 
+def solvate(input_solute_gro_path: str, output_gro_path: str, input_top_zip_path: str,
+            output_top_zip_path: str, input_solvent_gro_path: str = None, properties: dict = None, **kwargs) -> int:
+    """Create :class:`Solvate <gromacs.solvate.Solvate>` class and
+    execute the :meth:`launch() <gromacs.solvate.Solvate.launch>` method."""
+
+    return Solvate(input_solute_gro_path=input_solute_gro_path, output_gro_path=output_gro_path,
+                   input_top_zip_path=input_top_zip_path, output_top_zip_path=output_top_zip_path,
+                   input_solvent_gro_path=input_solvent_gro_path, properties=properties, **kwargs).launch()
+
+
 def main():
+    """Command line execution of this building block. Please check the command line documentation."""
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS solvate module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
@@ -162,15 +203,16 @@ def main():
     required_args.add_argument('--output_gro_path', required=True)
     required_args.add_argument('--input_top_zip_path', required=True)
     required_args.add_argument('--output_top_zip_path', required=True)
+    parser.add_argument('--input_solvent_gro_path', required=False)
 
     args = parser.parse_args()
     config = args.config if args.config else None
     properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
-    Solvate(input_solute_gro_path=args.input_solute_gro_path, output_gro_path=args.output_gro_path,
+    solvate(input_solute_gro_path=args.input_solute_gro_path, output_gro_path=args.output_gro_path,
             input_top_zip_path=args.input_top_zip_path, output_top_zip_path=args.output_top_zip_path,
-            properties=properties).launch()
+            input_solvent_gro_path=args.input_solvent_gro_path, properties=properties)
 
 
 if __name__ == '__main__':
