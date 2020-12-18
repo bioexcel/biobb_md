@@ -12,13 +12,16 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Pdb2gmx:
-    """Wrapper class for the `GROMACS pdb2gmx <http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html>`_ module.
+    """
+    | biobb_md Pdb2gmx
+    | Wrapper class for the `GROMACS pdb2gmx <http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html>`_ module.
+    | The GROMACS pdb2gmx module, reads a .pdb (or .gro) file, reads some database files, adds hydrogens to the molecules and generates coordinates in GROMACS (GROMOS), or optionally .pdb, format and a topology in GROMACS format. These files can subsequently be processed to generate a run input file.
 
     Args:
-        input_pdb_path (str): Path to the input PDB file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/egfr.pdb>`_. Accepted formats: pdb.
-        output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.gro>`_. Accepted formats: gro.
-        output_top_zip_path (str): Path the output TOP topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.zip>`_. Accepted formats: zip.
-        properties (dic):
+        input_pdb_path (str): Path to the input PDB file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/egfr.pdb>`_. Accepted formats: pdb (edam:format_1476).
+        output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.gro>`_. Accepted formats: gro (edam:format_2033).
+        output_top_zip_path (str): Path the output TOP topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_pdb2gmx.zip>`_. Accepted formats: zip (edam:format_3987).
+        properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **water_type** (*str*) - ("spce") Water molecule type. Valid values: spc, spce, tip3p, tip4p, tip5p, tips3p.
             * **force_field** (*str*) - ("amber99sb-ildn") Force field to be used during the conversion. Valid values: gromos45a3, charmm27, gromos53a6, amber96, amber99, gromos43a2, gromos54a7, gromos43a1, amberGS, gromos53a5, amber99sb, amber03, amber99sb-ildn, oplsaa, amber94.
             * **ignh** (*bool*) - (False) Should pdb2gmx ignore the hidrogens in the original structure.
@@ -90,7 +93,7 @@ class Pdb2gmx:
 
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the GROMACS pdb2gmx module."""
+        """Execute the :class:`Pdb2gmx <gromacs.pdb2gmx.Pdb2gmx>` object."""
         tmp_files = []
 
         # Get local loggers from launchlogger decorator
@@ -164,7 +167,18 @@ class Pdb2gmx:
         return returncode
 
 
+def pdb2gmx(input_pdb_path: str, output_gro_path: str, output_top_zip_path: str,
+            properties: dict = None, **kwargs) -> int:
+    """Create :class:`Pdb2gmx <gromacs.pdb2gmx.Pdb2gmx>` class and
+    execute the :meth:`launch() <gromacs.pdb2gmx.Pdb2gmx.launch>` method."""
+
+    return Pdb2gmx(input_pdb_path=input_pdb_path, output_gro_path=output_gro_path,
+                   output_top_zip_path=output_top_zip_path, properties=properties,
+                   **kwargs).launch()
+
+
 def main():
+    """Command line execution of this building block. Please check the command line documentation."""
     parser = argparse.ArgumentParser(description="Wrapper of the GROMACS pdb2gmx module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
@@ -180,8 +194,8 @@ def main():
     properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
-    Pdb2gmx(input_pdb_path=args.input_pdb_path, output_gro_path=args.output_gro_path,
-            output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
+    pdb2gmx(input_pdb_path=args.input_pdb_path, output_gro_path=args.output_gro_path,
+            output_top_zip_path=args.output_top_zip_path, properties=properties)
 
 
 if __name__ == '__main__':
