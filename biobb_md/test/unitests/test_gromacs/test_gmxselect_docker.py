@@ -1,7 +1,8 @@
 from biobb_common.tools import test_fixtures as fx
-from biobb_md.gromacs.gmxselect import Gmxselect
+from biobb_md.gromacs.gmxselect import gmxselect
 
-class TestSelect:
+
+class TestSelectDocker:
     def setUp(self):
         fx.test_setup(self, 'gmxselect_docker')
 
@@ -9,8 +10,8 @@ class TestSelect:
         #pass
         fx.test_teardown(self)
 
-    def test_select(self):
-        returncode = Gmxselect(properties=self.properties, **self.paths).launch()
+    def test_select_docker(self):
+        returncode = gmxselect(properties=self.properties, **self.paths)
         assert fx.not_empty(self.paths['output_ndx_path'])
         assert fx.equal(self.paths['output_ndx_path'], self.paths['ref_output_ndx_path'])
         assert fx.exe_success(returncode)
