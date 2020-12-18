@@ -38,6 +38,24 @@ class Pdb2gmx:
             * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
 
+    Examples:
+        This is a use example of how to use the building block from Python::
+
+            from biobb_md.gromacs.pdb2gmx import pdb2gmx
+            prop = { 'his': '0 0 1 1 0 0 0' }
+            pdb2gmx(input_pdb_path='/path/to/myStructure.pdb',
+                    output_gro_path='/path/to/newStructure.gro',
+                    output_top_zip_path='/path/to/newTopology.zip',
+                    properties=prop)
+
+    Info:
+        * wrapped_software:
+            * name: GROMACS Pdb2gmx
+            * version: >5.1
+            * license: LGPL 2.1
+        * ontology:
+            * name: EDAM
+            * schema: http://edamontology.org/EDAM.owl
     """
 
     def __init__(self, input_pdb_path: str, output_gro_path: str, output_top_zip_path: str, properties: dict = None,

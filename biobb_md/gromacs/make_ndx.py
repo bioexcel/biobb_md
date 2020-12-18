@@ -13,13 +13,16 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class MakeNdx:
-    """Wrapper of the `GROMACS make_ndx <http://manual.gromacs.org/current/onlinehelp/gmx-make_ndx.html>`_ module.
+    """
+    | biobb_md MakeNdx
+    | Wrapper of the `GROMACS make_ndx <http://manual.gromacs.org/current/onlinehelp/gmx-make_ndx.html>`_ module.
+    | The GROMACS make_ndx module, generates an index file using the atoms of the selection.
 
     Args:
-        input_structure_path (str): Path to the input GRO/PDB/TPR file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/make_ndx.tpr>`_. Accepted formats: gro, pdb, tpr.
-        output_ndx_path (str): Path to the output index NDX file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_make_ndx.ndx>`_. Accepted formats: ndx.
-        input_ndx_path (str) (Optional): Path to the input index NDX file. File type: input. Accepted formats: ndx.
-        properties (dic):
+        input_structure_path (str): Path to the input GRO/PDB/TPR file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/make_ndx.tpr>`_. Accepted formats: gro (edam:format_2033), pdb (edam:format_1476), tpr (edam:format_2333).
+        output_ndx_path (str): Path to the output index NDX file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_make_ndx.ndx>`_. Accepted formats: ndx (edam:format_2330).
+        input_ndx_path (str) (Optional): Path to the input index NDX file. File type: input. Accepted formats: ndx (edam:format_2330).
+        properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **selection** (*str*) - ("a CA C N O") Heavy atoms. Atom selection string.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
@@ -31,8 +34,25 @@ class MakeNdx:
             * **container_working_dir** (*str*) - (None) Path to the internal CWD in the container.
             * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
-    """
 
+    Examples:
+        This is a use example of how to use the building block from Python::
+
+            from biobb_md.gromacs.make_ndx import make_ndx
+            prop = { 'selection': 'a CA C N O' }
+            make_ndx(input_structure_path='/path/to/myStructure.gro',
+                     output_ndx_path='/path/to/newIndex.ndx',
+                     properties=prop)
+
+    Info:
+        * wrapped_software:
+            * name: GROMACS MakeNdx
+            * version: >5.1
+            * license: LGPL 2.1
+        * ontology:
+            * name: EDAM
+            * schema: http://edamontology.org/EDAM.owl
+    """
     def __init__(self, input_structure_path: str, output_ndx_path: str, input_ndx_path: str = None,
                  properties: dict = None, **kwargs) -> None:
         properties = properties or {}
@@ -80,7 +100,7 @@ class MakeNdx:
 
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the GROMACS make_ndx module."""
+        """Execute the :class:`MakeNdx <gromacs.make_ndx.MakeNdx>` object."""
         tmp_files = []
 
         # Get local loggers from launchlogger decorator
@@ -135,7 +155,18 @@ class MakeNdx:
         return returncode
 
 
+def make_ndx(input_structure_path: str, output_ndx_path: str,
+             input_ndx_path: str = None, properties: dict = None, **kwargs) -> int:
+    """Create :class:`MakeNdx <gromacs.make_ndx.MakeNdx>` class and
+        execute the :meth:`launch() <gromacs.make_ndx.MakeNdx.launch>` method."""
+    return MakeNdx(input_structure_path=input_structure_path,
+                   output_ndx_path=output_ndx_path,
+                   input_ndx_path=input_ndx_path,
+                   properties=properties, **kwargs).launch()
+
+
 def main():
+    """Command line execution of this building block. Please check the command line documentation."""
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS make_ndx module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
@@ -151,8 +182,10 @@ def main():
     properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
-    MakeNdx(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path,
-            input_ndx_path=args.input_ndx_path, properties=properties).launch()
+    make_ndx(input_structure_path=args.input_structure_path,
+             output_ndx_path=args.output_ndx_path,
+             input_ndx_path=args.input_ndx_path,
+             properties=properties)
 
 
 if __name__ == '__main__':
