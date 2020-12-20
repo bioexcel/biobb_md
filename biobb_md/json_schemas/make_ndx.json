@@ -1,8 +1,21 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/make_ndx",
-    "title": "Wrapper of the `GROMACS make_ndx <http://manual.gromacs.org/current/onlinehelp/gmx-make_ndx.html>`_ module.",
+    "name": "biobb_md MakeNdx",
+    "title": "Wrapper of the GROMACS make_ndx module.",
+    "description": "The GROMACS make_ndx module, generates an index file using the atoms of the selection.",
     "type": "object",
+    "info": {
+        "wrapped_software": {
+            "name": "GROMACS MakeNdx",
+            "version": ">5.1",
+            "license": "LGPL 2.1"
+        },
+        "ontology": {
+            "name": "EDAM",
+            "schema": "http://edamontology.org/EDAM.owl"
+        }
+    },
     "required": [
         "input_structure_path",
         "output_ndx_path"
@@ -17,6 +30,23 @@
                 ".*\\.gro$",
                 ".*\\.pdb$",
                 ".*\\.tpr$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.gro$",
+                    "description": "Path to the input GRO/PDB/TPR file",
+                    "edam": "format_2033"
+                },
+                {
+                    "extension": ".*\\.pdb$",
+                    "description": "Path to the input GRO/PDB/TPR file",
+                    "edam": "format_1476"
+                },
+                {
+                    "extension": ".*\\.tpr$",
+                    "description": "Path to the input GRO/PDB/TPR file",
+                    "edam": "format_2333"
+                }
             ]
         },
         "output_ndx_path": {
@@ -26,6 +56,13 @@
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_make_ndx.ndx",
             "enum": [
                 ".*\\.ndx$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.ndx$",
+                    "description": "Path to the output index NDX file",
+                    "edam": "format_2330"
+                }
             ]
         },
         "input_ndx_path": {
@@ -35,6 +72,13 @@
             "sample": null,
             "enum": [
                 ".*\\.ndx$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.ndx$",
+                    "description": "Path to the input index NDX file",
+                    "edam": "format_2330"
+                }
             ]
         },
         "properties": {
@@ -43,51 +87,67 @@
                 "selection": {
                     "type": "string",
                     "default": "a CA C N O",
+                    "wf_prop": false,
                     "description": "Heavy atoms. Atom selection string."
+                },
+                "gmx_lib": {
+                    "type": "string",
+                    "default": null,
+                    "wf_prop": false,
+                    "description": "Path set GROMACS GMXLIB environment variable."
                 },
                 "gmx_path": {
                     "type": "string",
                     "default": "gmx",
+                    "wf_prop": false,
                     "description": "Path to the GROMACS executable binary."
                 },
                 "remove_tmp": {
                     "type": "boolean",
                     "default": true,
-                    "description": "[WF property] Remove temporal files."
+                    "wf_prop": true,
+                    "description": "Remove temporal files."
                 },
                 "restart": {
                     "type": "boolean",
                     "default": false,
-                    "description": "[WF property] Do not execute if output files exist."
+                    "wf_prop": true,
+                    "description": "Do not execute if output files exist."
                 },
                 "container_path": {
                     "type": "string",
                     "default": null,
-                    "description": " Path to the binary executable of your container."
+                    "wf_prop": false,
+                    "description": "Path to the binary executable of your container."
                 },
                 "container_image": {
                     "type": "string",
                     "default": "gromacs/gromacs:latest",
+                    "wf_prop": false,
                     "description": "Container Image identifier."
                 },
                 "container_volume_path": {
                     "type": "string",
                     "default": "/data",
+                    "wf_prop": false,
                     "description": "Path to an internal directory in the container."
                 },
                 "container_working_dir": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "Path to the internal CWD in the container."
                 },
                 "container_user_id": {
                     "type": "string",
                     "default": null,
+                    "wf_prop": false,
                     "description": "User number id to be mapped inside the container."
                 },
                 "container_shell_path": {
                     "type": "string",
                     "default": "/bin/bash",
+                    "wf_prop": false,
                     "description": "Path to the binary executable of the container shell."
                 }
             }

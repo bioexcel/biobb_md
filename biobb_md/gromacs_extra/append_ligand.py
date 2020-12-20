@@ -11,16 +11,38 @@ from biobb_common.tools.file_utils import launchlogger
 
 
 class AppendLigand:
-    """This class takes a ligand ITP file and inserts it in a topology.
+    """
+    | biobb_md AppendLigand
+    | This class takes a ligand ITP file and inserts it in a topology.
+    | This module automatizes the process of inserting a ligand ITP file in a GROMACS topology.
 
     Args:
-        input_top_zip_path (str): Path the input topology TOP and ITP files zipball. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.zip>`_. Accepted formats: zip.
-        input_itp_path (str): Path to the ligand ITP file to be inserted in the topology. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/pep_ligand.itp>`_. Accepted formats: itp.
-        output_top_zip_path (str): Path/Name the output topology TOP and ITP files zipball. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs_extra/ref_appendligand.zip>`_. Accepted formats: zip.
+        input_top_zip_path (str): Path the input topology TOP and ITP files zipball. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.zip>`_. Accepted formats: zip (edam:format_3987).
+        input_itp_path (str): Path to the ligand ITP file to be inserted in the topology. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/pep_ligand.itp>`_. Accepted formats: itp (edam:format_3883).
+        output_top_zip_path (str): Path/Name the output topology TOP and ITP files zipball. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs_extra/ref_appendligand.zip>`_. Accepted formats: zip (edam:format_3987).
+        input_posres_itp_path (str) (Optional): Path to the position restriction ITP file. File type: input. Accepted formats: itp (edam:format_3883).
         properties (dic):
             * **posres_name** (*str*) - ("POSRES_LIGAND") String to be included in the ifdef clause.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+
+    Examples:
+        This is a use example of how to use the building block from Python::
+
+            from biobb_md.gromacs_extra.append_ligand import append_ligand
+            prop = { 'posres_name': 'POSRES_LIGAND' }
+            append_ligand(input_top_zip_path='/path/to/myTopology.zip',
+                          input_itp_path='/path/to/myTopologyAddOn.itp',
+                          output_top_zip_path='/path/to/newTopology.zip',
+                          properties=prop)
+
+    Info:
+        * wrapped_software:
+            * name: In house
+            * license: Apache-2.0
+        * ontology:
+            * name: EDAM
+            * schema: http://edamontology.org/EDAM.owl
     """
 
     def __init__(self, input_top_zip_path: str, input_itp_path: str, output_top_zip_path: str,
@@ -51,7 +73,7 @@ class AppendLigand:
 
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the GROMACS editconf module."""
+        """Execute the :class:`AppendLigand <gromacs_extra.append_ligand.AppendLigand>` object."""
         tmp_files = []
 
         # Get local loggers from launchlogger decorator
@@ -77,9 +99,14 @@ class AppendLigand:
         fu.rm(top_file)
 
         forcefield_pattern = r'#include.*forcefield.itp\"'
-        for index, line in enumerate(top_lines):
-            if re.search(forcefield_pattern, line):
-                break
+        if top_lines:
+            for index, line in enumerate(top_lines):
+                if re.search(forcefield_pattern, line):
+                    break
+        else:
+            fu.log(f'FATAL: Input topfile {top_file} from input_top_zip_path {self.io_dict["in"].get("input_top_zip_path")} is empty.', out_log, self.global_log)
+            return 1
+
         top_lines.insert(index+1, '\n')
         top_lines.insert(index+2, '; Including ligand ITP\n')
         top_lines.insert(index+3, '#include "' + itp_name + '"\n')
@@ -137,7 +164,19 @@ class AppendLigand:
         return 0
 
 
+def append_ligand(input_top_zip_path: str, input_itp_path: str, output_top_zip_path: str,
+                  input_posres_itp_path: str = None, properties: dict = None, **kwargs) -> int:
+    """Create :class:`AppendLigand <gromacs_extra.append_ligand.AppendLigand>` class and
+    execute the :meth:`launch() <gromacs_extra.append_ligand.AppendLigand.launch>` method."""
+    return AppendLigand(input_top_zip_path=input_top_zip_path,
+                        input_itp_path=input_itp_path,
+                        output_top_zip_path=output_top_zip_path,
+                        input_posres_itp_path=input_posres_itp_path,
+                        properties=properties, **kwargs).launch()
+
+
 def main():
+    """Command line execution of this building block. Please check the command line documentation."""
     parser = argparse.ArgumentParser(description="Wrapper of the GROMACS editconf module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
@@ -153,8 +192,9 @@ def main():
     properties = settings.ConfReader(config=config).get_prop_dic()
     
     # Specific call of each building block
-    AppendLigand(input_top_zip_path=args.input_top_zip_path, input_itp_path=args.input_itp_path,
-                 output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
+    append_ligand(input_top_zip_path=args.input_top_zip_path, input_itp_path=args.input_itp_path,
+                  output_top_zip_path=args.output_top_zip_path, input_posres_itp_path=args.input_posres_itp_path,
+                  properties=properties)
 
 
 if __name__ == '__main__':

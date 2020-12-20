@@ -2,7 +2,7 @@
   "properties": {
     "his": "0 0 1 1 0 0 0",
     "container_path": "docker",
-    "container_image": "pmx_image",
+    "container_image": "longr/gromacs-docker:latest",
     "container_volume_path": "/inout"
   }
 }

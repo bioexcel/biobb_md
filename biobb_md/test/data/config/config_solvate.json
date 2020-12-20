@@ -1,6 +1,6 @@
 {
   "properties": {
     "gmx_path": "gmx",
-    "input_solvent_gro_path": "spc216.gro"
+    "restart": "False"
   }
 }

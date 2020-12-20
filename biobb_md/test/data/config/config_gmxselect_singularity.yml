@@ -2,4 +2,5 @@ properties:
   container_image: gromacs.simg
   container_path: singularity
   container_volume_path: /inout
-  selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of resname ARG'
+  selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of
+    resname ARG'

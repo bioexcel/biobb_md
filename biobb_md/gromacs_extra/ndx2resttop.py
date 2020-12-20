@@ -10,15 +10,36 @@ from biobb_common.tools.file_utils import launchlogger
 
 
 class Ndx2resttop:
-    """Generate a restrained topology from an index NDX file.
+    """
+    | biobb_md Ndx2resttop
+    | Generate a restrained topology from an index NDX file.
+    | This module automatizes the process of restrained topology generation starting from an index NDX file.
 
     Args:
-        input_ndx_path (str): Path to the input NDX index file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.ndx>`_. Accepted formats: ndx.
-        input_top_zip_path (str): Path the input TOP topology in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.zip>`_. Accepted formats: zip.
-        output_top_zip_path (str): Path the output TOP topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs_extra/ref_ndx2resttop.zip>`_. Accepted formats: zip.
-        properties (dic):
+        input_ndx_path (str): Path to the input NDX index file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.ndx>`_. Accepted formats: ndx (edam:format_2330).
+        input_top_zip_path (str): Path the input TOP topology in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs_extra/ndx2resttop.zip>`_. Accepted formats: zip (edam:format_3987).
+        output_top_zip_path (str): Path the output TOP topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs_extra/ref_ndx2resttop.zip>`_. Accepted formats: zip (edam:format_3987).
+        properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **force_constants** (*str*) - ("500 500 500") Array of three floats defining the force constants.
             * **ref_rest_chain_triplet_list** (*str*) - (None) Triplet list composed by (reference group, restrain group, chain) list.
+
+    Examples:
+        This is a use example of how to use the building block from Python::
+
+            from biobb_md.gromacs_extra.ndx2resttop import ndx2resttop
+            prop = { 'ref_rest_chain_triplet_list': '( Chain_A, Chain_A_noMut, A ), ( Chain_B, Chain_B_noMut, B ), ( Chain_C, Chain_C_noMut, C ), ( Chain_D, Chain_D_noMut, D )' }
+            ndx2resttop(input_ndx_path='/path/to/myIndex.ndx',
+                        input_top_zip_path='/path/to/myTopology.zip',
+                        output_top_zip_path='/path/to/newTopology.zip',
+                        properties=prop)
+
+    Info:
+        * wrapped_software:
+            * name: In house
+            * license: Apache-2.0
+        * ontology:
+            * name: EDAM
+            * schema: http://edamontology.org/EDAM.owl
     """
 
     def __init__(self, input_ndx_path: str, input_top_zip_path: str, output_top_zip_path: str,
@@ -49,7 +70,7 @@ class Ndx2resttop:
 
     @launchlogger
     def launch(self) -> int:
-        """Launch the topology generation."""
+        """Execute the :class:`Ndx2resttop <gromacs_extra.ndx2resttop.Ndx2resttop>` object."""
         tmp_files = []
 
         # Get local loggers from launchlogger decorator
@@ -120,7 +141,18 @@ class Ndx2resttop:
         return 0
 
 
+def ndx2resttop(input_ndx_path: str, input_top_zip_path: str, output_top_zip_path: str,
+                properties: dict = None, **kwargs) -> int:
+    """Create :class:`Ndx2resttop <gromacs_extra.ndx2resttop.Ndx2resttop>` class and
+    execute the :meth:`launch() <gromacs_extra.ndx2resttop.Ndx2resttop.launch>` method."""
+    return Ndx2resttop(input_ndx_path=input_ndx_path,
+                       input_top_zip_path=input_top_zip_path,
+                       output_top_zip_path=output_top_zip_path,
+                       properties=properties, **kwargs).launch()
+
+
 def main():
+    """Command line execution of this building block. Please check the command line documentation."""
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS extra ndx2resttop module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
@@ -136,8 +168,8 @@ def main():
     properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
-    Ndx2resttop(input_ndx_path=args.input_ndx_path, input_top_zip_path=args.input_top_zip_path,
-                output_top_zip_path=args.output_top_zip_path, properties=properties).launch()
+    ndx2resttop(input_ndx_path=args.input_ndx_path, input_top_zip_path=args.input_top_zip_path,
+                output_top_zip_path=args.output_top_zip_path, properties=properties)
 
 
 if __name__ == '__main__':

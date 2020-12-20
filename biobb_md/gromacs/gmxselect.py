@@ -3,7 +3,7 @@
 """Module containing the Select class and the command line interface."""
 import os
 import argparse
-import pathlib as pl
+from pathlib import Path
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
@@ -13,13 +13,16 @@ from biobb_md.gromacs.common import GromacsVersionError
 
 
 class Gmxselect:
-    """Wrapper of the `GROMACS select <http://manual.gromacs.org/current/onlinehelp/gmx-select.html>`_ module.
+    """
+    | biobb_md Gmxselect
+    | Wrapper of the `GROMACS select <http://manual.gromacs.org/current/onlinehelp/gmx-select.html>`_ module.
+    | The GROMACS select module writes out basic data about dynamic selections. It can be used for some simple analyses, or the output can be combined with output from other programs and/or external analysis programs to calculate more complex things.
 
     Args:
-        input_structure_path (str): Path to the input GRO/PDB/TPR file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/make_ndx.tpr>`_. Accepted formats: gro, pdb, tpr.
-        output_ndx_path (str): Path to the output index NDX file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_select.ndx>`_. Accepted formats: ndx.
-        input_ndx_path (str) (Optional): Path to the input index NDX file. File type: input. Accepted formats: ndx.
-        properties (dic):
+        input_structure_path (str): Path to the input GRO/PDB/TPR file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/make_ndx.tpr>`_. Accepted formats: pdb (edam:format_1476), gro (edam:format_2033), tpr (edam:format_2333).
+        output_ndx_path (str): Path to the output index NDX file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_select.ndx>`_. Accepted formats: ndx (edam:format_2330).
+        input_ndx_path (str) (Optional): Path to the input index NDX file. File type: input. Accepted formats: ndx (edam:format_2330).
+        properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **selection** (*str*) - ("a CA C N O") Heavy atoms. Atom selection string.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
@@ -31,6 +34,24 @@ class Gmxselect:
             * **container_working_dir** (*str*) - (None) Path to the internal CWD in the container.
             * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
+
+    Examples:
+        This is a use example of how to use the building block from Python::
+
+            from biobb_md.gromacs.gmxselect import gmxselect
+            prop = { 'selection': '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of resname ARG' }
+            gmxselect(input_structure_path='/path/to/myStructure.gro',
+                      output_ndx_path='/path/to/newIndex.ndx',
+                      properties=prop)
+
+    Info:
+        * wrapped_software:
+            * name: GROMACS Gmxselect
+            * version: >5.1
+            * license: LGPL 2.1
+        * ontology:
+            * name: EDAM
+            * schema: http://edamontology.org/EDAM.owl
     """
 
     def __init__(self, input_structure_path: str, output_ndx_path: str, input_ndx_path: str = None,
@@ -55,7 +76,7 @@ class Gmxselect:
         self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
 
         # Properties common in all GROMACS BB
-        self.gmxlib = properties.get('gmxlib', None)
+        self.gmx_lib = properties.get('gmx_lib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
         self.gmx_nobackup = properties.get('gmx_nobackup', True)
         self.gmx_nocopyright = properties.get('gmx_nocopyright', True)
@@ -80,7 +101,7 @@ class Gmxselect:
 
     @launchlogger
     def launch(self) -> int:
-        """Launches the execution of the GROMACS select module."""
+        """Execute the :class:`Gmxselect <gromacs.gmxselect.Gmxselect>` object."""
         tmp_files = []
 
         # Get local loggers from launchlogger decorator
@@ -106,7 +127,7 @@ class Gmxselect:
                '-on', container_io_dict["out"]["output_ndx_path"]
                ]
 
-        if container_io_dict["in"].get("input_ndx_path") and pl.Path(
+        if container_io_dict["in"].get("input_ndx_path") and Path(
                 container_io_dict["in"].get("input_ndx_path")).exists():
             cmd.append('-n')
             cmd.append(container_io_dict["in"].get("input_ndx_path"))
@@ -115,9 +136,9 @@ class Gmxselect:
         cmd.append("\'"+self.selection+"\'")
 
         new_env = None
-        if self.gmxlib:
+        if self.gmx_lib:
             new_env = os.environ.copy()
-            new_env['GMXLIB'] = self.gmxlib
+            new_env['GMXLIB'] = self.gmx_lib
 
         if self.container_path:
             if self.container_path.endswith('singularity'):
@@ -151,7 +172,19 @@ class Gmxselect:
         return returncode
 
 
+def gmxselect(input_structure_path: str, output_ndx_path: str,
+              input_ndx_path: str = None, properties: dict = None,
+              **kwargs) -> int:
+    """Create :class:`Gmxselect <gromacs.gmxselect.Gmxselect>` class and
+    execute the :meth:`launch() <gromacs.gmxselect.Gmxselect.launch>` method."""
+    return Gmxselect(input_structure_path=input_structure_path,
+                     output_ndx_path=output_ndx_path,
+                     input_ndx_path=input_ndx_path,
+                     properties=properties, **kwargs).launch()
+
+
 def main():
+    """Command line execution of this building block. Please check the command line documentation."""
     parser = argparse.ArgumentParser(description="Wrapper for the GROMACS select module.",
                                      formatter_class=lambda prog: argparse.RawTextHelpFormatter(prog, width=99999))
     parser.add_argument('-c', '--config', required=False, help="This file can be a YAML file, JSON file or JSON string")
@@ -167,8 +200,10 @@ def main():
     properties = settings.ConfReader(config=config).get_prop_dic()
 
     # Specific call of each building block
-    Gmxselect(input_structure_path=args.input_structure_path, output_ndx_path=args.output_ndx_path,
-              input_ndx_path=args.input_ndx_path, properties=properties).launch()
+    gmxselect(input_structure_path=args.input_structure_path,
+              output_ndx_path=args.output_ndx_path,
+              input_ndx_path=args.input_ndx_path,
+              properties=properties)
 
 
 if __name__ == '__main__':
