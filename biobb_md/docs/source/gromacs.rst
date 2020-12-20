@@ -37,6 +37,14 @@ gromacs.grompp module
     :undoc-members:
     :show-inheritance:
 
+gromacs.grompp_mdrun module
+-----------------------------
+
+.. automodule:: gromacs.grompp_mdrun
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 gromacs.make_ndx module
 ------------------------------
 
