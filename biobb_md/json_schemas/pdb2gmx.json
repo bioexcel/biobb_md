@@ -1,11 +1,21 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/pdb2gmx",
-    "name": null,
-    "title": null,
-    "description": null,
+    "name": "biobb_md Pdb2gmx",
+    "title": "Wrapper class for the GROMACS pdb2gmx module.",
+    "description": "The GROMACS pdb2gmx module, reads a .pdb (or .gro) file, reads some database files, adds hydrogens to the molecules and generates coordinates in GROMACS (GROMOS), or optionally .pdb, format and a topology in GROMACS format. These files can subsequently be processed to generate a run input file.",
     "type": "object",
-    "info": [],
+    "info": {
+        "wrapped_software": {
+            "name": "GROMACS Pdb2gmx",
+            "version": ">5.1",
+            "license": "LGPL 2.1"
+        },
+        "ontology": {
+            "name": "EDAM",
+            "schema": "http://edamontology.org/EDAM.owl"
+        }
+    },
     "required": [
         "input_pdb_path",
         "output_gro_path",
@@ -23,7 +33,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.pdb$",
-                    "description": "Path to the input PDB file"
+                    "description": "Path to the input PDB file",
+                    "edam": "format_1476"
                 }
             ]
         },
@@ -38,7 +49,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.gro$",
-                    "description": "Path to the output GRO file"
+                    "description": "Path to the output GRO file",
+                    "edam": "format_2033"
                 }
             ]
         },
@@ -53,7 +65,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.zip$",
-                    "description": "Path the output TOP topology in zip format"
+                    "description": "Path the output TOP topology in zip format",
+                    "edam": "format_3987"
                 }
             ]
         },

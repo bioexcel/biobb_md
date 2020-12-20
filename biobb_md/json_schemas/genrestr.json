@@ -1,14 +1,23 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/genrestr",
-    "name": null,
-    "title": null,
-    "description": null,
+    "name": "biobb_md Genrestr",
+    "title": "Wrapper of the GROMACS genrestr module.",
+    "description": "The GROMACS genrestr module, produces an #include file for a topology containing a list of atom numbers and three force constants for the x-, y-, and z-direction based on the contents of the -f file. A single isotropic force constant may be given on the command line instead of three components.",
     "type": "object",
-    "info": [],
+    "info": {
+        "wrapped_software": {
+            "name": "GROMACS Genrestr",
+            "version": ">5.1",
+            "license": "LGPL 2.1"
+        },
+        "ontology": {
+            "name": "EDAM",
+            "schema": "http://edamontology.org/EDAM.owl"
+        }
+    },
     "required": [
         "input_structure_path",
-        "input_ndx_path",
         "output_itp_path"
     ],
     "properties": {
@@ -25,30 +34,18 @@
             "file_formats": [
                 {
                     "extension": ".*\\.pdb$",
-                    "description": "Path to the input structure PDB, GRO or TPR format"
+                    "description": "Path to the input structure PDB, GRO or TPR format",
+                    "edam": "format_1476"
                 },
                 {
                     "extension": ".*\\.gro$",
-                    "description": "Path to the input structure PDB, GRO or TPR format"
+                    "description": "Path to the input structure PDB, GRO or TPR format",
+                    "edam": "format_2033"
                 },
                 {
                     "extension": ".*\\.tpr$",
-                    "description": "Path to the input structure PDB, GRO or TPR format"
-                }
-            ]
-        },
-        "input_ndx_path": {
-            "type": "string",
-            "description": "Path to the input GROMACS index file, NDX format",
-            "filetype": "input",
-            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.ndx",
-            "enum": [
-                ".*\\.ndx$"
-            ],
-            "file_formats": [
-                {
-                    "extension": ".*\\.ndx$",
-                    "description": "Path to the input GROMACS index file, NDX format"
+                    "description": "Path to the input structure PDB, GRO or TPR format",
+                    "edam": "format_2333"
                 }
             ]
         },
@@ -63,7 +60,24 @@
             "file_formats": [
                 {
                     "extension": ".*\\.itp$",
-                    "description": "Path the output ITP topology file with restrains"
+                    "description": "Path the output ITP topology file with restrains",
+                    "edam": "format_3883"
+                }
+            ]
+        },
+        "input_ndx_path": {
+            "type": "string",
+            "description": "Path to the input GROMACS index file, NDX format",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genrestr.ndx",
+            "enum": [
+                ".*\\.ndx$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.ndx$",
+                    "description": "Path to the input GROMACS index file, NDX format",
+                    "edam": "format_2330"
                 }
             ]
         },

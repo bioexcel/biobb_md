@@ -1,5 +1,5 @@
 properties:
-  container_image: gromacs/gromacs:latest
+  container_image: longr/gromacs-docker:latest
   container_path: docker
   container_volume_path: /data
   container_working_dir: /data

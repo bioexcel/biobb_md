@@ -1,11 +1,21 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/make_ndx",
-    "name": null,
-    "title": null,
-    "description": null,
+    "name": "biobb_md MakeNdx",
+    "title": "Wrapper of the GROMACS make_ndx module.",
+    "description": "The GROMACS make_ndx module, generates an index file using the atoms of the selection.",
     "type": "object",
-    "info": [],
+    "info": {
+        "wrapped_software": {
+            "name": "GROMACS MakeNdx",
+            "version": ">5.1",
+            "license": "LGPL 2.1"
+        },
+        "ontology": {
+            "name": "EDAM",
+            "schema": "http://edamontology.org/EDAM.owl"
+        }
+    },
     "required": [
         "input_structure_path",
         "output_ndx_path"
@@ -24,15 +34,18 @@
             "file_formats": [
                 {
                     "extension": ".*\\.gro$",
-                    "description": "Path to the input GRO/PDB/TPR file"
+                    "description": "Path to the input GRO/PDB/TPR file",
+                    "edam": "format_2033"
                 },
                 {
                     "extension": ".*\\.pdb$",
-                    "description": "Path to the input GRO/PDB/TPR file"
+                    "description": "Path to the input GRO/PDB/TPR file",
+                    "edam": "format_1476"
                 },
                 {
                     "extension": ".*\\.tpr$",
-                    "description": "Path to the input GRO/PDB/TPR file"
+                    "description": "Path to the input GRO/PDB/TPR file",
+                    "edam": "format_2333"
                 }
             ]
         },
@@ -47,7 +60,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.ndx$",
-                    "description": "Path to the output index NDX file"
+                    "description": "Path to the output index NDX file",
+                    "edam": "format_2330"
                 }
             ]
         },
@@ -62,7 +76,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.ndx$",
-                    "description": "Path to the input index NDX file"
+                    "description": "Path to the input index NDX file",
+                    "edam": "format_2330"
                 }
             ]
         },

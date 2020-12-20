@@ -1,11 +1,21 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/gmxselect",
-    "name": null,
-    "title": null,
-    "description": null,
+    "name": "biobb_md Gmxselect",
+    "title": "Wrapper of the GROMACS select module.",
+    "description": "The GROMACS select module writes out basic data about dynamic selections. It can be used for some simple analyses, or the output can be combined with output from other programs and/or external analysis programs to calculate more complex things.",
     "type": "object",
-    "info": [],
+    "info": {
+        "wrapped_software": {
+            "name": "GROMACS Gmxselect",
+            "version": ">5.1",
+            "license": "LGPL 2.1"
+        },
+        "ontology": {
+            "name": "EDAM",
+            "schema": "http://edamontology.org/EDAM.owl"
+        }
+    },
     "required": [
         "input_structure_path",
         "output_ndx_path"
@@ -17,22 +27,25 @@
             "filetype": "input",
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/make_ndx.tpr",
             "enum": [
-                ".*\\.gro$",
                 ".*\\.pdb$",
+                ".*\\.gro$",
                 ".*\\.tpr$"
             ],
             "file_formats": [
                 {
-                    "extension": ".*\\.gro$",
-                    "description": "Path to the input GRO/PDB/TPR file"
+                    "extension": ".*\\.pdb$",
+                    "description": "Path to the input GRO/PDB/TPR file",
+                    "edam": "format_1476"
                 },
                 {
-                    "extension": ".*\\.pdb$",
-                    "description": "Path to the input GRO/PDB/TPR file"
+                    "extension": ".*\\.gro$",
+                    "description": "Path to the input GRO/PDB/TPR file",
+                    "edam": "format_2033"
                 },
                 {
                     "extension": ".*\\.tpr$",
-                    "description": "Path to the input GRO/PDB/TPR file"
+                    "description": "Path to the input GRO/PDB/TPR file",
+                    "edam": "format_2333"
                 }
             ]
         },
@@ -47,7 +60,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.ndx$",
-                    "description": "Path to the output index NDX file"
+                    "description": "Path to the output index NDX file",
+                    "edam": "format_2330"
                 }
             ]
         },
@@ -62,7 +76,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.ndx$",
-                    "description": "Path to the input index NDX file"
+                    "description": "Path to the input index NDX file",
+                    "edam": "format_2330"
                 }
             ]
         },

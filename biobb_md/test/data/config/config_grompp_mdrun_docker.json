@@ -1,5 +1,12 @@
 {
   "properties": {
+    "simulation_type": "free",
+    "mdp": {
+      "ld-seed": "1",
+      "dt": 0.0001
+    },
+    "num_threads": 0,
+    "gmx_path": "gmx",
     "container_path": "docker",
     "container_image": "longr/gromacs-docker:latest",
     "container_volume_path": "/inout"

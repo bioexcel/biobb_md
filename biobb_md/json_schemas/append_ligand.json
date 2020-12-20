@@ -1,11 +1,20 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/append_ligand",
-    "name": null,
-    "title": null,
-    "description": null,
+    "name": "biobb_md AppendLigand",
+    "title": "This class takes a ligand ITP file and inserts it in a topology.",
+    "description": "This module automatizes the process of inserting a ligand ITP file in a GROMACS topology.",
     "type": "object",
-    "info": [],
+    "info": {
+        "wrapped_software": {
+            "name": "In house",
+            "license": "Apache-2.0"
+        },
+        "ontology": {
+            "name": "EDAM",
+            "schema": "http://edamontology.org/EDAM.owl"
+        }
+    },
     "required": [
         "input_top_zip_path",
         "input_itp_path",
@@ -23,7 +32,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.zip$",
-                    "description": "Path the input topology TOP and ITP files zipball"
+                    "description": "Path the input topology TOP and ITP files zipball",
+                    "edam": "format_3987"
                 }
             ]
         },
@@ -38,7 +48,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.itp$",
-                    "description": "Path to the ligand ITP file to be inserted in the topology"
+                    "description": "Path to the ligand ITP file to be inserted in the topology",
+                    "edam": "format_3883"
                 }
             ]
         },
@@ -53,7 +64,24 @@
             "file_formats": [
                 {
                     "extension": ".*\\.zip$",
-                    "description": "Path/Name the output topology TOP and ITP files zipball"
+                    "description": "Path/Name the output topology TOP and ITP files zipball",
+                    "edam": "format_3987"
+                }
+            ]
+        },
+        "input_posres_itp_path": {
+            "type": "string",
+            "description": "Path to the position restriction ITP file",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.itp$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.itp$",
+                    "description": "Path to the position restriction ITP file",
+                    "edam": "format_3883"
                 }
             ]
         },

@@ -1,13 +1,13 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/mdrun",
-    "name": "biobb_md Mdrun",
-    "title": "Wrapper of the GROMACS mdrun module.",
-    "description": "MDRun is the main computational chemistry engine within GROMACS. It performs Molecular Dynamics simulations, but it can also perform Stochastic Dynamics, Energy Minimization, test particle insertion or (re)calculation of energies.",
+    "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/grompp_mdrun",
+    "name": "biobb_md GromppMdrun",
+    "title": "Wrapper of the GROMACS grompp module and the GROMACS mdrun module.",
+    "description": "Grompp The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The simulation parameters can be specified by two methods:  1.The predefined mdp settings defined at simulation_type property or  2.A custom mdp file defined at the input_mdp_path argument.  These two methods are mutually exclusive. In both cases can be further modified by adding parameters to the mdp section in the yaml configuration file. The simulation parameter names and default values can be consulted in the official MDP specification. MDRun is the main computational chemistry engine within GROMACS. It performs Molecular Dynamics simulations, but it can also perform Stochastic Dynamics, Energy Minimization, test particle insertion or (re)calculation of energies.",
     "type": "object",
     "info": {
         "wrapped_software": {
-            "name": "GROMACS Mdrun",
+            "name": "GROMACS Grompp & MDRun",
             "version": ">5.1",
             "license": "LGPL 2.1"
         },
@@ -17,26 +17,43 @@
         }
     },
     "required": [
-        "input_tpr_path",
+        "input_gro_path",
+        "input_top_zip_path",
         "output_trr_path",
         "output_gro_path",
         "output_edr_path",
         "output_log_path"
     ],
     "properties": {
-        "input_tpr_path": {
+        "input_gro_path": {
             "type": "string",
-            "description": "Path to the portable binary run input file TPR",
+            "description": "Path to the input GROMACS structure GRO file",
             "filetype": "input",
-            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/mdrun.tpr",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.gro",
             "enum": [
-                ".*\\.tpr$"
+                ".*\\.gro$"
             ],
             "file_formats": [
                 {
-                    "extension": ".*\\.tpr$",
-                    "description": "Path to the portable binary run input file TPR",
-                    "edam": "format_2333"
+                    "extension": ".*\\.gro$",
+                    "description": "Path to the input GROMACS structure GRO file",
+                    "edam": "format_2033"
+                }
+            ]
+        },
+        "input_top_zip_path": {
+            "type": "string",
+            "description": "Path to the input GROMACS topology TOP and ITP files in zip format",
+            "filetype": "input",
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/grompp.zip",
+            "enum": [
+                ".*\\.zip$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.zip$",
+                    "description": "Path to the input GROMACS topology TOP and ITP files in zip format",
+                    "edam": "format_3987"
                 }
             ]
         },
@@ -104,6 +121,54 @@
                 }
             ]
         },
+        "input_cpt_path": {
+            "type": "string",
+            "description": "Path to the input GROMACS checkpoint file CPT",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.cpt$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.cpt$",
+                    "description": "Path to the input GROMACS checkpoint file CPT",
+                    "edam": "format_2333"
+                }
+            ]
+        },
+        "input_ndx_path": {
+            "type": "string",
+            "description": "Path to the input GROMACS index files NDX",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.ndx$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.ndx$",
+                    "description": "Path to the input GROMACS index files NDX",
+                    "edam": "format_2330"
+                }
+            ]
+        },
+        "input_mdp_path": {
+            "type": "string",
+            "description": "Path to the input GROMACS MDP file",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.mdp$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.mdp$",
+                    "description": "Path to the input GROMACS MDP file",
+                    "edam": "format_2330"
+                }
+            ]
+        },
         "output_xtc_path": {
             "type": "string",
             "description": "Path to the GROMACS compressed trajectory file XTC",
@@ -155,6 +220,56 @@
         "properties": {
             "type": "object",
             "properties": {
+                "mdp": {
+                    "type": "object",
+                    "default": {},
+                    "wf_prop": false,
+                    "description": "MDP options specification."
+                },
+                "simulation_type": {
+                    "type": "string",
+                    "default": "minimization",
+                    "wf_prop": false,
+                    "description": "Default options for the mdp file. Each creates a different mdp file. ",
+                    "enum": [
+                        "minimization",
+                        "nvt",
+                        "npt",
+                        "free",
+                        "index"
+                    ],
+                    "property_formats": [
+                        {
+                            "name": "minimization",
+                            "description": "Energy minimization using steepest descent algorithm is used"
+                        },
+                        {
+                            "name": "nvt",
+                            "description": "substance N Volume V and Temperature T are conserved"
+                        },
+                        {
+                            "name": "npt",
+                            "description": "substance N pressure P and Temperature T are conserved"
+                        },
+                        {
+                            "name": "free",
+                            "description": "No design constraints applied; Free MD"
+                        },
+                        {
+                            "name": "index",
+                            "description": "Creates an empty mdp file).            * **maxwarn** (*int*) - (10"
+                        }
+                    ]
+                },
+                "maxwarn": {
+                    "type": "integer",
+                    "default": 10,
+                    "wf_prop": false,
+                    "description": "Maximum number of allowed warnings.",
+                    "min": 0,
+                    "max": 1000,
+                    "step": 1
+                },
                 "mpi_bin": {
                     "type": "string",
                     "default": null,
@@ -162,13 +277,10 @@
                     "description": "Path to the MPI runner. Usually \"mpirun\" or \"srun\"."
                 },
                 "mpi_np": {
-                    "type": "integer",
-                    "default": 0,
+                    "type": "string",
+                    "default": null,
                     "wf_prop": false,
-                    "description": "Number of MPI processes. Usually an integer bigger than 1.",
-                    "min": 0,
-                    "max": 1000,
-                    "step": 1
+                    "description": "Number of MPI processes. Usually an integer bigger than 1."
                 },
                 "mpi_hostlist": {
                     "type": "string",
@@ -188,38 +300,26 @@
                 "num_threads": {
                     "type": "integer",
                     "default": 0,
-                    "wf_prop": false,
-                    "description": "Let GROMACS guess. The number of threads that are going to be used.",
-                    "min": 0,
-                    "max": 1000,
-                    "step": 1
+                    "wf_prop": true,
+                    "description": "Let GROMACS guess. The number of threads that are going to be used."
                 },
                 "num_threads_mpi": {
                     "type": "integer",
                     "default": 0,
-                    "wf_prop": false,
-                    "description": "Let GROMACS guess. The number of GROMACS MPI threads that are going to be used.",
-                    "min": 0,
-                    "max": 1000,
-                    "step": 1
+                    "wf_prop": true,
+                    "description": "Let GROMACS guess. The number of GROMACS MPI threads that are going to be used."
                 },
                 "num_threads_omp": {
                     "type": "integer",
                     "default": 0,
-                    "wf_prop": false,
-                    "description": "Let GROMACS guess. The number of GROMACS OPENMP threads that are going to be used.",
-                    "min": 0,
-                    "max": 1000,
-                    "step": 1
+                    "wf_prop": true,
+                    "description": "Let GROMACS guess. The number of GROMACS OPENMP threads that are going to be used."
                 },
                 "num_threads_omp_pme": {
                     "type": "integer",
                     "default": 0,
-                    "wf_prop": false,
-                    "description": "Let GROMACS guess. The number of GROMACS OPENMP_PME threads that are going to be used.",
-                    "min": 0,
-                    "max": 1000,
-                    "step": 1
+                    "wf_prop": true,
+                    "description": "Let GROMACS guess. The number of GROMACS OPENMP_PME threads that are going to be used."
                 },
                 "use_gpu": {
                     "type": "boolean",

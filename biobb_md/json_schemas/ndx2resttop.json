@@ -1,11 +1,20 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/ndx2resttop",
-    "name": null,
-    "title": null,
-    "description": null,
+    "name": "biobb_md Ndx2resttop",
+    "title": "Generate a restrained topology from an index NDX file.",
+    "description": "This module automatizes the process of restrained topology generation starting from an index NDX file.",
     "type": "object",
-    "info": [],
+    "info": {
+        "wrapped_software": {
+            "name": "In house",
+            "license": "Apache-2.0"
+        },
+        "ontology": {
+            "name": "EDAM",
+            "schema": "http://edamontology.org/EDAM.owl"
+        }
+    },
     "required": [
         "input_ndx_path",
         "input_top_zip_path",
@@ -23,7 +32,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.ndx$",
-                    "description": "Path to the input NDX index file"
+                    "description": "Path to the input NDX index file",
+                    "edam": "format_2330"
                 }
             ]
         },
@@ -38,7 +48,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.zip$",
-                    "description": "Path the input TOP topology in zip format"
+                    "description": "Path the input TOP topology in zip format",
+                    "edam": "format_3987"
                 }
             ]
         },
@@ -53,7 +64,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.zip$",
-                    "description": "Path the output TOP topology in zip format"
+                    "description": "Path the output TOP topology in zip format",
+                    "edam": "format_3987"
                 }
             ]
         },

@@ -1,11 +1,21 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/solvate",
-    "name": null,
-    "title": null,
-    "description": null,
+    "name": "biobb_md Solvate",
+    "title": "Wrapper of the GROMACS solvate module.",
+    "description": "The GROMACS solvate module, generates a box of solvent around the selected structure.",
     "type": "object",
-    "info": [],
+    "info": {
+        "wrapped_software": {
+            "name": "GROMACS Solvate",
+            "version": ">5.1",
+            "license": "LGPL 2.1"
+        },
+        "ontology": {
+            "name": "EDAM",
+            "schema": "http://edamontology.org/EDAM.owl"
+        }
+    },
     "required": [
         "input_solute_gro_path",
         "output_gro_path",
@@ -24,7 +34,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.gro$",
-                    "description": "Path to the input GRO file"
+                    "description": "Path to the input GRO file",
+                    "edam": "format_2033"
                 }
             ]
         },
@@ -39,7 +50,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.gro$",
-                    "description": "Path to the output GRO file"
+                    "description": "Path to the output GRO file",
+                    "edam": "format_2033"
                 }
             ]
         },
@@ -54,7 +66,8 @@
             "file_formats": [
                 {
                     "extension": ".*\\.zip$",
-                    "description": "Path the input TOP topology in zip format"
+                    "description": "Path the input TOP topology in zip format",
+                    "edam": "format_3987"
                 }
             ]
         },
@@ -69,18 +82,38 @@
             "file_formats": [
                 {
                     "extension": ".*\\.zip$",
-                    "description": "Path the output topology in zip format"
+                    "description": "Path the output topology in zip format",
+                    "edam": "format_3987"
+                }
+            ]
+        },
+        "input_solvent_gro_path": {
+            "type": "string",
+            "description": "(spc216.gro) Path to the GRO file containing the structure of the solvent",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.gro$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.gro$",
+                    "description": "(spc216.gro) Path to the GRO file containing the structure of the solvent",
+                    "edam": "format_2033"
                 }
             ]
         },
         "properties": {
             "type": "object",
             "properties": {
-                "input_solvent_gro_path": {
-                    "type": "string",
-                    "default": "spc216.gro",
+                "shell": {
+                    "type": "number",
+                    "default": 0.0,
                     "wf_prop": false,
-                    "description": "Path to the GRO file contanining the structure of the solvent."
+                    "description": "Thickness in nanometers of optional water layer around solute.",
+                    "min": 0.0,
+                    "max": 100.0,
+                    "step": 0.1
                 },
                 "gmx_lib": {
                     "type": "string",

@@ -1,9 +1,9 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "http://bioexcel.eu/biobb_md/json_schemas/1.0/grompp",
-    "name": "biobb_md.gromacs.grompp Grompp",
+    "name": "biobb_md Grompp",
     "title": "Wrapper of the GROMACS grompp module.",
-    "description": "The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The dynamics parameters are specified in the mdp section of the configuration YAML file. The parameter names and defaults are the same as the ones in the official MDP specification.",
+    "description": "The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The simulation parameters can be specified by two methods:  1.The predefined mdp settings defined at simulation_type property or  2.A custom mdp file defined at the input_mdp_path argument.  These two methods are mutually exclusive. In both cases can be further modified by adding parameters to the mdp section in the yaml configuration file. The simulation parameter names and default values can be consulted in the official MDP specification.",
     "type": "object",
     "info": {
         "wrapped_software": {
@@ -125,7 +125,7 @@
                     "type": "object",
                     "default": {},
                     "wf_prop": false,
-                    "description": "MDP options specification. (Used if *input_mdp_path* is None)"
+                    "description": "MDP options specification."
                 },
                 "simulation_type": {
                     "type": "string",
@@ -135,11 +135,8 @@
                     "enum": [
                         "minimization",
                         "nvt",
-                        "Volume V and Temperature T are conserved",
                         "npt",
-                        "pressure P and Temperature T are conserved",
                         "free",
-                        "Free MD",
                         "index"
                     ],
                     "property_formats": [
@@ -149,27 +146,15 @@
                         },
                         {
                             "name": "nvt",
-                            "description": null
-                        },
-                        {
-                            "name": "Volume V and Temperature T are conserved",
-                            "description": null
+                            "description": "substance N Volume V and Temperature T are conserved"
                         },
                         {
                             "name": "npt",
-                            "description": null
-                        },
-                        {
-                            "name": "pressure P and Temperature T are conserved",
-                            "description": null
+                            "description": "substance N pressure P and Temperature T are conserved"
                         },
                         {
                             "name": "free",
-                            "description": null
-                        },
-                        {
-                            "name": "Free MD",
-                            "description": null
+                            "description": "No design constraints applied; Free MD"
                         },
                         {
                             "name": "index",
