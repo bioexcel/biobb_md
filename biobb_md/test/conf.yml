@@ -181,7 +181,6 @@ grompp_singularity:
     container_volume_path: /inout
     container_working_dir: /inout
 
-
 mdrun:
   paths:
     input_tpr_path: file:test_data_dir/gromacs/mdrun.tpr
@@ -284,7 +283,6 @@ make_ndx:
     ref_output_ndx_path: file:test_reference_dir/gromacs/ref_make_ndx.ndx
   properties:
     selection: "a CA C N O"
-
 
 make_ndx_docker:
   paths:

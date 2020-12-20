@@ -158,7 +158,7 @@ class MakeNdx:
 def make_ndx(input_structure_path: str, output_ndx_path: str,
              input_ndx_path: str = None, properties: dict = None, **kwargs) -> int:
     """Create :class:`MakeNdx <gromacs.make_ndx.MakeNdx>` class and
-        execute the :meth:`launch() <gromacs.make_ndx.MakeNdx.launch>` method."""
+    execute the :meth:`launch() <gromacs.make_ndx.MakeNdx.launch>` method."""
     return MakeNdx(input_structure_path=input_structure_path,
                    output_ndx_path=output_ndx_path,
                    input_ndx_path=input_ndx_path,

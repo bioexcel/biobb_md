@@ -31,9 +31,9 @@ class AppendLigand:
 
             from biobb_md.gromacs_extra.append_ligand import append_ligand
             prop = { 'posres_name': 'POSRES_LIGAND' }
-            append_ligand(input_top_zip_path=input_top_zip_path,
-                          input_itp_path=input_itp_path,
-                          output_top_zip_path=output_top_zip_path,
+            append_ligand(input_top_zip_path='/path/to/myTopology.zip',
+                          input_itp_path='/path/to/myTopologyAddOn.itp',
+                          output_top_zip_path='/path/to/newTopology.zip',
                           properties=prop)
 
     Info:
