@@ -15,7 +15,7 @@ The latest documentation of this package can be found in our readthedocs site:
 [latest API documentation](http://biobb-md.readthedocs.io/en/latest/).
 
 ### Version
-v3.0.1 2020.3
+v3.5.0 2020.4
 
 ### Installation
 Using PIP:
@@ -25,7 +25,7 @@ Using PIP:
 * Installation:
 
 
-        pip install "biobb_md>=3.0.1"
+        pip install "biobb_md>=3.5.0"
 
 
 * Usage: [Python API documentation](https://biobb-md.readthedocs.io/en/latest/modules.html)
@@ -35,7 +35,7 @@ Using ANACONDA:
 * Installation:
 
 
-        conda install -c bioconda "biobb_md>=3.0.1"
+        conda install -c bioconda "biobb_md>=3.5.0"
 
 
 * Usage: With conda installation BioBBs can be used with the [Python API documentation](https://biobb-md.readthedocs.io/en/latest/modules.html) and the [Command Line documentation](https://biobb-md.readthedocs.io/en/latest/command_line.html)
@@ -45,13 +45,13 @@ Using DOCKER:
 * Installation:
 
 
-        docker pull quay.io/biocontainers/biobb_md:3.0.1--py_0
+        docker pull quay.io/biocontainers/biobb_md:3.5.0--py_0
 
 
 * Usage:
 
 
-        docker run quay.io/biocontainers/biobb_md:3.0.1--py_0 <command>
+        docker run quay.io/biocontainers/biobb_md:3.5.0--py_0 <command>
 
 
 Using SINGULARITY:
@@ -76,8 +76,8 @@ The command list and specification can be found at the [Command Line documentati
 ### Copyright & Licensing
 This software has been developed in the [MMB group](http://mmb.irbbarcelona.org) at the [BSC](http://www.bsc.es/) & [IRB](https://www.irbbarcelona.org/) for the [European BioExcel](http://bioexcel.eu/), funded by the European Commission (EU H2020 [823830](http://cordis.europa.eu/projects/823830), EU H2020 [675728](http://cordis.europa.eu/projects/675728)).
 
-* (c) 2015-2020 [Barcelona Supercomputing Center](https://www.bsc.es/)
-* (c) 2015-2020 [Institute for Research in Biomedicine](https://www.irbbarcelona.org/)
+* (c) 2015-2021 [Barcelona Supercomputing Center](https://www.bsc.es/)
+* (c) 2015-2021 [Institute for Research in Biomedicine](https://www.irbbarcelona.org/)
 
 Licensed under the
 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0), see the file LICENSE for details.

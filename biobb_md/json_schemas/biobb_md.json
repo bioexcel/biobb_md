@@ -4,9 +4,9 @@
     "github": "https://github.com/bioexcel/biobb_md",
     "readthedocs": "https://biobb-md.readthedocs.io/en/latest/",
     "conda": "https://anaconda.org/bioconda/biobb_md",
-    "docker": "https://quay.io/repository/biocontainers/biobb_md",
+    "docker": "https://quay.io/repository/biocontainers/biobb_md:3.5.0--py_0",
     "singularity": "https://www.singularity-hub.org/collections/2735/usage",
-    "version": "3.0.1",
+    "version": "3.5.0",
     "tools" : [
         {
             "block" : "Pdb2gmx",
@@ -51,6 +51,13 @@
             "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.mdrun"
         },
         {
+            "block" : "GromppMdrun",
+            "tool" : "gmx grompp & gmx mdrun",
+            "desc" : "Grompp The GROMACS preprocessor module needs to be fed with the input system and the dynamics parameters to create a portable binary run input file TPR. The simulation parameters can be specified by two methods:  1.The predefined mdp settings defined at simulation_type property or  2.A custom mdp file defined at the input_mdp_path argument.  These two methods are mutually exclusive. In both cases can be further modified by adding parameters to the mdp section in the yaml configuration file. The simulation parameter names and default values can be consulted in the `official MDP specification <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_. MDRun is the main computational chemistry engine within GROMACS. It performs Molecular Dynamics simulations, but it can also perform Stochastic Dynamics, Energy Minimization, test particle insertion or (re)calculation of energies.",
+            "exec" : "grompp_mdrun",
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.grompp_mdrun"
+        },
+        {
             "block" : "MakeNdx",
             "tool" : "gmx make_ndx",
             "desc" : "Creates a GROMACS index file (NDX) from an input selection and an input GROMACS structure file.",
@@ -87,12 +94,12 @@
         }
     ],
     "dep_pypi" : [
-        "install_requires=['biobb_common==3.0.1']",
+        "install_requires=['biobb_common==3.5.1']",
         "python_requires='==3.7.*'"
     ],
     "dep_conda" : [
         "python ==3.7.*",
-        "biobb_common ==3.0.1",
+        "biobb_common ==3.5.1",
         "GROMACS ==2019.1"
     ],
     "keywords" : [
