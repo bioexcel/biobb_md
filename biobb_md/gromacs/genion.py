@@ -24,6 +24,7 @@ class Genion:
         output_gro_path (str): Path to the input structure GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genion.gro>`_. Accepted formats: gro (edam:format_2033).
         input_top_zip_path (str): Path the input TOP topology in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genion.zip>`_. Accepted formats: zip (edam:format_3987).
         output_top_zip_path (str): Path the output topology TOP and ITP files zipball. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genion.zip>`_. Accepted formats: zip (edam:format_3987).
+        input_ndx_path (str) (Optional): Path to the input index NDX file. File type: input. Accepted formats: ndx (edam:format_2330).
         properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **replaced_group** (*str*) - ("SOL") Group of molecules that will be replaced by the solvent.
             * **neutral** (*bool*) - (False) Neutralize the charge of the system.
@@ -62,12 +63,12 @@ class Genion:
             * schema: http://edamontology.org/EDAM.owl
     """
     def __init__(self, input_tpr_path: str, output_gro_path: str, input_top_zip_path: str,
-                 output_top_zip_path: str, properties: dict = None, **kwargs) -> None:
+                 output_top_zip_path: str, input_ndx_path: str = None, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
         self.io_dict = {
-            "in": {"input_tpr_path": input_tpr_path},
+            "in": {"input_tpr_path": input_tpr_path, "input_ndx_path": input_ndx_path},
             "out": {"output_gro_path": output_gro_path, "output_top_zip_path": output_top_zip_path}
         }
         # Should not be copied inside container
@@ -149,6 +150,11 @@ class Genion:
                '-s', container_io_dict["in"]["input_tpr_path"],
                '-o', container_io_dict["out"]["output_gro_path"],
                '-p', top_file]
+
+        if container_io_dict["in"].get("input_ndx_path") and Path(
+                container_io_dict["in"].get("input_ndx_path")).exists():
+            cmd.append('-n')
+            cmd.append(container_io_dict["in"].get("input_ndx_path"))
 
         if self.neutral:
             cmd.append('-neutral')
