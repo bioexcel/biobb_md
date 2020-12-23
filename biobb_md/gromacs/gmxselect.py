@@ -24,6 +24,7 @@ class Gmxselect:
         input_ndx_path (str) (Optional): Path to the input index NDX file. File type: input. Accepted formats: ndx (edam:format_2330).
         properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **selection** (*str*) - ("a CA C N O") Heavy atoms. Atom selection string.
+            * **append** (*bool*) - (False) Append the content of the input_ndx_path to the output_ndx_path.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
@@ -66,6 +67,7 @@ class Gmxselect:
 
         # Properties specific for BB
         self.selection = properties.get('selection', "a CA C N O")
+        self.append = properties.get('append', False)
 
         # container Specific
         self.container_path = properties.get('container_path')
@@ -164,6 +166,14 @@ class Gmxselect:
                 cmd = docker_cmd
         returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
         fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
+
+        if self.io_dict["in"].get("input_ndx_path"):
+            if self.append:
+                with open(self.io_dict["out"]["output_ndx_path"], 'a') as out_ndx_file:
+                    out_ndx_file.write('\n')
+                    with open(self.io_dict["in"].get("input_ndx_path")) as in_ndx_file:
+                        for line in in_ndx_file:
+                            out_ndx_file.write(line)
 
         tmp_files.append(container_io_dict.get("unique_dir"))
         if self.remove_tmp:
