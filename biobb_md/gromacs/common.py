@@ -117,7 +117,7 @@ def mdp_preset(sim_type: str) -> Dict[str, str]:
     if not sim_type: 
         return mdp_dict
     
-    minimization = (sim_type == 'minimization')
+    minimization = (sim_type == 'minimization') or (sim_type == 'ions')
     nvt = (sim_type == 'nvt')
     npt = (sim_type == 'npt')
     free = (sim_type == 'free')
