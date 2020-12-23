@@ -60,8 +60,8 @@ class Gmxselect:
 
         # Input/Output files
         self.io_dict = {
-            "in": {"input_structure_path": input_structure_path},
-            "out": {"output_ndx_path": output_ndx_path, "input_ndx_path": input_ndx_path}
+            "in": {"input_structure_path": input_structure_path, "input_ndx_path": input_ndx_path},
+            "out": {"output_ndx_path": output_ndx_path}
         }
 
         # Properties specific for BB
