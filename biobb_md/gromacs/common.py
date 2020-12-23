@@ -106,7 +106,7 @@ def read_mdp(input_mdp_path: str) -> Dict[str, str]:
             re_match = parameter_re.match(line.strip())
             if re_match:
                 parameter = re_match.group('parameter')
-                value = self._transform(re_match.group('value'))
+                value = re_match.group('value')
                 mdp_dict[parameter] = value
 
     return mdp_dict
