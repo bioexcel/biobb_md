@@ -186,6 +186,7 @@ def main():
     required_args.add_argument('--input_top_zip_path', required=True)
     required_args.add_argument('--input_itp_path', required=True)
     required_args.add_argument('--output_top_zip_path', required=True)
+    parser.add_argument('--input_posres_itp_path', required=False)
 
     args = parser.parse_args()
     config = args.config if args.config else None
