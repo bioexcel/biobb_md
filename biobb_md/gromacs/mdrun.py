@@ -23,6 +23,7 @@ class Mdrun:
         output_gro_path (str): Path to the output GROMACS structure GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.gro>`_. Accepted formats: gro (edam:format_2033).
         output_edr_path (str): Path to the output GROMACS portable energy file EDR. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.edr>`_. Accepted formats: edr (edam:format_2330).
         output_log_path (str): Path to the output GROMACS trajectory log file LOG. File type: output. Accepted formats: log (edam:format_2330).
+        input_cpt_path (str) (Optional): Path to .cpt file from which the run will be restarted. If provided the run is RESTARTED.
         output_xtc_path (str) (Optional): Path to the GROMACS compressed trajectory file XTC. File type: output. Accepted formats: xtc (edam:format_3875).
         output_cpt_path (str) (Optional): Path to the output GROMACS checkpoint file CPT. File type: output. Accepted formats: cpt (edam:format_2333).
         output_dhdl_path (str) (Optional): Path to the output dhdl.xvg file only used when free energy calculation is turned on. File type: output. Accepted formats: xvg (edam:format_2033).
@@ -73,13 +74,13 @@ class Mdrun:
     """
 
     def __init__(self, input_tpr_path: str, output_trr_path: str, output_gro_path: str, output_edr_path: str,
-                 output_log_path: str, output_xtc_path: str = None, output_cpt_path: str = None,
+                 output_log_path: str, input_cpt_path: str = None, output_xtc_path: str = None, output_cpt_path: str = None,
                  output_dhdl_path: str = None, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
         # Input/Output files
         self.io_dict = {
-            "in": {"input_tpr_path": input_tpr_path},
+            "in": {"input_tpr_path": input_tpr_path, "input_cpt_path": input_cpt_path},
             "out": {"output_trr_path": output_trr_path, "output_gro_path": output_gro_path,
                     "output_edr_path": output_edr_path, "output_log_path": output_log_path,
                     "output_xtc_path": output_xtc_path, "output_cpt_path": output_cpt_path,
@@ -166,6 +167,9 @@ class Mdrun:
                '-c', container_io_dict["out"]["output_gro_path"],
                '-e', container_io_dict["out"]["output_edr_path"],
                '-g', container_io_dict["out"]["output_log_path"]]
+        if container_io_dict["in"].get("input_cpt_path"):
+            cmd.append('-cpi')
+            cmd.append(container_io_dict["in"]["input_cpt_path"])
         if container_io_dict["out"].get("output_xtc_path"):
             cmd.append('-x')
             cmd.append(container_io_dict["out"]["output_xtc_path"])
@@ -249,16 +253,17 @@ class Mdrun:
 
 
 def mdrun(input_tpr_path: str, output_trr_path: str, output_gro_path: str, output_edr_path: str,
-          output_log_path: str, output_xtc_path: str = None, output_cpt_path: str = None,
+          output_log_path: str, input_cpt_path: str = None, output_xtc_path: str = None, output_cpt_path: str = None,
           output_dhdl_path: str = None, properties: dict = None, **kwargs) -> int:
     """Create :class:`Mdrun <gromacs.mdrun.Mdrun>` class and
     execute the :meth:`launch() <gromacs.mdrun.Mdrun.launch>` method."""
 
     return Mdrun(input_tpr_path=input_tpr_path, output_trr_path=output_trr_path,
                  output_gro_path=output_gro_path, output_edr_path=output_edr_path,
-                 output_log_path=output_log_path, output_xtc_path=output_xtc_path,
-                 output_cpt_path=output_cpt_path, output_dhdl_path=output_dhdl_path,
-                 properties=properties, **kwargs).launch()
+                 output_log_path=output_log_path, input_cpt_path=input_cpt_path,
+                 output_xtc_path=output_xtc_path, output_cpt_path=output_cpt_path,
+                 output_dhdl_path=output_dhdl_path, properties=properties,
+                 **kwargs).launch()
 
 
 def main():
@@ -274,6 +279,7 @@ def main():
     required_args.add_argument('--output_gro_path', required=True)
     required_args.add_argument('--output_edr_path', required=True)
     required_args.add_argument('--output_log_path', required=True)
+    parser.add_argument('--input_cpt_path', required=False)
     parser.add_argument('--output_xtc_path', required=False)
     parser.add_argument('--output_cpt_path', required=False)
     parser.add_argument('--output_dhdl_path', required=False)
@@ -285,9 +291,9 @@ def main():
     # Specific call of each building block
     mdrun(input_tpr_path=args.input_tpr_path, output_trr_path=args.output_trr_path,
           output_gro_path=args.output_gro_path, output_edr_path=args.output_edr_path,
-          output_log_path=args.output_log_path, output_xtc_path=args.output_xtc_path,
-          output_cpt_path=args.output_cpt_path, output_dhdl_path=args.output_dhdl_path,
-          properties=properties)
+          output_log_path=args.output_log_path, input_cpt_path=args.input_cpt_path, 
+          output_xtc_path=args.output_xtc_path, output_cpt_path=args.output_cpt_path,
+          output_dhdl_path=args.output_dhdl_path, properties=properties)
 
 
 if __name__ == '__main__':
