@@ -1,4 +1,8 @@
-$(document).ready(function(){
-	var rel_path = $('.icon.icon-home').attr('href').split('index.html')[0];
-	$('.icon.icon-home').html('<img src="' + rel_path + '_static/logo.png" class="logo" alt="Logo">');
+$(document).ready(function() {
+	var path = '';
+	
+	if($('.icon.icon-home').attr('href') == '../index.html') path = '../';
+	else if($('.icon.icon-home').attr('href') == '../../index.html') path = '../../';
+		
+	$('.icon.icon-home').html('<img src="' + path + '_static/logo.png" class="logo" alt="Logo">');
 });
