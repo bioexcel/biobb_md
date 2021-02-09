@@ -68,7 +68,7 @@
             "block" : "Gmxselect",
             "tool" : "gmx select",
             "desc" : "Creates a GROMACS index file (NDX) from an input selection and an input GROMACS structure file.",
-            "exec" : "gmx_select",
+            "exec" : "gmxselect",
             "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.gmxselect"
         },
         {
