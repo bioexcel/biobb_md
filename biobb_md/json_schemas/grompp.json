@@ -137,6 +137,7 @@
                         "nvt",
                         "npt",
                         "free",
+                        "ions",
                         "index"
                     ],
                     "property_formats": [
@@ -155,6 +156,10 @@
                         {
                             "name": "free",
                             "description": "No design constraints applied; Free MD"
+                        },
+                        {
+                            "name": "ions",
+                            "description": "Synonym of minimization"
                         },
                         {
                             "name": "index",

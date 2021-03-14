@@ -9,7 +9,8 @@
         "wrapped_software": {
             "name": "GROMACS Mdrun",
             "version": ">5.1",
-            "license": "LGPL 2.1"
+            "license": "LGPL 2.1",
+            "multinode": "mpi"
         },
         "ontology": {
             "name": "EDAM",
@@ -101,6 +102,22 @@
                     "extension": ".*\\.log$",
                     "description": "Path to the output GROMACS trajectory log file LOG",
                     "edam": "format_2330"
+                }
+            ]
+        },
+        "input_cpt_path": {
+            "type": "string",
+            "description": "Path to the input GROMACS checkpoint file CPT",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.cpt$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.cpt$",
+                    "description": "Path to the input GROMACS checkpoint file CPT",
+                    "edam": "format_2333"
                 }
             ]
         },

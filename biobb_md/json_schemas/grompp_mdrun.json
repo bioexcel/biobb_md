@@ -236,6 +236,7 @@
                         "nvt",
                         "npt",
                         "free",
+                        "ions",
                         "index"
                     ],
                     "property_formats": [
@@ -256,8 +257,12 @@
                             "description": "No design constraints applied; Free MD"
                         },
                         {
+                            "name": "ions",
+                            "description": "Synonym of minimization"
+                        },
+                        {
                             "name": "index",
-                            "description": "Creates an empty mdp file).            * **maxwarn** (*int*) - (10"
+                            "description": "Creates an empty mdp file"
                         }
                     ]
                 },

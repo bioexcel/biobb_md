@@ -90,6 +90,12 @@
                     "wf_prop": false,
                     "description": "Heavy atoms. Atom selection string."
                 },
+                "append": {
+                    "type": "boolean",
+                    "default": false,
+                    "wf_prop": false,
+                    "description": "Append the content of the input_ndx_path to the output_ndx_path."
+                },
                 "gmx_path": {
                     "type": "string",
                     "default": "gmx",
