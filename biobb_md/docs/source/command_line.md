@@ -13,7 +13,7 @@ Command:
 ```python
 mdrun -h
 ```
-    usage: mdrun [-h] [-c CONFIG] --input_tpr_path INPUT_TPR_PATH --output_trr_path OUTPUT_TRR_PATH --output_gro_path OUTPUT_GRO_PATH --output_edr_path OUTPUT_EDR_PATH --output_log_path OUTPUT_LOG_PATH [--output_xtc_path OUTPUT_XTC_PATH] [--output_cpt_path OUTPUT_CPT_PATH] [--output_dhdl_path OUTPUT_DHDL_PATH]
+    usage: mdrun [-h] [-c CONFIG] --input_tpr_path INPUT_TPR_PATH --output_trr_path OUTPUT_TRR_PATH --output_gro_path OUTPUT_GRO_PATH --output_edr_path OUTPUT_EDR_PATH --output_log_path OUTPUT_LOG_PATH [--input_cpt_path INPUT_CPT_PATH] [--output_xtc_path OUTPUT_XTC_PATH] [--output_cpt_path OUTPUT_CPT_PATH] [--output_dhdl_path OUTPUT_DHDL_PATH]
     
     Wrapper for the GROMACS mdrun module.
     
@@ -21,6 +21,7 @@ mdrun -h
       -h, --help            show this help message and exit
       -c CONFIG, --config CONFIG
                             This file can be a YAML file, JSON file or JSON string
+      --input_cpt_path INPUT_CPT_PATH
       --output_xtc_path OUTPUT_XTC_PATH
       --output_cpt_path OUTPUT_CPT_PATH
       --output_dhdl_path OUTPUT_DHDL_PATH
@@ -40,6 +41,7 @@ Config input / output arguments for this building block:
 * **output_gro_path** (*string*): Path to the output GROMACS structure GRO file. File type: output. [Sample file](https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.gro). Accepted formats: GRO
 * **output_edr_path** (*string*): Path to the output GROMACS portable energy file EDR. File type: output. [Sample file](https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_mdrun.edr). Accepted formats: EDR
 * **output_log_path** (*string*): Path to the output GROMACS trajectory log file LOG. File type: output. [Sample file](None). Accepted formats: LOG
+* **input_cpt_path** (*string*): Path to the input GROMACS checkpoint file CPT. File type: input. [Sample file](None). Accepted formats: CPT
 * **output_xtc_path** (*string*): Path to the GROMACS compressed trajectory file XTC. File type: output. [Sample file](None). Accepted formats: XTC
 * **output_cpt_path** (*string*): Path to the output GROMACS checkpoint file CPT. File type: output. [Sample file](None). Accepted formats: CPT
 * **output_dhdl_path** (*string*): Path to the output dhdl.xvg file only used when free energy calculation is turned on. File type: output. [Sample file](None). Accepted formats: XVG
@@ -94,7 +96,7 @@ properties:
 ```
 #### Command line
 ```python
-mdrun --config config_mdrun.yml --input_tpr_path mdrun.tpr --output_trr_path ref_mdrun.trr --output_gro_path ref_mdrun.gro --output_edr_path ref_mdrun.edr --output_log_path output.log --output_xtc_path output.xtc --output_cpt_path output.cpt --output_dhdl_path output.xvg
+mdrun --config config_mdrun.yml --input_tpr_path mdrun.tpr --output_trr_path ref_mdrun.trr --output_gro_path ref_mdrun.gro --output_edr_path ref_mdrun.edr --output_log_path output.log --input_cpt_path input.cpt --output_xtc_path output.xtc --output_cpt_path output.cpt --output_dhdl_path output.xvg
 ```
 ### JSON
 #### [Common config file](https://github.com/bioexcel/biobb_md/blob/master/biobb_md/test/data/config/config_mdrun.json)
@@ -128,7 +130,7 @@ mdrun --config config_mdrun.yml --input_tpr_path mdrun.tpr --output_trr_path ref
 ```
 #### Command line
 ```python
-mdrun --config config_mdrun.json --input_tpr_path mdrun.tpr --output_trr_path ref_mdrun.trr --output_gro_path ref_mdrun.gro --output_edr_path ref_mdrun.edr --output_log_path output.log --output_xtc_path output.xtc --output_cpt_path output.cpt --output_dhdl_path output.xvg
+mdrun --config config_mdrun.json --input_tpr_path mdrun.tpr --output_trr_path ref_mdrun.trr --output_gro_path ref_mdrun.gro --output_edr_path ref_mdrun.edr --output_log_path output.log --input_cpt_path input.cpt --output_xtc_path output.xtc --output_cpt_path output.cpt --output_dhdl_path output.xvg
 ```
 
 ## Make_ndx
@@ -546,6 +548,7 @@ Syntax: input_parameter (datatype) - (default_value) Definition
 
 Config parameters for this building block:
 * **selection** (*string*): (a CA C N O) Heavy atoms. Atom selection string..
+* **append** (*boolean*): (False) Append the content of the input_ndx_path to the output_ndx_path..
 * **gmx_path** (*string*): (gmx) Path to the GROMACS executable binary..
 * **gmx_lib** (*string*): (None) Path set GROMACS GMXLIB environment variable..
 * **remove_tmp** (*boolean*): (True) Remove temporal files..
@@ -921,6 +924,7 @@ Config input / output arguments for this building block:
 * **output_gro_path** (*string*): Path to the input structure GRO file. File type: output. [Sample file](https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genion.gro). Accepted formats: GRO
 * **input_top_zip_path** (*string*): Path the input TOP topology in zip format. File type: input. [Sample file](https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/genion.zip). Accepted formats: ZIP
 * **output_top_zip_path** (*string*): Path the output topology TOP and ITP files zipball. File type: output. [Sample file](https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_genion.zip). Accepted formats: ZIP
+* **input_ndx_path** (*string*): Path to the input index NDX file. File type: input. [Sample file](None). Accepted formats: NDX
 ### Config
 Syntax: input_parameter (datatype) - (default_value) Definition
 
@@ -967,7 +971,7 @@ properties:
 ```
 #### Command line
 ```python
-genion --config config_genion.yml --input_tpr_path genion.tpr --output_gro_path ref_genion.gro --input_top_zip_path genion.zip --output_top_zip_path ref_genion.zip
+genion --config config_genion.yml --input_tpr_path genion.tpr --output_gro_path ref_genion.gro --input_top_zip_path genion.zip --output_top_zip_path ref_genion.zip --input_ndx_path input.ndx
 ```
 ### JSON
 #### [Common config file](https://github.com/bioexcel/biobb_md/blob/master/biobb_md/test/data/config/config_genion.json)
@@ -1003,7 +1007,7 @@ genion --config config_genion.yml --input_tpr_path genion.tpr --output_gro_path 
 ```
 #### Command line
 ```python
-genion --config config_genion.json --input_tpr_path genion.tpr --output_gro_path ref_genion.gro --input_top_zip_path genion.zip --output_top_zip_path ref_genion.zip
+genion --config config_genion.json --input_tpr_path genion.tpr --output_gro_path ref_genion.gro --input_top_zip_path genion.zip --output_top_zip_path ref_genion.zip --input_ndx_path input.ndx
 ```
 
 ## Grompp_mdrun
