@@ -30,7 +30,7 @@ class Mdrun:
         properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **mpi_bin** (*str*) - (None) Path to the MPI runner. Usually "mpirun" or "srun".
             * **mpi_np** (*int*) - (0) [0~1000|1] Number of MPI processes. Usually an integer bigger than 1.
-            * **mpi_hostlist** (*str*) - (None) Path to the MPI hostlist file.
+            * **mpi_flags** (*str*) - (None) Path to the MPI hostlist file.
             * **checkpoint_time** (*int*) - (15) [0~1000|1] Checkpoint writing interval in minutes. Only enabled if an output_cpt_path is provided.
             * **num_threads** (*int*) - (0) [0~1000|1] Let GROMACS guess. The number of threads that are going to be used.
             * **num_threads_mpi** (*int*) - (0) [0~1000|1] Let GROMACS guess. The number of GROMACS MPI threads that are going to be used.
@@ -91,7 +91,7 @@ class Mdrun:
         # general mpi properties
         self.mpi_bin = properties.get('mpi_bin')
         self.mpi_np = properties.get('mpi_np')
-        self.mpi_hostlist = properties.get('mpi_hostlist')
+        self.mpi_flags = properties.get('mpi_flags')
         # gromacs cpu mpi/openmp properties
         self.num_threads = str(properties.get('num_threads', ''))
         self.num_threads_mpi = str(properties.get('num_threads_mpi', ''))
@@ -189,9 +189,8 @@ class Mdrun:
             if self.mpi_np:
                 mpi_cmd.append('-n')
                 mpi_cmd.append(str(self.mpi_np))
-            if self.mpi_hostlist:
-                mpi_cmd.append('-hostfile')
-                mpi_cmd.append(self.mpi_hostlist)
+            if self.mpi_flags:
+                mpi_cmd.extend(self.mpi_flags)
             cmd = mpi_cmd + cmd
 
         # gromacs cpu mpi/openmp properties
