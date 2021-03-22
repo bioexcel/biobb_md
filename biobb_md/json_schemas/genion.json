@@ -87,6 +87,22 @@
                 }
             ]
         },
+        "input_ndx_path": {
+            "type": "string",
+            "description": "Path to the input index NDX file",
+            "filetype": "input",
+            "sample": null,
+            "enum": [
+                ".*\\.ndx$"
+            ],
+            "file_formats": [
+                {
+                    "extension": ".*\\.ndx$",
+                    "description": "Path to the input index NDX file",
+                    "edam": "format_2330"
+                }
+            ]
+        },
         "properties": {
             "type": "object",
             "properties": {

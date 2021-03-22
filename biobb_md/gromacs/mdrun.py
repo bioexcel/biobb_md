@@ -68,6 +68,7 @@ class Mdrun:
             * name: GROMACS Mdrun
             * version: >5.1
             * license: LGPL 2.1
+            * multinode: mpi
         * ontology:
             * name: EDAM
             * schema: http://edamontology.org/EDAM.owl
