@@ -7,8 +7,8 @@ class TestPdb2gmx:
         fx.test_setup(self, 'pdb2gmx')
 
     def tearDown(self):
-        #pass
-        fx.test_teardown(self)
+        pass
+        #fx.test_teardown(self)
 
     def test_pdb2gmx(self):
         returncode = pdb2gmx(properties=self.properties, **self.paths)
