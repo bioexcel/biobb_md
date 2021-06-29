@@ -35,6 +35,16 @@ class Editconf:
             * **container_user_id** (*str*) - (None) User number id to be mapped inside the container.
             * **container_shell_path** (*str*) - ("/bin/bash") Path to the binary executable of the container shell.
 
+    Examples:
+        This is a use example of how to use the building block from Python::
+
+            from biobb_md.gromacs.editconf import editconf
+            prop = { 'distance_to_molecule': 1.0,
+                     'box_type': 'cubic'}
+            editconf(input_gro_path='/path/to/structure.gro',
+                     output_gro_path='/path/to/newStructure.gro',
+                     properties=prop)
+
     Info:
         * wrapped_software:
             * name: GROMACS Solvate
