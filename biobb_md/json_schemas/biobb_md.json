@@ -4,9 +4,9 @@
     "github": "https://github.com/bioexcel/biobb_md",
     "readthedocs": "https://biobb-md.readthedocs.io/en/latest/",
     "conda": "https://anaconda.org/bioconda/biobb_md",
-    "docker": "https://quay.io/biocontainers/biobb_md:3.5.1--py_0",
+    "docker": "https://quay.io/biocontainers/biobb_md:3.6.0--py_0",
     "singularity": "https://www.singularity-hub.org/collections/2735/usage",
-    "version": "3.5.1",
+    "version": "3.6.0",
     "tools" : [
         {
             "block" : "Pdb2gmx",
@@ -94,12 +94,12 @@
         }
     ],
     "dep_pypi" : [
-        "install_requires=['biobb_common==3.5.1']",
+        "install_requires=['biobb_common==3.6.0']",
         "python_requires='==3.7.*'"
     ],
     "dep_conda" : [
         "python ==3.7.*",
-        "biobb_common ==3.5.1",
+        "biobb_common ==3.6.0",
         "GROMACS ==2019.1"
     ],
     "keywords" : [
