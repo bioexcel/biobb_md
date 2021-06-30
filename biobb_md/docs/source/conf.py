@@ -1,4 +1,4 @@
-3.6.0# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # Pymdsetup documentation build configuration file, created by
 # sphinx-quickstart on Wed Nov 22 09:36:44 2017.
