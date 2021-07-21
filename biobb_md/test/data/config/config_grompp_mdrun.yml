@@ -1,5 +1,6 @@
 properties:
   gmx_path: gmx
+  maxwarn: 1
   mdp:
     dt: 0.0001
     ld-seed: '1'

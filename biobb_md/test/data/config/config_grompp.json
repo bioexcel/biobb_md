@@ -1,5 +1,6 @@
 {
   "properties": {
+    "maxwarn": 1,
     "mdp": {
       "ld-seed": "1"
     }

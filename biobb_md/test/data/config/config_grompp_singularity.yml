@@ -3,5 +3,6 @@ properties:
   container_path: singularity
   container_volume_path: /inout
   container_working_dir: /inout
+  maxwarn: 1
   mdp:
     ld-seed: '1'

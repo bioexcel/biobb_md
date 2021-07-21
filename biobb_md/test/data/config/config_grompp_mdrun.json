@@ -1,6 +1,7 @@
 {
   "properties": {
     "simulation_type": "free",
+    "maxwarn": 1,
     "mdp": {
       "ld-seed": "1",
       "dt": 0.0001
