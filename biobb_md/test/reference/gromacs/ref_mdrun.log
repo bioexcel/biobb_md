@@ -27,9 +27,9 @@ as published by the Free Software Foundation; either version 2.1
 of the License, or (at your option) any later version.
 
 GROMACS:      gmx mdrun, version 2019.1
-Executable:   /opt/anaconda3/envs/biobb_api_360/bin/gmx
-Data prefix:  /opt/anaconda3/envs/biobb_api_360
-Working dir:  /orozco/services/biobbapi_dev/Web/BBB6109189b92ed5
+Executable:   gmx
+Data prefix:  biobb_api_360
+Working dir:  BBB6109189b92ed5
 Process ID:   19882
 Command line:
   gmx -nobackup -nocopyright mdrun -s mdrun.tpr -o mdrun.output_trr_path.trr -c mdrun.output_gro_path.gro -e mdrun.output_edr_path.edr -g output_log_path.log -nt 0
@@ -46,12 +46,12 @@ RDTSCP usage:       disabled
 TNG support:        enabled
 Hwloc support:      hwloc-2.0.2
 Tracing support:    disabled
-C compiler:         /opt/conda/conda-bld/gromacs_1551110167250/_build_env/bin/x86_64-conda_cos6-linux-gnu-cc GNU 7.3.0
-C compiler flags:    -msse2   -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -pipe -I/opt/anaconda3/envs/biobb_api_360/include -fdebug-prefix-map=${SRC_DIR}=/usr/local/src/conda/${PKG_NAME}-${PKG_VERSION} -fdebug-prefix-map=${PREFIX}=/usr/local/src/conda-prefix  -O3 -DNDEBUG -funroll-all-loops -fexcess-precision=fast  
-C++ compiler:       /opt/conda/conda-bld/gromacs_1551110167250/_build_env/bin/x86_64-conda_cos6-linux-gnu-c++ GNU 7.3.0
-C++ compiler flags:  -msse2   -fvisibility-inlines-hidden -std=c++17 -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -pipe -I/opt/anaconda3/envs/biobb_api_360/include -fdebug-prefix-map=${SRC_DIR}=/usr/local/src/conda/${PKG_NAME}-${PKG_VERSION} -fdebug-prefix-map=${PREFIX}=/usr/local/src/conda-prefix -std=c++11   -O3 -DNDEBUG -funroll-all-loops -fexcess-precision=fast  
-OpenCL include dir: /opt/anaconda3/envs/biobb_api_360/include
-OpenCL library:     /opt/anaconda3/envs/biobb_api_360/lib/libOpenCL.so
+C compiler:         x86_64-conda_cos6-linux-gnu-cc GNU 7.3.0
+C compiler flags:    -msse2   -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -pipe -Ibiobb_api_360/include -fdebug-prefix-map=${SRC_DIR}=/usr/local/src/conda/${PKG_NAME}-${PKG_VERSION} -fdebug-prefix-map=${PREFIX}=/usr/local/src/conda-prefix  -O3 -DNDEBUG -funroll-all-loops -fexcess-precision=fast  
+C++ compiler:       x86_64-conda_cos6-linux-gnu-c++ GNU 7.3.0
+C++ compiler flags:  -msse2   -fvisibility-inlines-hidden -std=c++17 -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -pipe -Ibiobb_api_360/include -fdebug-prefix-map=${SRC_DIR}=/usr/local/src/conda/${PKG_NAME}-${PKG_VERSION} -fdebug-prefix-map=${PREFIX}=/usr/local/src/conda-prefix -std=c++11   -O3 -DNDEBUG -funroll-all-loops -fexcess-precision=fast  
+OpenCL include dir: biobb_api_360/include
+OpenCL library:     biobb_api_360/lib/libOpenCL.so
 OpenCL version:     2.2
 
 NOTE: Detection of GPUs failed. The API reported:
