@@ -109,7 +109,7 @@
             "type": "string",
             "description": "Path to the output GROMACS trajectory log file LOG",
             "filetype": "output",
-            "sample": null,
+            "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_gmx_mdrun.log",
             "enum": [
                 ".*\\.log$"
             ],
