@@ -114,14 +114,13 @@ def read_mdp(input_mdp_path: str) -> Dict[str, str]:
 
 def mdp_preset(sim_type: str) -> Dict[str, str]:
     mdp_dict = {}
-    if not sim_type: 
+    if not sim_type or sim_type == 'index':
         return mdp_dict
     
     minimization = (sim_type == 'minimization') or (sim_type == 'ions')
     nvt = (sim_type == 'nvt')
     npt = (sim_type == 'npt')
     free = (sim_type == 'free')
-    index = (sim_type == 'index')
     md = (nvt or npt or free)
 
     # Position restrain
@@ -225,9 +224,6 @@ def mdp_preset(sim_type: str) -> Dict[str, str]:
 
     # Periodic boundary conditions
     mdp_dict['pbc'] = 'xyz'
-
-    if index:
-        pass
 
     return mdp_dict
 

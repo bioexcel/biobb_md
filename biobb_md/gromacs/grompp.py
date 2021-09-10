@@ -30,7 +30,7 @@ class Grompp:
         input_mdp_path (str) (Optional): Path to the input GROMACS `MDP file <http://manual.gromacs.org/current/user-guide/mdp-options.html>`_. File type: input. Accepted formats: mdp (edam:format_2330).
         properties (dict - Python dictionary object containing the tool parameters, not input/output files):
             * **mdp** (*dict*) - ({}) MDP options specification.
-            * **simulation_type** (*str*) - ("minimization") Default options for the mdp file. Each one creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Energy minimization using steepest descent algorithm is used), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (substance N Volume V and Temperature T are conserved), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (substance N pressure P and Temperature T are conserved), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (No design constraints applied; Free MD), `ions <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Synonym of minimization), index (Creates an empty mdp file).
+            * **simulation_type** (*str*) - (None) Default options for the mdp file. Each one creates a different mdp file. Values: `minimization <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Energy minimization using steepest descent algorithm is used), `nvt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/nvt.mdp>`_ (substance N Volume V and Temperature T are conserved), `npt <https://biobb-md.readthedocs.io/en/latest/_static/mdp/npt.mdp>`_ (substance N pressure P and Temperature T are conserved), `free <https://biobb-md.readthedocs.io/en/latest/_static/mdp/free.mdp>`_ (No design constraints applied; Free MD), `ions <https://biobb-md.readthedocs.io/en/latest/_static/mdp/minimization.mdp>`_ (Synonym of minimization), index (Creates an empty mdp file).
             * **maxwarn** (*int*) - (0) [0~1000|1] Maximum number of allowed warnings. If simulation_type is index default is 10.
             * **gmx_lib** (*str*) - (None) Path set GROMACS GMXLIB environment variable.
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
@@ -48,9 +48,9 @@ class Grompp:
 
             from biobb_md.gromacs.grompp import grompp
 
-            prop = { 'mdp':
-                        { 'simulation_type': 'minimization',
-                          'emtol':'500',
+            prop = { 'simulation_type': 'minimization',
+                     'mdp':
+                        { 'emtol':'500',
                           'nsteps':'5000'}}
             grompp(input_gro_path='/path/to/myStructure.gro',
                    input_top_zip_path='/path/to/myTopology.zip',
@@ -84,8 +84,10 @@ class Grompp:
         # Properties specific for BB
         self.output_mdp_path = properties.get('output_mdp_path', 'grompp.mdp')
         self.output_top_path = properties.get('output_top_path', 'grompp.top')
-        self.simulation_type = properties.get('simulation_type', 'minimization')
-        self.maxwarn = str(properties.get('maxwarn', 0)) if self.simulation_type.lower() != 'index' else str(properties.get('maxwarn', 10))
+        self.simulation_type = properties.get('simulation_type')
+        self.maxwarn = str(properties.get('maxwarn', 0))
+        if self.simulation_type and self.simulation_type != 'index':
+            self.maxwarn = str(properties.get('maxwarn', 10))
         self.mdp = {k: str(v) for k, v in properties.get('mdp', dict()).items()}
 
         # container Specific
