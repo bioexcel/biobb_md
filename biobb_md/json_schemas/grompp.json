@@ -129,7 +129,7 @@
                 },
                 "simulation_type": {
                     "type": "string",
-                    "default": "minimization",
+                    "default": null,
                     "wf_prop": false,
                     "description": "Default options for the mdp file. Each one creates a different mdp file. ",
                     "enum": [
