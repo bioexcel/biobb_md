@@ -4,15 +4,15 @@
 import os
 import argparse
 from pathlib import Path
+from biobb_common.generic.biobb_object import BiobbObject
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
-from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
 
-class MakeNdx:
+class MakeNdx(BiobbObject):
     """
     | biobb_md MakeNdx
     | Wrapper of the `GROMACS make_ndx <http://manual.gromacs.org/current/onlinehelp/gmx-make_ndx.html>`_ module.
@@ -57,6 +57,9 @@ class MakeNdx:
                  properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
+        # Call parent class constructor
+        super().__init__(properties)
+
         # Input/Output files
         self.io_dict = {
             "in": {"input_structure_path": input_structure_path, "input_ndx_path": input_ndx_path},
@@ -65,14 +68,6 @@ class MakeNdx:
 
         # Properties specific for BB
         self.selection = properties.get('selection', "a CA C N O")
-
-        # container Specific
-        self.container_path = properties.get('container_path')
-        self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
-        self.container_volume_path = properties.get('container_volume_path', '/data')
-        self.container_working_dir = properties.get('container_working_dir')
-        self.container_user_id = properties.get('container_user_id')
-        self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
 
         # Properties common in all GROMACS BB
         self.gmx_lib = properties.get('gmx_lib', None)
@@ -86,73 +81,50 @@ class MakeNdx:
         if not self.container_path:
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
-        # Properties common in all BB
-        self.can_write_console_log = properties.get('can_write_console_log', True)
-        self.global_log = properties.get('global_log', None)
-        self.prefix = properties.get('prefix', None)
-        self.step = properties.get('step', None)
-        self.path = properties.get('path', '')
-        self.remove_tmp = properties.get('remove_tmp', True)
-        self.restart = properties.get('restart', False)
-
         # Check the properties
         fu.check_properties(self, properties)
 
     @launchlogger
     def launch(self) -> int:
         """Execute the :class:`MakeNdx <gromacs.make_ndx.MakeNdx>` object."""
-        tmp_files = []
 
-        # Get local loggers from launchlogger decorator
-        out_log = getattr(self, 'out_log', None)
-        err_log = getattr(self, 'err_log', None)
+        # Setup Biobb
+        if self.check_restart(): return 0
+        self.stage_files()
+
+        # Create command line
+        self.cmd = ['echo', '-e', '\'' + self.selection + '\\nq' + '\'', '|',
+               self.gmx_path, 'make_ndx',
+               '-f', self.stage_io_dict["in"]["input_structure_path"],
+               '-o', self.stage_io_dict["out"]["output_ndx_path"]
+               ]
+
+        if self.stage_io_dict["in"].get("input_ndx_path")\
+                and Path(self.stage_io_dict["in"].get("input_ndx_path")).exists():
+            self.cmd.append('-n')
+            self.cmd.append(self.stage_io_dict["in"].get("input_ndx_path"))
+
+        if self.gmx_lib:
+            self.environment = os.environ.copy()
+            self.environment['GMXLIB'] = self.gmx_lib
 
         # Check GROMACS version
         if not self.container_path:
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), self.out_log)
 
-        # Restart if needed
-        if self.restart:
-            if fu.check_complete_files(self.io_dict["out"].values()):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
-                return 0
+        # create_cmd_line and execute_command
+        self.run_biobb()
 
-        container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
+        # Retrieve results
+        self.copy_to_host()
 
-        cmd = ['echo', '-e', '\'' + self.selection + '\\nq' + '\'', '|',
-               self.gmx_path, 'make_ndx',
-               '-f', container_io_dict["in"]["input_structure_path"],
-               '-o', container_io_dict["out"]["output_ndx_path"]
-               ]
+        # Remove temporal files
+        self.tmp_files.append(self.stage_io_dict.get("unique_dir"))
+        self.remove_tmp_files()
 
-        if container_io_dict["in"].get("input_ndx_path")\
-                and Path(container_io_dict["in"].get("input_ndx_path")).exists():
-            cmd.append('-n')
-            cmd.append(container_io_dict["in"].get("input_ndx_path"))
-
-        new_env = None
-        if self.gmx_lib:
-            new_env = os.environ.copy()
-            new_env['GMXLIB'] = self.gmx_lib
-
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
-                                 host_volume=container_io_dict.get("unique_dir"),
-                                 container_volume=self.container_volume_path,
-                                 container_working_dir=self.container_working_dir,
-                                 container_user_uid=self.container_user_id,
-                                 container_shell_path=self.container_shell_path,
-                                 container_image=self.container_image,
-                                 out_log=out_log, global_log=self.global_log)
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
-        fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
-
-        tmp_files.append(container_io_dict.get("unique_dir"))
-        if self.remove_tmp:
-            fu.rm_file_list(tmp_files, out_log=out_log)
-
-        return returncode
+        return self.return_code
 
 
 def make_ndx(input_structure_path: str, output_ndx_path: str,

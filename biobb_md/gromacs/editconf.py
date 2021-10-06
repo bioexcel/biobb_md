@@ -7,7 +7,6 @@ from biobb_common.generic.biobb_object import BiobbObject
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
-from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
@@ -92,22 +91,14 @@ class Editconf(BiobbObject):
     def launch(self) -> int:
         """Execute the :class:`Editconf <gromacs.editconf.Editconf>` object."""
 
-        # Check GROMACS version
-        if not self.container_path:
-            if self.gmx_version < 512:
-                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), self.out_log)
-
-        # Restart if needed
+        # Setup Biobb
         if self.check_restart(): return 0
-
-        # Copy files to container
-        self.copy_to_container()
+        self.stage_files()
 
         # Create command line
         self.cmd = [self.gmx_path, 'editconf',
-                    '-f', self.container_io_dict["in"]["input_gro_path"],
-                    '-o', self.container_io_dict["out"]["output_gro_path"],
+                    '-f', self.stage_io_dict["in"]["input_gro_path"],
+                    '-o', self.stage_io_dict["out"]["output_gro_path"],
                     '-d', str(self.distance_to_molecule),
                     '-bt', self.box_type]
 
@@ -122,17 +113,20 @@ class Editconf(BiobbObject):
             self.environment = os.environ.copy()
             self.environment['GMXLIB'] = self.gmx_lib
 
-        # Create command line
-        self.create_cmd_line()
+        # Check GROMACS version
+        if not self.container_path:
+            if self.gmx_version < 512:
+                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), self.out_log)
 
-        # Execute command line
-        self.execute_command()
+        # Run Biobb block
+        self.run_biobb()
 
         # Copy files to host
         self.copy_to_host()
 
         # Remove temporal files
-        self.tmp_files.append(self.container_io_dict.get("unique_dir"))
+        self.tmp_files.append(self.stage_io_dict.get("unique_dir"))
         self.remove_tmp_files()
 
         return self.return_code
