@@ -5,17 +5,17 @@ import os
 import argparse
 import shutil
 from pathlib import Path
+from biobb_common.generic.biobb_object import BiobbObject
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
-from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 from biobb_md.gromacs.common import create_mdp
 from biobb_md.gromacs.common import mdp_preset
 
 
-class Grompp:
+class Grompp(BiobbObject):
     """
     | biobb_md Grompp
     | Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module.
@@ -72,6 +72,9 @@ class Grompp:
                  properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
+        # Call parent class constructor
+        super().__init__(properties)
+
         # Input/Output files
         self.io_dict = {
             "in": {"input_gro_path": input_gro_path, "input_cpt_path": input_cpt_path,
@@ -110,110 +113,83 @@ class Grompp:
         if not self.container_path:
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
-        # Properties common in all BB
-        self.can_write_console_log = properties.get('can_write_console_log', True)
-        self.global_log = properties.get('global_log', None)
-        self.prefix = properties.get('prefix', None)
-        self.step = properties.get('step', None)
-        self.path = properties.get('path', '')
-        self.remove_tmp = properties.get('remove_tmp', True)
-        self.restart = properties.get('restart', False)
-
         # Check the properties
-        fu.check_properties(self, properties)
+        self.check_properties(properties)
 
     @launchlogger
     def launch(self) -> int:
         """Execute the :class:`Grompp <gromacs.grompp.Grompp>` object."""
 
-        tmp_files = []
-        mdout = 'mdout.mdp'
-        tmp_files.append(mdout)
-
-        # Get local loggers from launchlogger decorator
-        out_log = getattr(self, 'out_log', None)
-        err_log = getattr(self, 'err_log', None)
-
-        # Check GROMACS version
-        if not self.container_path:
-            if self.gmx_version < 512:
-                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
-
-        # Restart if needed
-        if self.restart:
-            if fu.check_complete_files(self.io_dict["out"].values()):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
-                return 0
+        # Setup Biobb
+        if self.check_restart(): return 0
+        self.stage_files()
 
         # Unzip topology to topology_out
-        top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=out_log)
+        top_file = fu.unzip_top(zip_file=self.input_top_zip_path, out_log=self.out_log)
         top_dir = str(Path(top_file).parent)
-        tmp_files.append(top_dir)
 
-        container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
-
+        # Create MDP file
         mdp_dir = fu.create_unique_dir()
-        tmp_files.append(mdp_dir)
         self.output_mdp_path = create_mdp(output_mdp_path=str(Path(mdp_dir).joinpath(self.output_mdp_path)),
                                           input_mdp_path=self.io_dict["in"]["input_mdp_path"],
                                           preset_dict=mdp_preset(self.simulation_type),
                                           mdp_properties_dict=self.mdp)
 
+        # Copy extra files to container: MDP file and topology folder
         if self.container_path:
-            fu.log('Container execution enabled', out_log)
+            fu.log('Container execution enabled', self.out_log)
 
-            shutil.copy2(self.output_mdp_path, container_io_dict.get("unique_dir"))
+            shutil.copy2(self.output_mdp_path, self.stage_io_dict.get("unique_dir"))
             self.output_mdp_path = str(Path(self.container_volume_path).joinpath(Path(self.output_mdp_path).name))
 
-            shutil.copytree(top_dir, str(Path(container_io_dict.get("unique_dir")).joinpath(Path(top_dir).name)))
+            shutil.copytree(top_dir, str(Path(self.stage_io_dict.get("unique_dir")).joinpath(Path(top_dir).name)))
             top_file = str(Path(self.container_volume_path).joinpath(Path(top_dir).name, Path(top_file).name))
 
-        cmd = [self.gmx_path, 'grompp',
+        self.cmd = [self.gmx_path, 'grompp',
                '-f', self.output_mdp_path,
-               '-c', container_io_dict["in"]["input_gro_path"],
-               '-r', container_io_dict["in"]["input_gro_path"],
+               '-c', self.stage_io_dict["in"]["input_gro_path"],
+               '-r', self.stage_io_dict["in"]["input_gro_path"],
                '-p', top_file,
-               '-o', container_io_dict["out"]["output_tpr_path"],
-               '-po', mdout,
+               '-o', self.stage_io_dict["out"]["output_tpr_path"],
+               '-po', 'mdout.mdp',
                '-maxwarn', self.maxwarn]
 
-        if container_io_dict["in"].get("input_cpt_path") and Path(container_io_dict["in"]["input_cpt_path"]).exists():
-            cmd.append('-t')
+        if self.stage_io_dict["in"].get("input_cpt_path") and Path(self.stage_io_dict["in"]["input_cpt_path"]).exists():
+            self.cmd.append('-t')
             if self.container_path:
-                shutil.copy2(container_io_dict["in"]["input_cpt_path"], container_io_dict.get("unique_dir"))
-                cmd.append(str(Path(self.container_volume_path).joinpath(Path(container_io_dict["in"]["input_cpt_path"]).name)))
+                shutil.copy2(self.stage_io_dict["in"]["input_cpt_path"], self.stage_io_dict.get("unique_dir"))
+                self.cmd.append(str(Path(self.container_volume_path).joinpath(Path(self.stage_io_dict["in"]["input_cpt_path"]).name)))
             else:
-                cmd.append(container_io_dict["in"]["input_cpt_path"])
-        if container_io_dict["in"].get("input_ndx_path") and Path(container_io_dict["in"]["input_ndx_path"]).exists():
-            cmd.append('-n')
+                self.cmd.append(self.stage_io_dict["in"]["input_cpt_path"])
+        if self.stage_io_dict["in"].get("input_ndx_path") and Path(self.stage_io_dict["in"]["input_ndx_path"]).exists():
+            self.cmd.append('-n')
             if self.container_path:
-                shutil.copy2(container_io_dict["in"]["input_ndx_path"], container_io_dict.get("unique_dir"))
-                cmd.append(Path(self.container_volume_path).joinpath(Path(container_io_dict["in"]["input_ndx_path"]).name))
+                shutil.copy2(self.stage_io_dict["in"]["input_ndx_path"], self.stage_io_dict.get("unique_dir"))
+                self.cmd.append(Path(self.container_volume_path).joinpath(Path(self.stage_io_dict["in"]["input_ndx_path"]).name))
             else:
-                cmd.append(container_io_dict["in"]["input_ndx_path"])
+                self.cmd.append(self.stage_io_dict["in"]["input_ndx_path"])
 
-        new_env = None
         if self.gmx_lib:
-            new_env = os.environ.copy()
-            new_env['GMXLIB'] = self.gmx_lib
+            self.environment = os.environ.copy()
+            self.environment['GMXLIB'] = self.gmx_lib
 
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
-                                 host_volume=container_io_dict.get("unique_dir"),
-                                 container_volume=self.container_volume_path,
-                                 container_working_dir=self.container_working_dir,
-                                 container_user_uid=self.container_user_id,
-                                 container_shell_path=self.container_shell_path,
-                                 container_image=self.container_image,
-                                 out_log=out_log, global_log=self.global_log)
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
-        fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
+        # Check GROMACS version
+        if not self.container_path:
+            if self.gmx_version < 512:
+                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), self.out_log)
 
-        tmp_files.append(container_io_dict.get("unique_dir"))
-        if self.remove_tmp:
-            fu.rm_file_list(tmp_files, out_log=out_log)
+        # Run Biobb block
+        self.run_biobb()
 
-        return returncode
+        # Copy files to host
+        self.copy_to_host()
+
+        # Remove temporal files
+        self.tmp_files.extend([self.stage_io_dict.get("unique_dir"), top_dir, mdp_dir, 'mdout.mdp'])
+        self.remove_tmp_files()
+
+        return self.return_code
 
 
 def grompp(input_gro_path: str, input_top_zip_path: str, output_tpr_path: str,

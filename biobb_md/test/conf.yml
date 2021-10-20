@@ -165,7 +165,7 @@ grompp_docker:
     mdp:
       ld-seed: '1'
     container_path: docker
-    container_image: longr/gromacs-docker:latest
+    container_image: gromacs/gromacs:latest
     container_volume_path: /inout
     container_working_dir: /inout
 
@@ -315,6 +315,7 @@ gmxselect:
     output_ndx_path: output_ndx.ndx
     ref_output_ndx_path: file:test_reference_dir/gromacs/ref_select.ndx
   properties:
+    #selection: '\"Mynewgroup\" group \"Protein-H\" and not same residue as within 0.4 of resname ARG'
     selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of resname ARG'
 
 gmxselect_docker:
@@ -323,9 +324,9 @@ gmxselect_docker:
     output_ndx_path: output_ndx.ndx
     ref_output_ndx_path: file:test_reference_dir/gromacs/ref_select.ndx
   properties:
-    selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of resname ARG'
+    selection: '\"Mynewgroup\" group \"Protein-H\" and not same residue as within 0.4 of resname ARG'
     container_path: docker
-    container_image: longr/gromacs-docker:latest
+    container_image: gromacs/gromacs:latest
     container_volume_path: /inout
 
 gmxselect_singularity:

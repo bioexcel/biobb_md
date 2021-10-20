@@ -7,8 +7,8 @@ class TestGenion:
         fx.test_setup(self, 'genion')
 
     def tearDown(self):
-        #pass
-        fx.test_teardown(self)
+        pass
+        #fx.test_teardown(self)
 
     def test_genion(self):
         returncode = genion(properties=self.properties, **self.paths)

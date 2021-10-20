@@ -4,15 +4,15 @@
 import os
 import argparse
 from pathlib import Path
+from biobb_common.generic.biobb_object import BiobbObject
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
-from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
 
-class Gmxselect:
+class Gmxselect(BiobbObject):
     """
     | biobb_md Gmxselect
     | Wrapper of the `GROMACS select <http://manual.gromacs.org/current/onlinehelp/gmx-select.html>`_ module.
@@ -59,6 +59,9 @@ class Gmxselect:
                  properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
+        # Call parent class constructor
+        super().__init__(properties)
+
         # Input/Output files
         self.io_dict = {
             "in": {"input_structure_path": input_structure_path, "input_ndx_path": input_ndx_path},
@@ -68,14 +71,6 @@ class Gmxselect:
         # Properties specific for BB
         self.selection = properties.get('selection', "a CA C N O")
         self.append = properties.get('append', False)
-
-        # container Specific
-        self.container_path = properties.get('container_path')
-        self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
-        self.container_volume_path = properties.get('container_volume_path', '/data')
-        self.container_working_dir = properties.get('container_working_dir')
-        self.container_user_id = properties.get('container_user_id')
-        self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
 
         # Properties common in all GROMACS BB
         self.gmx_lib = properties.get('gmx_lib', None)
@@ -89,98 +84,60 @@ class Gmxselect:
         if not self.container_path:
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
-        # Properties common in all BB
-        self.can_write_console_log = properties.get('can_write_console_log', True)
-        self.global_log = properties.get('global_log', None)
-        self.prefix = properties.get('prefix', None)
-        self.step = properties.get('step', None)
-        self.path = properties.get('path', '')
-        self.remove_tmp = properties.get('remove_tmp', True)
-        self.restart = properties.get('restart', False)
-
         # Check the properties
-        fu.check_properties(self, properties)
+        self.check_properties(properties)
 
     @launchlogger
     def launch(self) -> int:
         """Execute the :class:`Gmxselect <gromacs.gmxselect.Gmxselect>` object."""
-        tmp_files = []
 
-        # Get local loggers from launchlogger decorator
-        out_log = getattr(self, 'out_log', None)
-        err_log = getattr(self, 'err_log', None)
+        # Setup Biobb
+        if self.check_restart(): return 0
+        self.stage_files()
+
+        self.cmd = [self.gmx_path, 'select',
+                    '-s', self.stage_io_dict["in"]["input_structure_path"],
+                    '-on', self.stage_io_dict["out"]["output_ndx_path"]
+                    ]
+
+        if self.stage_io_dict["in"].get("input_ndx_path") and Path(
+                self.stage_io_dict["in"].get("input_ndx_path")).exists():
+            self.cmd.append('-n')
+            self.cmd.append(self.stage_io_dict["in"].get("input_ndx_path"))
+
+        self.cmd.append('-select')
+        self.cmd.append("\'"+self.selection+"\'")
+
+        if self.gmx_lib:
+            self.environment = os.environ.copy()
+            self.environment['GMXLIB'] = self.gmx_lib
 
         # Check GROMACS version
         if not self.container_path:
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), self.out_log)
 
-        # Restart if needed
-        if self.restart:
-            if fu.check_complete_files(self.io_dict["out"].values()):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
-                return 0
+        # Run Biobb block
+        self.run_biobb()
 
-        container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
-
-        cmd = [self.gmx_path, 'select',
-               '-s', container_io_dict["in"]["input_structure_path"],
-               '-on', container_io_dict["out"]["output_ndx_path"]
-               ]
-
-        if container_io_dict["in"].get("input_ndx_path") and Path(
-                container_io_dict["in"].get("input_ndx_path")).exists():
-            cmd.append('-n')
-            cmd.append(container_io_dict["in"].get("input_ndx_path"))
-
-        cmd.append('-select')
-        cmd.append("\'"+self.selection+"\'")
-
-        new_env = None
-        if self.gmx_lib:
-            new_env = os.environ.copy()
-            new_env['GMXLIB'] = self.gmx_lib
-
-        if self.container_path:
-            if self.container_path.endswith('singularity'):
-                fu.log('Using Singularity image %s' % self.container_image, out_log, self.global_log)
-                cmd = [self.container_path, 'exec', '--bind',
-                       container_io_dict.get("unique_dir") + ':' + self.container_volume_path,
-                       self.container_image, " ".join(cmd)]
-
-            elif self.container_path.endswith('docker'):
-                fu.log('Using Docker image %s' % self.container_image, out_log, self.global_log)
-                docker_cmd = [self.container_path, 'run', ]
-                if self.container_working_dir:
-                    docker_cmd.append('-w')
-                    docker_cmd.append(self.container_working_dir)
-                if self.container_volume_path:
-                    docker_cmd.append('-v')
-                    docker_cmd.append(container_io_dict.get("unique_dir") + ':' + self.container_volume_path)
-                if self.container_user_id:
-                    docker_cmd.append('--user')
-                    docker_cmd.append(self.container_user_id)
-                docker_cmd.append(self.container_image)
-                docker_cmd.append(" ".join(cmd))
-                cmd = docker_cmd
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
-        fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
+        # Copy files to host
+        self.copy_to_host()
 
         if self.io_dict["in"].get("input_ndx_path"):
             if self.append:
-                fu.log(f"Appending {self.io_dict['in'].get('input_ndx_path')} to {self.io_dict['out']['output_ndx_path']}", out_log, self.global_log)
+                fu.log(f"Appending {self.io_dict['in'].get('input_ndx_path')} to {self.io_dict['out']['output_ndx_path']}", self.out_log, self.global_log)
                 with open(self.io_dict["out"]["output_ndx_path"], 'a') as out_ndx_file:
                     out_ndx_file.write('\n')
                     with open(self.io_dict["in"].get("input_ndx_path")) as in_ndx_file:
                         for line in in_ndx_file:
                             out_ndx_file.write(line)
 
-        tmp_files.append(container_io_dict.get("unique_dir"))
-        if self.remove_tmp:
-            fu.rm_file_list(tmp_files, out_log=out_log)
+        # Remove temporal files
+        self.tmp_files.append(self.stage_io_dict.get("unique_dir"))
+        self.remove_tmp_files()
 
-        return returncode
+        return self.return_code
 
 
 def gmxselect(input_structure_path: str, output_ndx_path: str,

@@ -5,12 +5,13 @@ import re
 import argparse
 import shutil
 from pathlib import Path
+from biobb_common.generic.biobb_object import BiobbObject
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
 
 
-class AppendLigand:
+class AppendLigand(BiobbObject):
     """
     | biobb_md AppendLigand
     | This class takes a ligand ITP file and inserts it in a topology.
@@ -49,6 +50,9 @@ class AppendLigand:
                  input_posres_itp_path: str = None, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
+        # Call parent class constructor
+        super().__init__(properties)
+
         # Input/Output files
         self.io_dict = {
             "in": {"input_top_zip_path": input_top_zip_path, "input_itp_path": input_itp_path,
@@ -59,38 +63,18 @@ class AppendLigand:
         # Properties specific for BB
         self.posres_name = properties.get('posres_name', 'POSRES_LIGAND')
 
-        # Properties common in all BB
-        self.can_write_console_log = properties.get('can_write_console_log', True)
-        self.global_log = properties.get('global_log', None)
-        self.prefix = properties.get('prefix', None)
-        self.step = properties.get('step', None)
-        self.path = properties.get('path', '')
-        self.remove_tmp = properties.get('remove_tmp', True)
-        self.restart = properties.get('restart', False)
-
         # Check the properties
-        fu.check_properties(self, properties)
+        self.check_properties(properties)
 
     @launchlogger
     def launch(self) -> int:
         """Execute the :class:`AppendLigand <gromacs_extra.append_ligand.AppendLigand>` object."""
-        tmp_files = []
-
-        # Get local loggers from launchlogger decorator
-        out_log = getattr(self, 'out_log', None)
-        err_log = getattr(self, 'err_log', None)
-
-        # Restart if needed
-        if self.restart:
-            output_file_list = [self.io_dict['out'].get("output_top_zip_path")]
-            if fu.check_complete_files(output_file_list):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
-                return 0
+        # Setup Biobb
+        if self.check_restart(): return 0
 
         # Unzip topology
-        top_file = fu.unzip_top(zip_file=self.io_dict['in'].get("input_top_zip_path"), out_log=out_log)
+        top_file = fu.unzip_top(zip_file=self.io_dict['in'].get("input_top_zip_path"), out_log=self.out_log)
         top_dir = str(Path(top_file).parent)
-        tmp_files.append(top_dir)
         itp_name = str(Path(self.io_dict['in'].get("input_itp_path")).name)
 
         with open(top_file) as top_f:
@@ -104,7 +88,7 @@ class AppendLigand:
                 if re.search(forcefield_pattern, line):
                     break
         else:
-            fu.log(f'FATAL: Input topfile {top_file} from input_top_zip_path {self.io_dict["in"].get("input_top_zip_path")} is empty.', out_log, self.global_log)
+            fu.log(f'FATAL: Input topfile {top_file} from input_top_zip_path {self.io_dict["in"].get("input_top_zip_path")} is empty.', self.out_log, self.global_log)
             return 1
 
         top_lines.insert(index+1, '\n')
@@ -155,11 +139,12 @@ class AppendLigand:
             shutil.copy2(self.io_dict['in'].get("input_posres_itp_path"), top_dir)
 
         # zip topology
-        fu.log('Compressing topology to: %s' % self.io_dict['out'].get("output_top_zip_path"), out_log, self.global_log)
-        fu.zip_top(zip_file=self.io_dict['out'].get("output_top_zip_path"), top_file=new_top, out_log=out_log)
+        fu.log('Compressing topology to: %s' % self.io_dict['out'].get("output_top_zip_path"), self.out_log, self.global_log)
+        fu.zip_top(zip_file=self.io_dict['out'].get("output_top_zip_path"), top_file=new_top, out_log=self.out_log)
 
-        if self.remove_tmp:
-            fu.rm_file_list(tmp_files, out_log=out_log)
+        # Remove temporal files
+        self.tmp_files.append(top_dir)
+        self.remove_tmp_files()
 
         return 0
 

@@ -1,6 +1,6 @@
 properties:
-  container_image: longr/gromacs-docker:latest
+  container_image: gromacs/gromacs:latest
   container_path: docker
   container_volume_path: /inout
-  selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of
-    resname ARG'
+  selection: \"Mynewgroup\" group \"Protein-H\" and not same residue as within 0.4
+    of resname ARG

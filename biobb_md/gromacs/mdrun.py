@@ -3,15 +3,15 @@
 """Module containing the MDrun class and the command line interface."""
 import os
 import argparse
+from biobb_common.generic.biobb_object import BiobbObject
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
-from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
 
-class Mdrun:
+class Mdrun(BiobbObject):
     """
     | biobb_md Mdrun
     | Wrapper of the `GROMACS mdrun <http://manual.gromacs.org/current/onlinehelp/gmx-mdrun.html>`_ module.
@@ -79,6 +79,9 @@ class Mdrun:
                  output_dhdl_path: str = None, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
+        # Call parent class constructor
+        super().__init__(properties)
+
         # Input/Output files
         self.io_dict = {
             "in": {"input_tpr_path": input_tpr_path, "input_cpt_path": input_cpt_path},
@@ -107,14 +110,6 @@ class Mdrun:
         # Not documented and not listed option, only for devs
         self.dev = properties.get('dev')
 
-        # container Specific
-        self.container_path = properties.get('container_path')
-        self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
-        self.container_volume_path = properties.get('container_volume_path', '/tmp')
-        self.container_working_dir = properties.get('container_working_dir')
-        self.container_user_id = properties.get('container_user_id')
-        self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
-
         # Properties common in all GROMACS BB
         self.gmx_lib = properties.get('gmx_lib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
@@ -127,62 +122,39 @@ class Mdrun:
         if (not self.mpi_bin) and (not self.container_path):
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
-        # Properties common in all BB
-        self.can_write_console_log = properties.get('can_write_console_log', True)
-        self.global_log = properties.get('global_log', None)
-        self.prefix = properties.get('prefix', None)
-        self.step = properties.get('step', None)
-        self.path = properties.get('path', '')
-        self.remove_tmp = properties.get('remove_tmp', True)
-        self.restart = properties.get('restart', False)
-
         # Check the properties
-        fu.check_properties(self, properties)
+        self.check_properties(properties)
 
     @launchlogger
     def launch(self) -> int:
         """Execute the :class:`Mdrun <gromacs.mdrun.Mdrun>` object."""
-        tmp_files = []
 
-        # Get local loggers from launchlogger decorator
-        out_log = getattr(self, 'out_log', None)
-        err_log = getattr(self, 'err_log', None)
+        # Setup Biobb
+        if self.check_restart(): return 0
+        self.stage_files()
 
-        # Check GROMACS version
-        if (not self.mpi_bin) and (not self.container_path):
-            if self.gmx_version < 512:
-                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+        self.cmd = [self.gmx_path, 'mdrun',
+                    '-s', self.stage_io_dict["in"]["input_tpr_path"],
+                    '-o', self.stage_io_dict["out"]["output_trr_path"],
+                    '-c', self.stage_io_dict["out"]["output_gro_path"],
+                    '-e', self.stage_io_dict["out"]["output_edr_path"],
+                    '-g', self.stage_io_dict["out"]["output_log_path"]]
 
-        # Restart if needed
-        if self.restart:
-            if fu.check_complete_files(self.io_dict["out"].values()):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
-                return 0
-
-        container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
-
-        cmd = [self.gmx_path, 'mdrun',
-               '-s', container_io_dict["in"]["input_tpr_path"],
-               '-o', container_io_dict["out"]["output_trr_path"],
-               '-c', container_io_dict["out"]["output_gro_path"],
-               '-e', container_io_dict["out"]["output_edr_path"],
-               '-g', container_io_dict["out"]["output_log_path"]]
-        if container_io_dict["in"].get("input_cpt_path"):
-            cmd.append('-cpi')
-            cmd.append(container_io_dict["in"]["input_cpt_path"])
-        if container_io_dict["out"].get("output_xtc_path"):
-            cmd.append('-x')
-            cmd.append(container_io_dict["out"]["output_xtc_path"])
-        if container_io_dict["out"].get("output_cpt_path"):
-            cmd.append('-cpo')
-            cmd.append(container_io_dict["out"]["output_cpt_path"])
+        if self.stage_io_dict["in"].get("input_cpt_path"):
+            self.cmd.append('-cpi')
+            self.cmd.append(self.stage_io_dict["in"]["input_cpt_path"])
+        if self.stage_io_dict["out"].get("output_xtc_path"):
+            self.cmd.append('-x')
+            self.cmd.append(self.stage_io_dict["out"]["output_xtc_path"])
+        if self.stage_io_dict["out"].get("output_cpt_path"):
+            self.cmd.append('-cpo')
+            self.cmd.append(self.stage_io_dict["out"]["output_cpt_path"])
             if self.checkpoint_time:
-                cmd.append('-cpt')
-                cmd.append(str(self.checkpoint_time))
-        if container_io_dict["out"].get("output_dhdl_path"):
-            cmd.append('-dhdl')
-            cmd.append(container_io_dict["out"]["output_dhdl_path"])
+                self.cmd.append('-cpt')
+                self.cmd.append(str(self.checkpoint_time))
+        if self.stage_io_dict["out"].get("output_dhdl_path"):
+            self.cmd.append('-dhdl')
+            self.cmd.append(self.stage_io_dict["out"]["output_dhdl_path"])
 
         # general mpi properties
         if self.mpi_bin:
@@ -192,64 +164,63 @@ class Mdrun:
                 mpi_cmd.append(str(self.mpi_np))
             if self.mpi_flags:
                 mpi_cmd.extend(self.mpi_flags)
-            cmd = mpi_cmd + cmd
+            self.cmd = mpi_cmd + self.cmd
 
         # gromacs cpu mpi/openmp properties
         if self.num_threads:
-            fu.log(f'User added number of gmx threads: {self.num_threads}')
-            cmd.append('-nt')
-            cmd.append(self.num_threads)
+            fu.log(f'User added number of gmx threads: {self.num_threads}', self.out_log)
+            self.cmd.append('-nt')
+            self.cmd.append(self.num_threads)
         if self.num_threads_mpi:
-            fu.log(f'User added number of gmx mpi threads: {self.num_threads_mpi}')
-            cmd.append('-ntmpi')
-            cmd.append(self.num_threads_mpi)
+            fu.log(f'User added number of gmx mpi threads: {self.num_threads_mpi}', self.out_log)
+            self.cmd.append('-ntmpi')
+            self.cmd.append(self.num_threads_mpi)
         if self.num_threads_omp:
-            fu.log(f'User added number of gmx omp threads: {self.num_threads_omp}')
-            cmd.append('-ntomp')
-            cmd.append(self.num_threads_omp)
+            fu.log(f'User added number of gmx omp threads: {self.num_threads_omp}', self.out_log)
+            self.cmd.append('-ntomp')
+            self.cmd.append(self.num_threads_omp)
         if self.num_threads_omp_pme:
-            fu.log(f'User added number of gmx omp_pme threads: {self.num_threads_omp_pme}')
-            cmd.append('-ntomp_pme')
-            cmd.append(self.num_threads_omp_pme)
+            fu.log(f'User added number of gmx omp_pme threads: {self.num_threads_omp_pme}', self.out_log)
+            self.cmd.append('-ntomp_pme')
+            self.cmd.append(self.num_threads_omp_pme)
         # GMX gpu properties
         if self.use_gpu: 
-            fu.log('Adding GPU specific settings adds: -nb gpu -pme gpu')
-            cmd += ["-nb","gpu","-pme","gpu"]
+            fu.log('Adding GPU specific settings adds: -nb gpu -pme gpu', self.out_log)
+            self.cmd += ["-nb", "gpu", "-pme", "gpu"]
         if self.gpu_id:
-            fu.log(f'List of unique GPU device IDs available to use: {self.gpu_id}')
-            cmd.append('-gpu_id')
-            cmd.append(self.gpu_id)
+            fu.log(f'List of unique GPU device IDs available to use: {self.gpu_id}', self.out_log)
+            self.cmd.append('-gpu_id')
+            self.cmd.append(self.gpu_id)
         if self.gpu_tasks:
-            fu.log(f'List of GPU device IDs, mapping each PP task on each node to a device: {self.gpu_tasks}')
-            cmd.append('-gputasks')
-            cmd.append(self.gpu_tasks)
+            fu.log(f'List of GPU device IDs, mapping each PP task on each node to a device: {self.gpu_tasks}', self.out_log)
+            self.cmd.append('-gputasks')
+            self.cmd.append(self.gpu_tasks)
         # Not documented and not listed option, only for devs
         if self.dev:
-            fu.log(f'Adding development options: {self.dev}')
-            cmd += [self.dev.split()]
+            fu.log(f'Adding development options: {self.dev}', self.out_log)
+            self.cmd += [self.dev.split()]
 
-        new_env = None
         if self.gmx_lib:
-            new_env = os.environ.copy()
-            new_env['GMXLIB'] = self.gmx_lib
+            self.environment = os.environ.copy()
+            self.environment['GMXLIB'] = self.gmx_lib
 
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
-                                 host_volume=container_io_dict.get("unique_dir"),
-                                 container_volume=self.container_volume_path,
-                                 container_working_dir=self.container_working_dir,
-                                 container_user_uid=self.container_user_id,
-                                 container_shell_path=self.container_shell_path,
-                                 container_image=self.container_image,
-                                 out_log=out_log, global_log=self.global_log)
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
-        fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
+        # Check GROMACS version
+        if not self.container_path:
+            if self.gmx_version < 512:
+                raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), self.out_log)
 
-        tmp_files.append(container_io_dict.get("unique_dir"))
+        # Run Biobb block
+        self.run_biobb()
 
-        if self.remove_tmp:
-            fu.rm_file_list(tmp_files, out_log=out_log)
+        # Copy files to host
+        self.copy_to_host()
 
-        return returncode
+        # Remove temporal files
+        self.tmp_files.append(self.stage_io_dict.get("unique_dir"))
+        self.remove_tmp_files()
+
+        return self.return_code
 
 
 def mdrun(input_tpr_path: str, output_trr_path: str, output_gro_path: str, output_edr_path: str,

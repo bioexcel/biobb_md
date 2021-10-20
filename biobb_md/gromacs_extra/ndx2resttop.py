@@ -4,12 +4,13 @@
 import fnmatch
 import argparse
 from pathlib import Path
+from biobb_common.generic.biobb_object import BiobbObject
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
 
 
-class Ndx2resttop:
+class Ndx2resttop(BiobbObject):
     """
     | biobb_md Ndx2resttop
     | Generate a restrained topology from an index NDX file.
@@ -46,6 +47,9 @@ class Ndx2resttop:
                  properties: dict = None, **kwargs) -> None:
         properties = properties or {}
 
+        # Call parent class constructor
+        super().__init__(properties)
+
         # Input/Output files
         self.io_dict = {
             "in": {"input_ndx_path": input_ndx_path, "input_top_zip_path": input_top_zip_path},
@@ -56,35 +60,16 @@ class Ndx2resttop:
         self.force_constants = properties.get('force_constants', '500 500 500')
         self.ref_rest_chain_triplet_list = properties.get('ref_rest_chain_triplet_list')
 
-        # Properties common in all BB
-        self.can_write_console_log = properties.get('can_write_console_log', True)
-        self.global_log = properties.get('global_log', None)
-        self.prefix = properties.get('prefix', None)
-        self.step = properties.get('step', None)
-        self.path = properties.get('path', '')
-        self.remove_tmp = properties.get('remove_tmp', True)
-        self.restart = properties.get('restart', False)
-
         # Check the properties
-        fu.check_properties(self, properties)
+        self.check_properties(properties)
 
     @launchlogger
     def launch(self) -> int:
         """Execute the :class:`Ndx2resttop <gromacs_extra.ndx2resttop.Ndx2resttop>` object."""
-        tmp_files = []
+        # Setup Biobb
+        if self.check_restart(): return 0
 
-        # Get local loggers from launchlogger decorator
-        out_log = getattr(self, 'out_log', None)
-        err_log = getattr(self, 'err_log', None)
-
-        # Restart if needed
-        if self.restart:
-            output_file_list = [self.io_dict['out'].get("output_top_zip_path")]
-            if fu.check_complete_files(output_file_list):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
-                return 0
-
-        top_file = fu.unzip_top(zip_file=self.io_dict['in'].get("input_top_zip_path"), out_log=out_log)
+        top_file = fu.unzip_top(zip_file=self.io_dict['in'].get("input_top_zip_path"), out_log=self.out_log)
 
         # Create index list of index file :)
         index_dic = {}
@@ -96,25 +81,25 @@ class Ndx2resttop:
                 if index > 0:
                     index_dic[label] = index_dic[label][0], index
         index_dic[label] = index_dic[label][0], index
-        fu.log('Index_dic: '+str(index_dic), out_log, self.global_log)
+        fu.log('Index_dic: '+str(index_dic), self.out_log, self.global_log)
 
         self.ref_rest_chain_triplet_list = [tuple(elem.strip(' ()').replace(' ', '').split(',')) for elem in self.ref_rest_chain_triplet_list.split('),')]
-        fu.log('ref_rest_chain_triplet_list: ' + str(self.ref_rest_chain_triplet_list), out_log, self.global_log)
+        fu.log('ref_rest_chain_triplet_list: ' + str(self.ref_rest_chain_triplet_list), self.out_log, self.global_log)
         for reference_group, restrain_group, chain in self.ref_rest_chain_triplet_list:
-            fu.log('Reference group: '+reference_group, out_log, self.global_log)
-            fu.log('Restrain group: '+restrain_group, out_log, self.global_log)
-            fu.log('Chain: '+chain, out_log, self.global_log)
+            fu.log('Reference group: '+reference_group, self.out_log, self.global_log)
+            fu.log('Restrain group: '+restrain_group, self.out_log, self.global_log)
+            fu.log('Chain: '+chain, self.out_log, self.global_log)
             self.io_dict['out']["output_itp_path"] = fu.create_name(path=str(Path(top_file).parent), prefix=self.prefix, step=self.step, name=restrain_group+'.itp')
 
             # Mapping atoms from absolute enumeration to Chain relative enumeration
-            fu.log('reference_group_index: start_closed:'+str(index_dic['[ '+reference_group+' ]'][0]+1)+' stop_open: '+str(index_dic['[ '+reference_group+' ]'][1]), out_log, self.global_log)
+            fu.log('reference_group_index: start_closed:'+str(index_dic['[ '+reference_group+' ]'][0]+1)+' stop_open: '+str(index_dic['[ '+reference_group+' ]'][1]), self.out_log, self.global_log)
             reference_group_list = [int(elem) for line in lines[index_dic['[ '+reference_group+' ]'][0]+1: index_dic['[ '+reference_group+' ]'][1]] for elem in line.split()]
-            fu.log('restrain_group_index: start_closed:'+str(index_dic['[ '+restrain_group+' ]'][0]+1)+' stop_open: '+str(index_dic['[ '+restrain_group+' ]'][1]), out_log, self.global_log)
+            fu.log('restrain_group_index: start_closed:'+str(index_dic['[ '+restrain_group+' ]'][0]+1)+' stop_open: '+str(index_dic['[ '+restrain_group+' ]'][1]), self.out_log, self.global_log)
             restrain_group_list = [int(elem) for line in lines[index_dic['[ '+restrain_group+' ]'][0]+1: index_dic['[ '+restrain_group+' ]'][1]] for elem in line.split()]
             selected_list = [reference_group_list.index(atom)+1 for atom in restrain_group_list]
             # Creating new ITP with restrictions
             with open(self.io_dict['out'].get("output_itp_path"), 'w') as f:
-                fu.log('Creating: '+str(f)+' and adding the selected atoms force constants', out_log, self.global_log)
+                fu.log('Creating: '+str(f)+' and adding the selected atoms force constants', self.out_log, self.global_log)
                 f.write('[ position_restraints ]\n')
                 f.write('; atom  type      fx      fy      fz\n')
                 for atom in selected_list:
@@ -125,7 +110,7 @@ class Ndx2resttop:
                 if not file_dir.name.startswith("posre") and not file_dir.name.endswith("_pr.itp"):
                     if fnmatch.fnmatch(str(file_dir), "*_chain_"+chain+".itp"):
                         with open(str(file_dir), 'a') as f:
-                            fu.log('Opening: '+str(f)+' and adding the ifdef include statement', out_log, self.global_log)
+                            fu.log('Opening: '+str(f)+' and adding the ifdef include statement', self.out_log, self.global_log)
                             f.write('\n')
                             f.write('; Include Position restraint file\n')
                             f.write('#ifdef CUSTOM_POSRES\n')
@@ -133,10 +118,10 @@ class Ndx2resttop:
                             f.write('#endif\n')
 
         # zip topology
-        fu.zip_top(zip_file=self.io_dict['out'].get("output_top_zip_path"), top_file=top_file, out_log=out_log)
+        fu.zip_top(zip_file=self.io_dict['out'].get("output_top_zip_path"), top_file=top_file, out_log=self.out_log)
 
-        if self.remove_tmp:
-            fu.rm_file_list(tmp_files, out_log=out_log)
+        # Remove temporal files
+        self.remove_tmp_files()
 
         return 0
 

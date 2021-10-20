@@ -3,15 +3,15 @@
 """Module containing the Pdb2gmx class and the command line interface."""
 import os
 import argparse
+from biobb_common.generic.biobb_object import BiobbObject
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
-from biobb_common.command_wrapper import cmd_wrapper
 from biobb_md.gromacs.common import get_gromacs_version
 from biobb_md.gromacs.common import GromacsVersionError
 
 
-class Pdb2gmx:
+class Pdb2gmx(BiobbObject):
     """
     | biobb_md Pdb2gmx
     | Wrapper class for the `GROMACS pdb2gmx <http://manual.gromacs.org/current/onlinehelp/gmx-pdb2gmx.html>`_ module.
@@ -62,6 +62,9 @@ class Pdb2gmx:
                  **kwargs) -> None:
         properties = properties or {}
 
+        # Call parent class constructor
+        super().__init__(properties)
+
         # Input/Output files
         self.io_dict = {
             "in": {"input_pdb_path": input_pdb_path},
@@ -77,14 +80,6 @@ class Pdb2gmx:
         self.his = properties.get('his', None)
         self.merge = properties.get('merge', False)
 
-        # container Specific
-        self.container_path = properties.get('container_path')
-        self.container_image = properties.get('container_image', 'gromacs/gromacs:latest')
-        self.container_volume_path = properties.get('container_volume_path', '/data')
-        self.container_working_dir = properties.get('container_working_dir')
-        self.container_user_id = properties.get('container_user_id')
-        self.container_shell_path = properties.get('container_shell_path', '/bin/bash')
-
         # Properties common in all GROMACS BB
         self.gmx_lib = properties.get('gmx_lib', None)
         self.gmx_path = properties.get('gmx_path', 'gmx')
@@ -97,92 +92,67 @@ class Pdb2gmx:
         if not self.container_path:
             self.gmx_version = get_gromacs_version(self.gmx_path)
 
-        # Properties common in all BB
-        self.can_write_console_log = properties.get('can_write_console_log', True)
-        self.global_log = properties.get('global_log', None)
-        self.prefix = properties.get('prefix', None)
-        self.step = properties.get('step', None)
-        self.path = properties.get('path', '')
-        self.remove_tmp = properties.get('remove_tmp', True)
-        self.restart = properties.get('restart', False)
-
         # Check the properties
-        fu.check_properties(self, properties)
+        self.check_properties(properties)
 
     @launchlogger
     def launch(self) -> int:
         """Execute the :class:`Pdb2gmx <gromacs.pdb2gmx.Pdb2gmx>` object."""
-        tmp_files = []
 
-        # Get local loggers from launchlogger decorator
-        out_log = getattr(self, 'out_log', None)
-        err_log = getattr(self, 'err_log', None)
+        # Setup Biobb
+        if self.check_restart(): return 0
+        self.stage_files()
+
+        internal_top_name = fu.create_name(prefix=self.prefix, step=self.step, name=self.internal_top_name)
+        internal_itp_name = fu.create_name(prefix=self.prefix, step=self.step, name=self.internal_itp_name)
+
+        # Create command line
+        self.cmd = [self.gmx_path, "pdb2gmx",
+                    "-f", self.stage_io_dict["in"]["input_pdb_path"],
+                    "-o", self.stage_io_dict["out"]["output_gro_path"],
+                    "-p", internal_top_name,
+                    "-water", self.water_type,
+                    "-ff", self.force_field,
+                    "-i", internal_itp_name]
+
+        if self.his:
+            self.cmd.append("-his")
+            self.cmd = ['echo', self.his, '|'] + self.cmd
+        if self.ignh:
+            self.cmd.append("-ignh")
+        if self.merge:
+            self.cmd.append("-merge")
+            self.cmd.append("all")
+
+        if self.gmx_lib:
+            self.environment = os.environ.copy()
+            self.environment['GMXLIB'] = self.gmx_lib
 
         # Check GROMACS version
         if not self.container_path:
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
-            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), out_log)
+            fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), self.out_log)
 
-        # Restart if needed
-        if self.restart:
-            if fu.check_complete_files(self.io_dict["out"].values()):
-                fu.log('Restart is enabled, this step: %s will the skipped' % self.step, out_log, self.global_log)
-                return 0
+        # Run Biobb block
+        self.run_biobb()
 
-        container_io_dict = fu.copy_to_container(self.container_path, self.container_volume_path, self.io_dict)
-
-        internal_top_name = fu.create_name(prefix=self.prefix, step=self.step, name=self.internal_top_name)
-        internal_itp_name = fu.create_name(prefix=self.prefix, step=self.step, name=self.internal_itp_name)
-
-        cmd = [self.gmx_path, "pdb2gmx",
-               "-f", container_io_dict["in"]["input_pdb_path"],
-               "-o", container_io_dict["out"]["output_gro_path"],
-               "-p", internal_top_name,
-               "-water", self.water_type,
-               "-ff", self.force_field,
-               "-i", internal_itp_name]
-
-        if self.his:
-            cmd.append("-his")
-            cmd = ['echo', self.his, '|'] + cmd
-        if self.ignh:
-            cmd.append("-ignh")
-        if self.merge:
-            cmd.append("-merge")
-            cmd.append("all")
-
-        new_env = None
-        if self.gmx_lib:
-            new_env = os.environ.copy()
-            new_env['GMXLIB'] = self.gmx_lib
-
-        cmd = fu.create_cmd_line(cmd, container_path=self.container_path,
-                                 host_volume=container_io_dict.get("unique_dir"),
-                                 container_volume=self.container_volume_path,
-                                 container_working_dir=self.container_working_dir,
-                                 container_user_uid=self.container_user_id,
-                                 container_shell_path=self.container_shell_path,
-                                 container_image=self.container_image,
-                                 out_log=out_log, global_log=self.global_log)
-        returncode = cmd_wrapper.CmdWrapper(cmd, out_log, err_log, self.global_log, new_env).launch()
-        fu.copy_to_host(self.container_path, container_io_dict, self.io_dict)
+        # Copy files to host
+        self.copy_to_host()
 
         if self.container_path:
-            internal_top_name = os.path.join(container_io_dict.get("unique_dir"), internal_top_name)
+            internal_top_name = os.path.join(self.stage_io_dict.get("unique_dir"), internal_top_name)
 
         # zip topology
-        fu.log('Compressing topology to: %s' % container_io_dict["out"]["output_top_zip_path"], out_log,
+        fu.log('Compressing topology to: %s' % self.stage_io_dict["out"]["output_top_zip_path"], self.out_log,
                self.global_log)
-        fu.zip_top(zip_file=self.io_dict["out"]["output_top_zip_path"], top_file=internal_top_name, out_log=out_log)
+        fu.zip_top(zip_file=self.io_dict["out"]["output_top_zip_path"], top_file=internal_top_name, out_log=self.out_log)
 
-        tmp_files.append(self.internal_top_name)
-        tmp_files.append(self.internal_itp_name)
-        tmp_files.append(container_io_dict.get("unique_dir"))
-        if self.remove_tmp:
-            fu.rm_file_list(tmp_files, out_log=out_log)
+        # Remove temporal files
+        self.tmp_files.extend([self.internal_top_name, self.internal_itp_name, self.stage_io_dict.get("unique_dir")])
+        self.remove_tmp_files()
 
-        return returncode
+        return self.return_code
 
 
 def pdb2gmx(input_pdb_path: str, output_gro_path: str, output_top_zip_path: str,

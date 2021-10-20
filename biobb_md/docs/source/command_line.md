@@ -394,7 +394,7 @@ properties:
 #### [Docker config file](https://github.com/bioexcel/biobb_md/blob/master/biobb_md/test/data/config/config_grompp_docker.yml)
 ```python
 properties:
-  container_image: longr/gromacs-docker:latest
+  container_image: gromacs/gromacs:latest
   container_path: docker
   container_volume_path: /inout
   container_working_dir: /inout
@@ -440,7 +440,7 @@ grompp --config config_grompp.yml --input_gro_path grompp.gro --input_top_zip_pa
       "ld-seed": "1"
     },
     "container_path": "docker",
-    "container_image": "longr/gromacs-docker:latest",
+    "container_image": "gromacs/gromacs:latest",
     "container_volume_path": "/inout",
     "container_working_dir": "/inout"
   }
@@ -508,11 +508,11 @@ properties:
 #### [Docker config file](https://github.com/bioexcel/biobb_md/blob/master/biobb_md/test/data/config/config_gmxselect_docker.yml)
 ```python
 properties:
-  container_image: longr/gromacs-docker:latest
+  container_image: gromacs/gromacs:latest
   container_path: docker
   container_volume_path: /inout
-  selection: '"Mynewgroup" group "Protein-H" and not same residue as within 0.4 of
-    resname ARG'
+  selection: \"Mynewgroup\" group \"Protein-H\" and not same residue as within 0.4
+    of resname ARG
 
 ```
 #### [Singularity config file](https://github.com/bioexcel/biobb_md/blob/master/biobb_md/test/data/config/config_gmxselect_singularity.yml)
@@ -542,9 +542,9 @@ gmxselect --config config_gmxselect.yml --input_structure_path make_ndx.tpr --ou
 ```python
 {
   "properties": {
-    "selection": "\"Mynewgroup\" group \"Protein-H\" and not same residue as within 0.4 of resname ARG",
+    "selection": "\\\"Mynewgroup\\\" group \\\"Protein-H\\\" and not same residue as within 0.4 of resname ARG",
     "container_path": "docker",
-    "container_image": "longr/gromacs-docker:latest",
+    "container_image": "gromacs/gromacs:latest",
     "container_volume_path": "/inout"
   }
 }

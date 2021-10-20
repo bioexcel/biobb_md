@@ -3,6 +3,7 @@
 """Module containing the GromppMDrun class and the command line interface."""
 import argparse
 from pathlib import Path
+from biobb_common.generic.biobb_object import BiobbObject
 from biobb_common.configuration import settings
 from biobb_common.tools import file_utils as fu
 from biobb_common.tools.file_utils import launchlogger
@@ -10,7 +11,7 @@ from biobb_md.gromacs.grompp import grompp
 from biobb_md.gromacs.mdrun import mdrun
 
 
-class GromppMdrun:
+class GromppMdrun(BiobbObject):
     """
     | biobb_md GromppMdrun
     | Wrapper of the `GROMACS grompp <http://manual.gromacs.org/current/onlinehelp/gmx-grompp.html>`_ module and the `GROMACS mdrun <http://manual.gromacs.org/current/onlinehelp/gmx-mdrun.html>`_ module.
@@ -91,6 +92,10 @@ class GromppMdrun:
                  properties: dict = None, **kwargs) -> None:
         # Properties management
         properties = properties or {}
+
+        # Call parent class constructor
+        super().__init__(properties)
+
         grompp_properties_keys = ['mdp', 'maxwarn', 'simulation_type']
         mdrun_properties_keys = ['mpi_bin', 'mpi_np', 'mpi_hostlist', 'checkpoint_time', 'num_threads', 'num_threads_mpi', 'num_threads_omp', 'num_threads_omp_pme', 'use_gpu', 'gpu_id', 'gpu_tasks', 'dev']
         self.properties_grompp = {}
@@ -122,38 +127,25 @@ class GromppMdrun:
         self.output_cpt_path = output_cpt_path
         self.output_dhdl_path = output_dhdl_path
 
-        # Properties common in all BB
-        self.can_write_console_log = properties.get('can_write_console_log', True)
-        self.global_log = properties.get('global_log', None)
-        self.prefix = properties.get('prefix', None)
-        self.step = properties.get('step', None)
-        self.path = properties.get('path', '')
-        self.remove_tmp = properties.get('remove_tmp', True)
-        self.restart = properties.get('restart', False)
-
     @launchlogger
     def launch(self) -> int:
         """Execute the :class:`GromppMdrun <gromacs.grompp_mdrun.GromppMdrun>` object."""
 
-        # Get local loggers from launchlogger decorator
-        out_log = getattr(self, 'out_log', None)
-        err_log = getattr(self, 'err_log', None)
-
-        fu.log(f'Calling Grompp class', out_log, self.global_log)
+        fu.log(f'Calling Grompp class', self.out_log, self.global_log)
         grompp_return_code = grompp(input_gro_path=self.input_gro_path, input_top_zip_path=self.input_top_zip_path,
                                     output_tpr_path=self.output_tpr_path, input_cpt_path=self.input_cpt_path,
                                     input_ndx_path=self.input_ndx_path, input_mdp_path=self.input_mdp_path,
                                     properties=self.properties_grompp)
-        fu.log(f'Grompp return code: {grompp_return_code}', out_log, self.global_log)
+        fu.log(f'Grompp return code: {grompp_return_code}', self.out_log, self.global_log)
 
         if not grompp_return_code:
-            fu.log(f'Grompp return code is correct. Calling MDRun class', out_log, self.global_log)
+            fu.log(f'Grompp return code is correct. Calling MDRun class', self.out_log, self.global_log)
             mdrun_return_code = mdrun(input_tpr_path=self.output_tpr_path, output_trr_path=self.output_trr_path,
                                       output_gro_path=self.output_gro_path, output_edr_path=self.output_edr_path,
                                       output_log_path=self.output_log_path, output_xtc_path=self.output_xtc_path,
                                       output_cpt_path=self.output_cpt_path, output_dhdl_path=self.output_dhdl_path,
                                       properties=self.properties_mdrun)
-            fu.log(f'MDRun return code: {mdrun_return_code}', out_log, self.global_log)
+            fu.log(f'MDRun return code: {mdrun_return_code}', self.out_log, self.global_log)
         else:
             return 1
 
