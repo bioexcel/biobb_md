@@ -205,7 +205,7 @@ class Mdrun(BiobbObject):
             self.environment['GMXLIB'] = self.gmx_lib
 
         # Check GROMACS version
-        if not self.container_path:
+        if (not self.mpi_bin) and (not self.container_path):
             if self.gmx_version < 512:
                 raise GromacsVersionError("Gromacs version should be 5.1.2 or newer %d detected" % self.gmx_version)
             fu.log("GROMACS %s %d version detected" % (self.__class__.__name__, self.gmx_version), self.out_log)
