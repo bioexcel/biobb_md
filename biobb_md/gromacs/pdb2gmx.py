@@ -144,7 +144,7 @@ class Pdb2gmx(BiobbObject):
             internal_top_name = os.path.join(self.stage_io_dict.get("unique_dir"), internal_top_name)
 
         # zip topology
-        fu.log('Compressing topology to: %s' % self.stage_io_dict["out"]["output_top_zip_path"], self.out_log,
+        fu.log('Compressing topology to: %s' % self.io_dict["out"]["output_top_zip_path"], self.out_log,
                self.global_log)
         fu.zip_top(zip_file=self.io_dict["out"]["output_top_zip_path"], top_file=internal_top_name, out_log=self.out_log)
 
