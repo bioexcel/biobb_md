@@ -7,90 +7,103 @@
     "docker": "https://quay.io/biocontainers/biobb_md:3.7.0--pyhdfd78af_0",
     "singularity": "https://www.singularity-hub.org/collections/2735/usage",
     "version": "3.7.0",
+    "rest": true,
     "tools" : [
         {
             "block" : "Pdb2gmx",
             "tool" : "gmx pdb2gmx",
             "desc" : "Creates a compressed (ZIP) GROMACS topology (TOP and ITP files) from a given PDB file.",
             "exec" : "pdb2gmx",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.pdb2gmx"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.pdb2gmx",
+            "rest": true
         },
         {
             "block" : "Editconf",
             "tool" : "gmx editconf",
             "desc" : "Creates a GROMACS structure file (GRO) adding the information of the solvent box to the input structure file.",
             "exec" : "editconf",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.editconf"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.editconf",
+            "rest": true
         },
         {
             "block" : "Genion",
             "tool" : "gmx genion",
             "desc" : "Creates a new compressed GROMACS topology adding ions until reaching the desired concentration to the input compressed GROMACS topology. ",
             "exec" : "genion",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.genion"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.genion",
+            "rest": true
         },
         {
             "block" : "Genrestr",
             "tool" : "gmx genrestr",
             "desc" : "Creates a new GROMACS compressed topology applying the indicated force restrains to the given input compressed topology.",
             "exec" : "genrestr",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.genrestr"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.genrestr",
+            "rest": true
         },
         {
             "block" : "Grompp",
             "tool" : "gmx grompp",
             "desc" : "Creates a GROMACS portable binary run input file (TPR) applying the desired properties from the input compressed GROMACS topology.",
             "exec" : "grompp",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.grompp"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.grompp",
+            "rest": true
         },
         {
             "block" : "Mdrun",
             "tool" : "gmx mdrun",
             "desc" : "Performs molecular dynamics simulations from an input GROMACS TPR file.",
             "exec" : "mdrun",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.mdrun"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.mdrun",
+            "rest": true
         },
         {
             "block" : "GromppMdrun",
             "tool" : "gmx grompp & gmx mdrun",
             "desc" : "Combination of Grompp & Mdrun blocks. Grompp, creates a GROMACS portable binary run input file (TPR) applying the desired properties from the input compressed GROMACS topology. Mdrun, performs molecular dynamics simulations from an input GROMACS TPR file.",
             "exec" : "grompp_mdrun",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.grompp_mdrun"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.grompp_mdrun",
+            "rest": true
         },
         {
             "block" : "MakeNdx",
             "tool" : "gmx make_ndx",
             "desc" : "Creates a GROMACS index file (NDX) from an input selection and an input GROMACS structure file.",
             "exec" : "make_ndx",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.make_ndx"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.make_ndx",
+            "rest": true
         },
         {
             "block" : "Gmxselect",
             "tool" : "gmx select",
             "desc" : "Creates a GROMACS index file (NDX) from an input selection and an input GROMACS structure file.",
             "exec" : "gmxselect",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.gmxselect"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.gmxselect",
+            "rest": true
         },
         {
             "block" : "Solvate",
             "tool" : "gmx solvate",
             "desc" : "Creates a new compressed GROMACS topology file adding solvent molecules to a given input compressed GROMACS topology file.",
             "exec" : "solvate",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.solvate"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs.html#module-gromacs.solvate",
+            "rest": true
         },
         {
             "block" : "Ndx2resttop",
             "tool" : "in house",
             "desc" : "Creates a new GROMACS compressed topology applying the force restrains to the input groups in the input index file to the given input compressed topology.",
             "exec" : "ndx2resttop",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs_extra.html#gromacs-extra-ndx2resttop-module"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs_extra.html#gromacs-extra-ndx2resttop-module",
+            "rest": true
         },
         {
             "block" : "AppendLigand",
             "tool" : "in house",
             "desc" : "Takes a ligand ITP file and inserts it in a topology.",
             "exec" : "append_ligand",
-            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs_extra.html#gromacs-extra-append-ligand-module"
+            "docs": "https://biobb-md.readthedocs.io/en/latest/gromacs_extra.html#gromacs-extra-append-ligand-module",
+            "rest": true
         }
     ],
     "dep_pypi" : [
