@@ -1,5 +1,11 @@
 # Biobb MD changelog
 
+## What's new in version [3.7.1](https://github.com/bioexcel/biobb_md/releases/tag/v3.7.1)?
+
+### Bug fixes
+
+* Problem with Gmx version check (mdrun) [#48](https://github.com/bioexcel/biobb_md/issues/48)
+
 ## What's new in version [3.7.0](https://github.com/bioexcel/biobb_md/releases/tag/v3.7.0)?
 In version 3.7.0 the dependency biobb_common has been updated to 3.7.0 version.
 
