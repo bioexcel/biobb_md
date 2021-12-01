@@ -98,7 +98,7 @@
                 {
                     "extension": ".*\\.ndx$",
                     "description": "Path to the input GROMACS index files NDX",
-                    "edam": "format_2330"
+                    "edam": "format_2033"
                 }
             ]
         },

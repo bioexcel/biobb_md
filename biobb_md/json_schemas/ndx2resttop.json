@@ -33,7 +33,7 @@
                 {
                     "extension": ".*\\.ndx$",
                     "description": "Path to the input NDX index file",
-                    "edam": "format_2330"
+                    "edam": "format_2033"
                 }
             ]
         },
