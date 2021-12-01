@@ -36,11 +36,11 @@ setuptools.setup(
             "append_ligand = biobb_md.gromacs_extra.append_ligand:main"
         ]
     },
-    classifiers=(
+    classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: MacOS :: MacOS X",
-        "Operating System :: POSIX",
-    ),
+        "Operating System :: POSIX"
+    ],
 )
