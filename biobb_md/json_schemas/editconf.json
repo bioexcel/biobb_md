@@ -27,13 +27,19 @@
             "filetype": "input",
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/editconf.gro",
             "enum": [
-                ".*\\.gro$"
+                ".*\\.gro$",
+                ".*\\.pdb$"
             ],
             "file_formats": [
                 {
                     "extension": ".*\\.gro$",
                     "description": "Path to the input GRO file",
                     "edam": "format_2033"
+                },
+                {
+                    "extension": ".*\\.pdb$",
+                    "description": "Path to the input GRO file",
+                    "edam": "format_1476"
                 }
             ]
         },
@@ -43,13 +49,19 @@
             "filetype": "output",
             "sample": "https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_editconf.gro",
             "enum": [
-                ".*\\.gro$"
+                ".*\\.gro$",
+                ".*\\.pdb$"
             ],
             "file_formats": [
                 {
                     "extension": ".*\\.gro$",
                     "description": "Path to the output GRO file",
                     "edam": "format_2033"
+                },
+                {
+                    "extension": ".*\\.pdb$",
+                    "description": "Path to the output GRO file",
+                    "edam": "format_1476"
                 }
             ]
         },
