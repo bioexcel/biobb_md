@@ -14,5 +14,6 @@ python:
    version: "3.7"
    install:
       - requirements: biobb_md/docs/requirements.txt
-      - method: setuptools
+      - requirements:
+        method: setuptools
            path: biobb_md
