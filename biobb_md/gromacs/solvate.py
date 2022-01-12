@@ -20,7 +20,7 @@ class Solvate(BiobbObject):
     | The GROMACS solvate module, generates a box of solvent around the selected structure.
 
     Args:
-        input_solute_gro_path (str): Path to the input GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/solvate.gro>`_. Accepted formats: gro (edam:format_2033).
+        input_solute_gro_path (str): Path to the input GRO file. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/solvate.gro>`_. Accepted formats: gro (edam:format_2033), pdb (edam:format_1476).
         output_gro_path (str): Path to the output GRO file. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_solvate.gro>`_. Accepted formats: gro (edam:format_2033), pdb (edam:format_1476).
         input_top_zip_path (str): Path the input TOP topology in zip format. File type: input. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/data/gromacs/solvate.zip>`_. Accepted formats: zip (edam:format_3987).
         output_top_zip_path (str): Path the output topology in zip format. File type: output. `Sample file <https://github.com/bioexcel/biobb_md/raw/master/biobb_md/test/reference/gromacs/ref_solvate.zip>`_. Accepted formats: zip (edam:format_3987).
