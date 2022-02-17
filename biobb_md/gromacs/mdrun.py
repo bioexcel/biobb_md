@@ -198,7 +198,7 @@ class Mdrun(BiobbObject):
         # Not documented and not listed option, only for devs
         if self.dev:
             fu.log(f'Adding development options: {self.dev}', self.out_log)
-            self.cmd += [self.dev.split()]
+            self.cmd += self.dev.split()
 
         if self.gmx_lib:
             self.environment = os.environ.copy()
