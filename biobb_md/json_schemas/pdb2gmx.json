@@ -133,7 +133,8 @@
                         "amber03",
                         "amber99sb-ildn",
                         "oplsaa",
-                        "amber94"
+                        "amber94",
+                        "amber99sb-star-ildn-mut"
                     ],
                     "property_formats": [
                         {
@@ -194,6 +195,10 @@
                         },
                         {
                             "name": "amber94",
+                            "description": null
+                        },
+                        {
+                            "name": "amber99sb-star-ildn-mut",
                             "description": null
                         }
                     ]
