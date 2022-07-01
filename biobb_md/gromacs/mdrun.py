@@ -107,8 +107,6 @@ class Mdrun(BiobbObject):
         self.gpu_tasks = str(properties.get('gpu_tasks', ''))
         # gromacs
         self.checkpoint_time = properties.get('checkpoint_time')
-        # Not documented and not listed option, only for devs
-        self.dev = properties.get('dev')
 
         # Properties common in all GROMACS BB
         self.gmx_lib = properties.get('gmx_lib', None)
@@ -195,10 +193,7 @@ class Mdrun(BiobbObject):
             fu.log(f'List of GPU device IDs, mapping each PP task on each node to a device: {self.gpu_tasks}', self.out_log)
             self.cmd.append('-gputasks')
             self.cmd.append(self.gpu_tasks)
-        # Not documented and not listed option, only for devs
-        if self.dev:
-            fu.log(f'Adding development options: {self.dev}', self.out_log)
-            self.cmd += self.dev.split()
+
 
         if self.gmx_lib:
             self.environment = os.environ.copy()
