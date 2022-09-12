@@ -13,6 +13,8 @@ bioinformatics tools.
 The latest documentation of this package can be found in our readthedocs site:
 [latest API documentation](http://biobb-md.readthedocs.io/en/latest/).
 
+> **Important:** This package has been discontinued, superseeded by [biobb_gromacs](https://github.com/bioexcel/biobb_gromacs).
+
 ### Version
 v3.7.1 2021.3
 

@@ -1,6 +1,6 @@
 {
     "_id": "biobb_md",
-    "desc": "Biobb_md is the Biobb module collection to perform molecular dynamics simulations.",
+    "desc": "Biobb_md is the Biobb module collection to perform molecular dynamics simulations. IMPORTANT: This package has been discontinued, superseeded by biobb_gromacs",
     "github": "https://github.com/bioexcel/biobb_md",
     "readthedocs": "https://biobb-md.readthedocs.io/en/latest/",
     "conda": "https://anaconda.org/bioconda/biobb_md",
