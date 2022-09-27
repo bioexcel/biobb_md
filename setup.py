@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="biobb_md",
-    version="3.7.1",
+    version="3.7.2",
     author="Biobb developers",
     author_email="pau.andrio@bsc.es",
-    description="Biobb_md is the Biobb module collection to perform molecular dynamics simulations.",
+    description="Deprecated Package: biobb_md is no longer maintained and has been superseded by the biobb_gromacs package. Biobb_md is the Biobb module collection to perform molecular dynamics simulations.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     keywords="Bioinformatics Workflows BioExcel Compatibility",

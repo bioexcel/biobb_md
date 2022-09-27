@@ -1,5 +1,9 @@
 # Biobb MD changelog
 
+## What's new in version [3.7.2](https://github.com/bioexcel/biobb_md/releases/tag/v3.7.2)?
+
+* Deprecated Package: biobb_md is no longer maintained and has been superseded by the biobb_gromacs package.
+
 ## What's new in version [3.7.1](https://github.com/bioexcel/biobb_md/releases/tag/v3.7.1)?
 
 ### Bug fixes
