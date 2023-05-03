@@ -7,7 +7,9 @@ on:
 jobs:
   test-action:
     runs-on: ubuntu-20.04
-
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Transfer Issue & Create Stub
         uses: lando/transfer-issue-action@v2
