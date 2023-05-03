@@ -2,62 +2,15 @@ name: Manual Issue Transer Action Test
 on:
   issues:
     types:
-      - opened
+      - labeled
 
 jobs:
   test-action:
     runs-on: self-hosted
-    strategy:
-      matrix:
-        router:
-          #- manual_issue_transfer_action_test:biobb_md
-          - from-md:biobb_gromacs
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Transfer Issue to biobb_gromacs
-        id: test_action
-        uses: ./
+      - name: Transfer Issue & Create Stub
+        uses: lando/transfer-issue-action@v2
         with:
           token: ${{ secrets.TRANSFER_ISSUE_TOKEN }}
-          router: ${{ matrix.router }}
-          apply_label: FROM BIOBB MD
-          debug: true
-      - name: Echo Output Data
-        run: |
-          echo "DESTINATION REPO: ${{steps.test_action.outputs.destination_repo}}"
-          echo "NEW ISSUE NUMBER: ${{steps.test_action.outputs.new_issue_number}}"
-          echo "NEW ISSUE URL: ${{steps.test_action.outputs.new_issue_url}}"
-          echo "STUB ISSUE NUMBER: ${{steps.test_action.outputs.stub_issue_number}}"
-      - name: Comment on transferred issue
-        if: steps.test_action.outputs.new_issue_number != ''
-        uses: actions/github-script@v5
-        with:
-          debug: true
-          script: |
-            try {
-              await github.rest.issues.createComment({
-                issue_number: '${{steps.test_action.outputs.new_issue_number}}',
-                owner: context.repo.owner,
-                repo: '${{steps.test_action.outputs.destination_repo}}',
-                body: 'Comment to verify manual action test. The issue will now automatically be closed.'
-              });
-            } catch (error) {
-              core.setFailed(error.message);
-            }
-      - name: Close transferred issue
-        if: steps.test_action.outputs.new_issue_number != ''
-        uses: actions/github-script@v5
-        with:
-          debug: true
-          script: |
-            try {
-              await github.rest.issues.update({
-                issue_number: '${{steps.test_action.outputs.new_issue_number}}',
-                owner: context.repo.owner,
-                repo: '${{steps.test_action.outputs.destination_repo}}',
-                state: 'closed'
-              });
-            } catch (error) {
-              core.setFailed(error.message);
-            }
+          router: md:biobb_gromacs
