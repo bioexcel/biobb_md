@@ -12,5 +12,5 @@ jobs:
       - name: Transfer Issue & Create Stub
         uses: lando/transfer-issue-action@v2
         with:
-          token: ${{ secrets.TRANSFER_ISSUE_TOKEN }}
+          token: ${{ secrets.github_token }}
           router: md:biobb_gromacs
