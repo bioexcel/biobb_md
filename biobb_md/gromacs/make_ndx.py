@@ -28,6 +28,7 @@ class MakeNdx(BiobbObject):
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+            * **sandbox_path** (*str*) - ("./") [WF property] Parent path to the sandbox directory.
             * **container_path** (*str*) - (None)  Path to the binary executable of your container.
             * **container_image** (*str*) - ("gromacs/gromacs:latest") Container Image identifier.
             * **container_volume_path** (*str*) - ("/data") Path to an internal directory in the container.
@@ -53,6 +54,7 @@ class MakeNdx(BiobbObject):
             * name: EDAM
             * schema: http://edamontology.org/EDAM.owl
     """
+
     def __init__(self, input_structure_path: str, output_ndx_path: str, input_ndx_path: str = None,
                  properties: dict = None, **kwargs) -> None:
         properties = properties or {}
@@ -89,15 +91,16 @@ class MakeNdx(BiobbObject):
         """Execute the :class:`MakeNdx <gromacs.make_ndx.MakeNdx>` object."""
 
         # Setup Biobb
-        if self.check_restart(): return 0
+        if self.check_restart():
+            return 0
         self.stage_files()
 
         # Create command line
         self.cmd = ['echo', '-e', '\'' + self.selection + '\\nq' + '\'', '|',
-               self.gmx_path, 'make_ndx',
-               '-f', self.stage_io_dict["in"]["input_structure_path"],
-               '-o', self.stage_io_dict["out"]["output_ndx_path"]
-               ]
+                    self.gmx_path, 'make_ndx',
+                    '-f', self.stage_io_dict["in"]["input_structure_path"],
+                    '-o', self.stage_io_dict["out"]["output_ndx_path"]
+                    ]
 
         if self.stage_io_dict["in"].get("input_ndx_path")\
                 and Path(self.stage_io_dict["in"].get("input_ndx_path")).exists():

@@ -26,6 +26,7 @@ class AppendLigand(BiobbObject):
             * **posres_name** (*str*) - ("POSRES_LIGAND") String to be included in the ifdef clause.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+            * **sandbox_path** (*str*) - ("./") [WF property] Parent path to the sandbox directory.
 
     Examples:
         This is a use example of how to use the building block from Python::
@@ -70,7 +71,8 @@ class AppendLigand(BiobbObject):
     def launch(self) -> int:
         """Execute the :class:`AppendLigand <gromacs_extra.append_ligand.AppendLigand>` object."""
         # Setup Biobb
-        if self.check_restart(): return 0
+        if self.check_restart():
+            return 0
 
         # Unzip topology
         top_file = fu.unzip_top(zip_file=self.io_dict['in'].get("input_top_zip_path"), out_log=self.out_log)
@@ -176,7 +178,7 @@ def main():
     args = parser.parse_args()
     config = args.config if args.config else None
     properties = settings.ConfReader(config=config).get_prop_dic()
-    
+
     # Specific call of each building block
     append_ligand(input_top_zip_path=args.input_top_zip_path, input_itp_path=args.input_itp_path,
                   output_top_zip_path=args.output_top_zip_path, input_posres_itp_path=args.input_posres_itp_path,

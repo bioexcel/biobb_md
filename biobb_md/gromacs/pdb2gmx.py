@@ -31,6 +31,7 @@ class Pdb2gmx(BiobbObject):
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+            * **sandbox_path** (*str*) - ("./") [WF property] Parent path to the sandbox directory.
             * **container_path** (*str*) - (None)  Path to the binary executable of your container.
             * **container_image** (*str*) - ("gromacs/gromacs:latest") Container Image identifier.
             * **container_volume_path** (*str*) - ("/data") Path to an internal directory in the container.
@@ -72,8 +73,8 @@ class Pdb2gmx(BiobbObject):
         }
 
         # Properties specific for BB
-        self.internal_top_name = properties.get('internal_top_name', 'p2g.top') # Excluded from documentation for simplicity
-        self.internal_itp_name = properties.get('internal_itp_name', 'posre.itp') # Excluded from documentation for simplicity
+        self.internal_top_name = properties.get('internal_top_name', 'p2g.top')  # Excluded from documentation for simplicity
+        self.internal_itp_name = properties.get('internal_itp_name', 'posre.itp')  # Excluded from documentation for simplicity
         self.water_type = properties.get('water_type', 'spce')
         self.force_field = properties.get('force_field', 'amber99sb-ildn')
         self.ignh = properties.get('ignh', False)
@@ -100,7 +101,8 @@ class Pdb2gmx(BiobbObject):
         """Execute the :class:`Pdb2gmx <gromacs.pdb2gmx.Pdb2gmx>` object."""
 
         # Setup Biobb
-        if self.check_restart(): return 0
+        if self.check_restart():
+            return 0
         self.stage_files()
 
         internal_top_name = fu.create_name(prefix=self.prefix, step=self.step, name=self.internal_top_name)

@@ -34,6 +34,7 @@ class Genion(BiobbObject):
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+            * **sandbox_path** (*str*) - ("./") [WF property] Parent path to the sandbox directory.
             * **container_path** (*str*) - (None)  Path to the binary executable of your container.
             * **container_image** (*str*) - ("gromacs/gromacs:latest") Container Image identifier.
             * **container_volume_path** (*str*) - ("/data") Path to an internal directory in the container.
@@ -62,6 +63,7 @@ class Genion(BiobbObject):
             * name: EDAM
             * schema: http://edamontology.org/EDAM.owl
     """
+
     def __init__(self, input_tpr_path: str, output_gro_path: str, input_top_zip_path: str,
                  output_top_zip_path: str, input_ndx_path: str = None, properties: dict = None, **kwargs) -> None:
         properties = properties or {}
@@ -104,7 +106,8 @@ class Genion(BiobbObject):
         """Execute the :class:`Genion <gromacs.genion.Genion>` object."""
 
         # Setup Biobb
-        if self.check_restart(): return 0
+        if self.check_restart():
+            return 0
         self.stage_files()
 
         # Unzip topology to topology_out

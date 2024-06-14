@@ -43,6 +43,7 @@ class Mdrun(BiobbObject):
             * **gmx_path** (*str*) - ("gmx") Path to the GROMACS executable binary.
             * **remove_tmp** (*bool*) - (True) [WF property] Remove temporal files.
             * **restart** (*bool*) - (False) [WF property] Do not execute if output files exist.
+            * **sandbox_path** (*str*) - ("./") [WF property] Parent path to the sandbox directory.
             * **container_path** (*str*) - (None)  Path to the binary executable of your container.
             * **container_image** (*str*) - (None) Container Image identifier.
             * **container_volume_path** (*str*) - ("/data") Path to an internal directory in the container.
@@ -128,7 +129,8 @@ class Mdrun(BiobbObject):
         """Execute the :class:`Mdrun <gromacs.mdrun.Mdrun>` object."""
 
         # Setup Biobb
-        if self.check_restart(): return 0
+        if self.check_restart():
+            return 0
         self.stage_files()
 
         self.cmd = [self.gmx_path, 'mdrun',
@@ -182,7 +184,7 @@ class Mdrun(BiobbObject):
             self.cmd.append('-ntomp_pme')
             self.cmd.append(self.num_threads_omp_pme)
         # GMX gpu properties
-        if self.use_gpu: 
+        if self.use_gpu:
             fu.log('Adding GPU specific settings adds: -nb gpu -pme gpu', self.out_log)
             self.cmd += ["-nb", "gpu", "-pme", "gpu"]
         if self.gpu_id:
@@ -193,7 +195,6 @@ class Mdrun(BiobbObject):
             fu.log(f'List of GPU device IDs, mapping each PP task on each node to a device: {self.gpu_tasks}', self.out_log)
             self.cmd.append('-gputasks')
             self.cmd.append(self.gpu_tasks)
-
 
         if self.gmx_lib:
             self.environment = os.environ.copy()
@@ -257,7 +258,7 @@ def main():
     # Specific call of each building block
     mdrun(input_tpr_path=args.input_tpr_path, output_trr_path=args.output_trr_path,
           output_gro_path=args.output_gro_path, output_edr_path=args.output_edr_path,
-          output_log_path=args.output_log_path, input_cpt_path=args.input_cpt_path, 
+          output_log_path=args.output_log_path, input_cpt_path=args.input_cpt_path,
           output_xtc_path=args.output_xtc_path, output_cpt_path=args.output_cpt_path,
           output_dhdl_path=args.output_dhdl_path, properties=properties)
 
