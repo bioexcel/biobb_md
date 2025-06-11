@@ -142,7 +142,7 @@ class AppendLigand(BiobbObject):
 
         # zip topology
         fu.log('Compressing topology to: %s' % self.io_dict['out'].get("output_top_zip_path"), self.out_log, self.global_log)
-        fu.zip_top(zip_file=self.io_dict['out'].get("output_top_zip_path"), top_file=new_top, out_log=self.out_log)
+        fu.zip_top(zip_file=self.io_dict['out'].get("output_top_zip_path"), top_file=new_top, out_log=self.out_log, remove_original_files=self.remove_tmp)
 
         # Remove temporal files
         self.tmp_files.append(top_dir)
