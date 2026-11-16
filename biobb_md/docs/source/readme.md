@@ -1,4 +1,4 @@
-[![](https://readthedocs.org/projects/biobb-md/badge/?version=latest)](https://biobb-md.readthedocs.io/en/latest/?badge=latest)
+[![](https://img.shields.io/readthedocs/biobb-md/latest?label=docs)](https://biobb-md.readthedocs.io/en/latest/?badge=latest)
 [![](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](https://anaconda.org/bioconda/biobb_md)
 [![](https://img.shields.io/badge/docker-Quay.io-blue)](https://quay.io/repository/biocontainers/biobb_md?tab=tags)
 [![](https://img.shields.io/badge/singularity-GalaxyProject-blue)](https://depot.galaxyproject.org/singularity/biobb_md:3.7.2--pyhdfd78af_0)
